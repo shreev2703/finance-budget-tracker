@@ -1,16 +1,24 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "description": "LedgerLogic REST API (Express + SQLite)",
+  "type": "module",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "seed": "node src/db/seed.js",
+    "test": "node --test",
+    "lint": "eslint ."
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
   "devDependencies": {
-    "eslint": "^10.11.0"
+    "@eslint/js": "^10.0.0",
+    "eslint": "^10.11.0",
+    "globals": "^16.0.0"
   }
 }
