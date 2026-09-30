@@ -1,0 +1,50 @@
+classDiagram
+  direction LR
+
+  class User {
+    +int id
+    +string email
+    +string passwordHash
+    +string name
+    +register(email, password, name) User
+    +login(email, password) bool
+  }
+
+  class Category {
+    +int id
+    +string name
+    +CategoryType type
+  }
+
+  class Transaction {
+    +int id
+    +decimal amount
+    +date date
+    +string note
+    +CategoryType type
+  }
+
+  class Budget {
+    +int id
+    +decimal limitAmount
+    +string period
+    +spent() decimal
+    +remaining() decimal
+    +percentUsed() float
+    +isNearLimit() bool
+    +isOverLimit() bool
+  }
+
+  class CategoryType {
+    <<enumeration>>
+    INCOME
+    EXPENSE
+  }
+
+  User "1" --> "*" Transaction : records
+  User "1" --> "*" Budget : sets
+  User "1" --> "*" Category : owns
+  Transaction "*" --> "1" Category : classified as
+  Budget "*" --> "1" Category : limits
+  Category ..> CategoryType
+  Transaction ..> CategoryType
