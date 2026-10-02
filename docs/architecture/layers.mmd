@@ -1,0 +1,22 @@
+%%{init: {"flowchart": {"wrappingWidth": 260}}}%%
+flowchart LR
+  subgraph Client["React SPA · packages/frontend"]
+    UI["Pages & components<br/>DashboardPage · BudgetSummary<br/>TransactionList · AddTransactionForm"]
+  end
+
+  subgraph API["Express API · packages/backend/src"]
+    direction TB
+    MW["<b>Middleware chain</b><br/>json → demoUser → router → notFound → errorHandler<br/><i>app.js · middleware/</i>"]
+    R["<b>Routes</b><br/>/api/transactions · /api/budgets/summary · /api/categories<br/><i>routes/api.js</i>"]
+    S["<b>Services</b>: validation + business rules<br/><i>services/</i>"]
+    D["<b>Domain rules</b><br/>remaining · isOverLimit · 80% warning<br/><i>domain/budget.js</i>"]
+    Repo["<b>Repositories</b>: all SQL<br/><i>repositories/</i>"]
+    MW --> R --> S
+    S --> D
+    S --> Repo
+  end
+
+  DB[("<b>Database</b><br/>SQLite (demo) / MySQL (prod)<br/>users · categories · transactions · budgets<br/><i>db/schema.sql</i>")]
+
+  UI -- "HTTP + JSON" --> MW
+  Repo -- "SQL" --> DB
