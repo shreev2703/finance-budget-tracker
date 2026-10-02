@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <style>
+    .box { fill: white; stroke: #1d4ed8; stroke-width: 2; }
+    .head { fill: #dbeafe; }
+    .line { stroke: #374151; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    text { font-family: Arial, sans-serif; fill: #111827; }
+    .title { font-size: 23px; font-weight: 700; }
+    .field { font-size: 17px; }
+    .label { font-size: 17px; font-weight: 600; }
+    .multi { font-size: 16px; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#374151"/>
+    </marker>
+  </defs>
+  <text x="600" y="45" text-anchor="middle" font-size="30" font-weight="700">Finance Budget Tracker — Basic UML Class Diagram</text>
+
+  <rect class="box" x="60" y="170" width="270" height="240" rx="4"/>
+  <rect class="head" x="61" y="171" width="268" height="57"/>
+  <line x1="60" y1="228" x2="330" y2="228" stroke="#1d4ed8" stroke-width="2"/>
+  <text class="title" x="195" y="207" text-anchor="middle">User</text>
+  <text class="field" x="85" y="265">userId: String</text>
+  <text class="field" x="85" y="300">name: String</text>
+  <text class="field" x="85" y="335">email: String</text>
+  <text class="field" x="85" y="370">password: String</text>
+
+  <rect class="box" x="465" y="100" width="290" height="280" rx="4"/>
+  <rect class="head" x="466" y="101" width="288" height="57"/>
+  <line x1="465" y1="158" x2="755" y2="158" stroke="#1d4ed8" stroke-width="2"/>
+  <text class="title" x="610" y="137" text-anchor="middle">Budget</text>
+  <text class="field" x="490" y="195">budgetId: String</text>
+  <text class="field" x="490" y="230">name: String</text>
+  <text class="field" x="490" y="265">amountLimit: Decimal</text>
+  <text class="field" x="490" y="300">startDate: Date</text>
+  <text class="field" x="490" y="335">endDate: Date</text>
+
+  <rect class="box" x="865" y="170" width="290" height="280" rx="4"/>
+  <rect class="head" x="866" y="171" width="288" height="57"/>
+  <line x1="865" y1="228" x2="1155" y2="228" stroke="#1d4ed8" stroke-width="2"/>
+  <text class="title" x="1010" y="207" text-anchor="middle">Transaction</text>
+  <text class="field" x="890" y="265">transactionId: String</text>
+  <text class="field" x="890" y="300">amount: Decimal</text>
+  <text class="field" x="890" y="335">type: String</text>
+  <text class="field" x="890" y="370">category: String</text>
+  <text class="field" x="890" y="405">date: Date</text>
+
+  <path class="line" d="M330 230 L465 230"/>
+  <text class="label" x="375" y="215">creates</text>
+  <text class="multi" x="345" y="250">1</text>
+  <text class="multi" x="425" y="250">1...N</text>
+
+  <path class="line" d="M755 250 L865 250"/>
+  <text class="label" x="780" y="235">tracks</text>
+  <text class="multi" x="765" y="270">1</text>
+  <text class="multi" x="825" y="270">1...N</text>
+
+  <path class="line" d="M330 400 C515 560, 730 560, 865 400"/>
+  <text class="label" x="585" y="558">records</text>
+  <text class="multi" x="360" y="455">1</text>
+  <text class="multi" x="825" y="455">1...N</text>
+</svg>
