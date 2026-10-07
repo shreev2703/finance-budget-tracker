@@ -1,0 +1,317 @@
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #202a25;
+  background: #f6f6f2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  background: #f6f6f2;
+}
+
+.sidebar {
+  width: 245px;
+  min-height: 100vh;
+  padding: 30px 18px;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  background: #154734;
+}
+
+.brand {
+  margin: 0;
+  color: #c8a951;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.brand-subtitle {
+  margin: 3px 0 45px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  opacity: 0.9;
+}
+
+nav {
+  display: grid;
+  gap: 8px;
+}
+
+.nav-link {
+  border: 0;
+  padding: 12px;
+  border-radius: 7px;
+  color: #d9e5df;
+  background: transparent;
+  text-align: left;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: white;
+  background: #287054;
+}
+
+.profile {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.profile p {
+  margin: 3px 0 0;
+  color: #bdd1c8;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #154734;
+  font-weight: bold;
+  background: #e6c65c;
+}
+
+.content {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 46px;
+}
+
+header,
+.section-heading,
+.transaction-row,
+.budget-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #6b766f;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+h2 {
+  margin: 0;
+}
+
+.subtitle,
+.section-heading p,
+.transaction-row p,
+.budget-card p {
+  color: #68746d;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+}
+
+.add-button {
+  padding: 12px 17px;
+  border: 0;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  background: #c69214;
+}
+
+.top-cards,
+.budget-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 30px;
+}
+
+.card {
+  border: 1px solid #e0e4de;
+  border-radius: 9px;
+  background: white;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 4%);
+}
+
+.top-cards .card {
+  padding: 20px;
+}
+
+.card p {
+  margin: 0;
+}
+
+.card h2 {
+  margin: 12px 0;
+  font-size: 26px;
+}
+
+.card span,
+.card small {
+  color: #557365;
+  font-size: 12px;
+}
+
+.balance-card {
+  border-top: 4px solid #c69214;
+}
+
+.spending-card {
+  border-top: 4px solid #154734;
+}
+
+.income-card {
+  border-top: 4px solid #5f8e59;
+}
+
+.section-heading {
+  margin-top: 42px;
+}
+
+.section-heading h2 {
+  font-size: 19px;
+}
+
+.section-heading p {
+  margin: 5px 0 0;
+  font-size: 13px;
+}
+
+.text-button {
+  border: 0;
+  color: #154734;
+  font-weight: bold;
+  background: transparent;
+}
+
+.budget-card {
+  padding: 18px;
+}
+
+.budget-title span {
+  color: #154734;
+  font-weight: bold;
+}
+
+.budget-card p {
+  margin: 10px 0;
+  font-size: 13px;
+}
+
+.progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #e6eae6;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.progress-fill.green {
+  background: #297354;
+}
+
+.progress-fill.orange {
+  background: #db8526;
+}
+
+.budget-card small {
+  display: block;
+  margin-top: 10px;
+}
+
+.transactions-section {
+  margin-top: 10px;
+}
+
+.transaction-card {
+  margin-top: 18px;
+  padding: 4px 18px;
+}
+
+.transaction-row {
+  gap: 14px;
+  padding: 15px 0;
+  border-bottom: 1px solid #edf0ed;
+}
+
+.transaction-row:last-child {
+  border-bottom: 0;
+}
+
+.transaction-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #154734;
+  font-weight: bold;
+  background: #e1eee8;
+}
+
+.transaction-row div:nth-child(2) {
+  flex: 1;
+}
+
+.transaction-row p {
+  margin: 3px 0 0;
+  font-size: 12px;
+}
+
+.income {
+  color: #287054;
+}
+
+.expense {
+  color: #9b3d31;
+}
+
+@media (max-width: 850px) {
+  .sidebar {
+    display: none;
+  }
+
+  .content {
+    padding: 25px;
+  }
+
+  .top-cards,
+  .budget-grid {
+    grid-template-columns: 1fr;
+  }
+
+  header {
+    align-items: flex-start;
+    gap: 20px;
+    flex-direction: column;
+  }
+}
