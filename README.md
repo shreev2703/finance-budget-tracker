@@ -6,12 +6,12 @@ Project SRD: https://docs.google.com/document/d/1Lc2qm145vXdAHm76jv-lCK-DichXJx5
 
 ## Course documents
 
-| Document                                                  | File                                                                                 |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| TE4: Design and Architectural Patterns                    | [docs/te4/TE4-Design-and-Architecture.pdf](docs/te4/TE4-Design-and-Architecture.pdf) |
-| Software Requirements Specification (PDF copy of the SRD) | [docs/srd/LedgerLogic-SRD.pdf](docs/srd/LedgerLogic-SRD.pdf)                         |
-| UML class diagram + traceability (TE3)                    | [docs/uml/](docs/uml/)                                                               |
-| Architecture notes and design patterns                    | [docs/architecture/](docs/architecture/)                                             |
+| Document                                                                        | File                                                                                                       |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Design document: TE3 UML + TE4 design and architectural patterns (all diagrams) | [docs/design/LedgerLogic-Design-Document-TE3-TE4.pdf](docs/design/LedgerLogic-Design-Document-TE3-TE4.pdf) |
+| Software Requirements Specification (PDF copy of the SRD)                       | [docs/srd/LedgerLogic-SRD.pdf](docs/srd/LedgerLogic-SRD.pdf)                                               |
+| Diagram sources (Mermaid + PNG)                                                 | [docs/uml/](docs/uml/), [docs/te4/](docs/te4/)                                                             |
+| Architecture notes and design patterns                                          | [docs/architecture/](docs/architecture/)                                                                   |
 
 ## Getting started
 
