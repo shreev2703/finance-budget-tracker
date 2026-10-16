@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TE4 – Design and Architectural Patterns – LedgerLogic</title>
+<style>
+  @page { size: Letter; margin: 0.75in 0.7in; }
+  body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10.5pt; line-height: 1.45; color: #1f2933; }
+  h1 { font-size: 20pt; margin: 0 0 2pt; }
+  h2 { font-size: 14pt; margin: 22pt 0 6pt; padding-bottom: 3pt; border-bottom: 2px solid #1d4ed8; color: #0f2a6b; page-break-after: avoid; }
+  h3 { font-size: 11.5pt; margin: 14pt 0 4pt; page-break-after: avoid; }
+  p { margin: 4pt 0 6pt; }
+  .sub { color: #52606d; margin: 0 0 14pt; }
+  .meta { border-collapse: collapse; margin-bottom: 8pt; font-size: 9.5pt; }
+  .meta td { padding: 2pt 10pt 2pt 0; vertical-align: top; }
+  table.t { width: 100%; border-collapse: collapse; margin: 6pt 0 10pt; font-size: 9.5pt; page-break-inside: avoid; }
+  table.t th, table.t td { border: 1px solid #cbd2d9; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+  table.t th { background: #eef2f7; }
+  figure { margin: 8pt 0 12pt; text-align: center; page-break-inside: avoid; }
+  figure img { max-width: 100%; max-height: 7.4in; width: auto; border: 1px solid #e4e7eb; }
+  figure.side { display: flex; gap: 14pt; align-items: flex-start; text-align: left; }
+  figure.side img { max-height: 4.5in; flex: none; }
+  figure.side .t { font-size: 8.6pt; }
+  figure.cor img { max-height: 4.6in; }
+  figure.side figcaption { margin-top: 0; }
+  figcaption { font-size: 9pt; color: #52606d; margin-top: 3pt; }
+  pre { background: #f5f7fa; border: 1px solid #e4e7eb; border-radius: 4px; padding: 7pt 9pt; font-size: 8.8pt; line-height: 1.35; white-space: pre-wrap; page-break-inside: avoid; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 9pt; }
+  .tag { display: inline-block; font-size: 8pt; font-weight: 700; padding: 1pt 6pt; border-radius: 3pt; vertical-align: middle; }
+  .impl { background: #dcfce7; color: #166534; }
+  .plan { background: #fef3c7; color: #92400e; }
+  ul { margin: 3pt 0 6pt 16pt; padding: 0; }
+  li { margin: 2pt 0; }
+  .note { font-size: 9.5pt; color: #3e4c59; background: #f8fafc; border-left: 3px solid #94a3b8; padding: 5pt 9pt; margin: 6pt 0 10pt; }
+  .pb { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<h1>TE4 – Design and Architectural Patterns</h1>
+<p class="sub">LedgerLogic (Finance Budget Tracker) · CSC 3100 · Fall 2026 · Team OpenAnthropic</p>
+<table class="meta">
+  <tr><td><b>Team</b></td><td>Shreev B. (Lead Developer) · Juan S. (Scrum Master &amp; PM) · Juan F. (Project Tester)</td></tr>
+  <tr><td><b>Repository</b></td><td>https://github.com/shreev2703/finance-budget-tracker</td></tr>
+  <tr><td><b>Date</b></td><td>October 16, 2026</td></tr>
+</table>
+<p>LedgerLogic is a web app that helps college students log income and expenses, see their monthly balance, and stay under per-category spending limits, with a warning at 80% of a limit. This document records the architecture and design decisions we have made so far. Each item is labeled <span class="tag impl">IMPLEMENTED</span> (in the code on <code>main</code>) or <span class="tag plan">PLANNED</span>.</p>
+
+<h2>1. Proposed Architecture</h2>
+<h3>Pattern: Layered architecture inside a client-server system <span class="tag impl">IMPLEMENTED</span></h3>
+<p>The system is split into three tiers: a <b>React client</b> running in the browser, a <b>Node.js/Express REST API</b> server, and a <b>relational database</b>. Inside the server, the code is organized into strict layers. Each layer only calls the layer directly below it:</p>
+<pre>React client  →  Express middleware  →  routes (controllers)  →  services  →  repositories  →  SQLite / MySQL</pre>
+
+
+<p><b>Why it fits LedgerLogic.</b></p>
+<ul>
+  <li><b>The app is mostly CRUD plus a few business rules.</b> A layered design gives each rule one obvious home. For example, the 80% budget warning (US-09) is defined once in <code>domain/budget.js</code>.</li>
+  <li><b>Three students work in parallel.</b> The client and the server only share a JSON contract (the REST endpoints), so frontend and backend work can proceed independently.</li>
+  <li><b>It is easy to test.</b> The whole API runs against an in-memory database in our automated tests (<code>backend/test/api.test.js</code>), because the database is passed into the app rather than hard-coded.</li>
+  <li><b>Microservices or event-driven designs would be overkill</b> for a single-user budgeting app with four tables and no real-time features.</li>
+</ul>
+<p><b>Communication direction:</b> the client always starts the exchange (HTTP request); the server never pushes to the client. Within the server, calls only go downward (routes → services → repositories → database), and results return up the same path.</p>
+<p><b>External systems:</b> none. Bank linking, automatic transaction import, and payments are explicitly <i>out of scope</i> in our SRS, and we build login ourselves (see Decision 4), so the app has no third-party services.</p>
+
+<figure class="side">
+  <img src="architecture.png" alt="Layered client-server architecture">
+  <div>
+    <table class="t">
+      <tr><th style="width:24%">Layer</th><th>Responsibility</th><th style="width:34%">Where it lives</th></tr>
+      <tr><td>Presentation</td><td>Pages and components the student interacts with</td><td><code>packages/frontend/src/</code></td></tr>
+      <tr><td>Middleware</td><td>Parses JSON, identifies the user, turns errors into consistent JSON</td><td><code>backend/src/app.js</code>, <code>middleware/</code></td></tr>
+      <tr><td>Routes</td><td>Maps HTTP method + URL to a service call; picks the status code</td><td><code>routes/api.js</code></td></tr>
+      <tr><td>Services</td><td>Validation and business rules (amounts, dates, category type, 80% warning)</td><td><code>services/</code>, <code>domain/budget.js</code></td></tr>
+      <tr><td>Repositories</td><td>The only code that contains SQL</td><td><code>repositories/</code></td></tr>
+      <tr><td>Data</td><td>Users, categories, transactions, budgets</td><td><code>db/schema.sql</code></td></tr>
+    </table>
+    <figcaption>Figure 1. Architecture. Requests flow top to bottom (client → server → database), and responses return up the same path. Each server layer only calls the layer directly below it.</figcaption>
+  </div>
+</figure>
+
+<h2>2. High-Level Design</h2>
+<figure>
+  <img src="high-level-design.png" alt="High-level design diagram">
+  <figcaption>Figure 2. High-level design: main pages, API routes, services, repositories, and storage. Dashed lines are planned.</figcaption>
+</figure>
+
+<h3>Client side <span class="tag impl">IMPLEMENTED (prototype)</span></h3>
+<p>The React prototype (built with Vite) has these main pages: <b>Login</b>, <b>Dashboard</b> (monthly budget card, category allocation bars with amount remaining, recent transactions), <b>Transactions</b> (full history), and <b>Create / Edit Category</b> (name + monthly limit). <code>App.jsx</code> holds the shared state (the current page and the list of categories) and passes it to each page as props. Juan F.'s component plan (<code>frontend-architecture.md</code>) sets the target structure: <code>App → DashboardPage → BudgetSummary, TransactionList, AddTransactionForm</code>, with <code>DashboardPage</code> owning the shared data and refreshing it after a transaction is added.</p>
+<p class="note">The current prototype uses sample data in React state. <b>Planned:</b> a small API client module (<code>fetch('/api/...')</code>) that loads real data from the backend, plus a Vite proxy that forwards <code>/api</code> to port 3001.</p>
+
+<h3>Server side <span class="tag impl">IMPLEMENTED</span></h3>
+<table class="t">
+  <tr><th style="width:32%">Route</th><th>Purpose</th><th style="width:22%">Service → repositories</th></tr>
+  <tr><td><code>GET /api/transactions</code></td><td>List transactions, newest first (US-01, US-02)</td><td>TransactionService → TransactionRepository</td></tr>
+  <tr><td><code>POST /api/transactions</code></td><td>Validate and save an income or expense (US-01, US-02)</td><td>TransactionService → Transaction + Category repositories</td></tr>
+  <tr><td><code>GET /api/budgets/summary</code></td><td>Monthly totals and per-category spent / remaining / status (US-04, US-08, US-09)</td><td>BudgetService → Transaction + Budget repositories</td></tr>
+  <tr><td><code>GET /api/categories</code></td><td>Categories for the form (US-01, US-02)</td><td>CategoryRepository</td></tr>
+  <tr><td><code>/api/auth/*</code>, <code>/api/budgets</code>, edit/delete/filter <span class="tag plan">PLANNED</span></td><td>Login (US-07), set limits (US-08), edit/delete (US-03), filter (US-06)</td><td>New AuthService; existing services</td></tr>
+</table>
+
+<h3>Key data flow: adding an expense</h3>
+<ol>
+  <li>The student submits the Add Transaction form; the client sends <code>POST /api/transactions</code> with <code>{ amount, type, categoryId, date, note }</code>.</li>
+  <li>Middleware parses the JSON and attaches the user ID.</li>
+  <li><code>TransactionService</code> validates every field, checks that the category belongs to the user and matches the type, and converts dollars to cents.</li>
+  <li><code>TransactionRepository</code> inserts the row; the API returns <code>201</code> with the saved transaction (or <code>400</code> with a list of problems).</li>
+  <li>The client re-requests <code>GET /api/budgets/summary</code>, so the balance and category bars update. A category at or above 80% of its limit is flagged <code>warning</code>, and one above 100% is flagged <code>over</code>.</li>
+</ol>
+
+<h2>3. Design Pattern: Chain of Responsibility <span class="tag impl">IMPLEMENTED</span></h2>
+<p><b>Category:</b> Gang of Four, behavioral pattern.</p>
+
+<h3>Problem it solves</h3>
+<p>Every API request needs the same cross-cutting steps before and after the actual work: parse the JSON body, figure out which user is calling, find the matching route, answer with a 404 if nothing matched, and convert any thrown error into a clean JSON error with the right status code. If every route did these steps itself, the same code would be copied into every endpoint, and changing one step (for example, replacing our temporary demo user with real login) would mean editing every route.</p>
+
+<h3>How we apply it</h3>
+<p>Chain of Responsibility passes a request along a chain of handlers. Each handler either handles the request or passes it to the next one. Express middleware is this pattern. Every handler has the same interface, <code>(req, res, next)</code>, and calls <code>next()</code> to pass the request on, or <code>next(err)</code> to jump to the error handler. We build the chain once in <code>backend/src/app.js</code>:</p>
+<pre><code>// packages/backend/src/app.js (lines 17–32)
+const app = express();
+app.use(express.json());              // 1. parse the JSON body          → next()
+app.use('/api', demoUser(db));        // 2. attach req.userId            → next()
+app.use('/api', apiRouter({ ... }));  // 3. run the matching route, or   → next()
+app.use(notFound);                    // 4. no route matched → 404 JSON
+app.use(errorHandler);                // 5. any next(err)/throw → 4xx/500 JSON</code></pre>
+<pre><code>// packages/backend/src/middleware/demoUser.js
+export function demoUser(db) {
+  const findUser = db.prepare('SELECT id FROM users WHERE email = ?');
+  return (req, res, next) => {
+    req.userId = findUser.get(DEMO_USER_EMAIL)?.id;  // handle my part...
+    next();                                           // ...then pass it on
+  };
+}</code></pre>
+
+<table class="t">
+  <tr><th style="width:22%">GoF role</th><th style="width:30%">Our code</th><th>What it does</th></tr>
+  <tr><td>Handler (interface)</td><td><code>(req, res, next)</code> function signature</td><td>The common interface every link implements</td></tr>
+  <tr><td>Concrete handlers</td><td><code>express.json()</code>, <code>demoUser</code>, <code>apiRouter</code>, <code>notFound</code>, <code>errorHandler</code></td><td>Each does one job, then calls <code>next()</code> or ends the request</td></tr>
+  <tr><td>Client / chain builder</td><td><code>createApp()</code> in <code>app.js</code></td><td>Puts the handlers in order</td></tr>
+  <tr><td>Successor link</td><td><code>next()</code> / <code>next(err)</code></td><td>Passes the request on, or skips straight to the error handler</td></tr>
+</table>
+
+<figure class="cor">
+  <img src="chain-of-responsibility.png" alt="Chain of Responsibility UML">
+  <figcaption>Figure 3. Chain of Responsibility in LedgerLogic. Every handler implements the same <code>handle(req, res, next)</code> interface.</figcaption>
+</figure>
+
+
+<h3>Why this beats one large module</h3>
+<ul>
+  <li><b>One job per handler.</b> Each handler is a few lines and can be read and tested on its own. One large request-handling function would mix parsing, identity, routing, and error formatting together.</li>
+  <li><b>Swappable links.</b> When we build login (US-07), we replace <code>demoUser</code> with an auth handler that checks a session or token. No route or service changes.</li>
+  <li><b>Consistent errors.</b> Every error in the app takes the same path to <code>errorHandler</code>. The frontend always receives <code>{ error, details }</code>, so it can show validation messages the same way on every form.</li>
+  <li><b>Easy to extend.</b> Future handlers such as request logging or rate limiting can be inserted at the right point in the chain without touching existing code.</li>
+</ul>
+
+<h2>4. Design Decisions and Tradeoffs</h2>
+
+<h3>Decision 1: Separate service and repository layers instead of putting logic in Express routes</h3>
+<table class="t">
+  <tr><th style="width:22%">Options considered</th><td>(a) Write SQL and validation directly inside each route handler. (b) Routes → services → repositories.</td></tr>
+  <tr><th>Selected</th><td><b>(b)</b> Routes only translate HTTP; services hold validation and business rules; repositories hold all SQL.</td></tr>
+  <tr><th>Why it fits now</th><td>It costs a few more files, but rules like "the category must match the transaction type" and "warn at 80%" live in one place. The SQL can change (SQLite → MySQL) without touching the routes. It also lets us test the full API automatically, which matters because our Project Tester role is responsible for verifying each feature.</td></tr>
+</table>
+
+<h3>Decision 2: SQLite now, MySQL-compatible schema for later</h3>
+<table class="t">
+  <tr><th style="width:22%">Options considered</th><td>(a) MySQL server from day one (as listed in the SRS template). (b) MongoDB. (c) SQLite through Node's built-in <code>node:sqlite</code>, with a schema written to map 1:1 to MySQL.</td></tr>
+  <tr><th>Selected</th><td><b>(c)</b> SQLite for development and demos.</td></tr>
+  <tr><th>Why it fits now</th><td>No database server has to be installed on any teammate's laptop or the presentation machine, so <code>npm install</code> then <code>npm run dev</code> just works. The data is relational (users → categories → transactions/budgets), so a SQL database suits it better than MongoDB. Because all SQL sits in the repository layer, moving to MySQL later is contained to <code>repositories/</code> and <code>db/</code>. Tradeoff: SQLite is not built for many simultaneous writers, which is fine at our scale.</td></tr>
+</table>
+
+<h3>Decision 3: Store money as integer cents</h3>
+<table class="t">
+  <tr><th style="width:22%">Options considered</th><td>(a) JavaScript floating-point numbers. (b) A DECIMAL column. (c) Integer cents (<code>amount_cents</code>), converted at the API edge.</td></tr>
+  <tr><th>Selected</th><td><b>(c)</b> Integer cents. The API accepts dollars in requests and returns <code>…Cents</code> fields.</td></tr>
+  <tr><th>Why it fits now</th><td>Floating-point math gives answers like 0.1 + 0.2 = 0.30000000000000004, which would make totals and the 80% threshold slightly wrong. Integers are exact in both SQLite and JavaScript. Tradeoff: the frontend has to divide by 100 when displaying amounts.</td></tr>
+</table>
+
+<h3>Decision 4: Build our own login later; use a demo user for now <span class="tag plan">PLANNED</span></h3>
+<table class="t">
+  <tr><th style="width:22%">Options considered</th><td>(a) A hosted auth service (Supabase Auth, Firebase Auth). (b) Our own email + password login with bcrypt hashing and a session/JWT middleware. (c) Build auth before any other feature.</td></tr>
+  <tr><th>Selected</th><td><b>(b)</b>, scheduled after the core budgeting flow. Until then, a <code>demoUser</code> middleware acts as one seeded student.</td></tr>
+  <tr><th>Why it fits now</th><td>Our SRS promises privacy and no third-party accounts, and it already requires bcrypt hashing. Our <code>users</code> table (email, password_hash) is ready for it. Building the budgeting features first let us demo real value sooner. Thanks to the Chain of Responsibility design, adding login means swapping one handler.</td></tr>
+</table>
+
+<h3>Decision 5: Shared state in the top-level React component instead of a state library</h3>
+<table class="t">
+  <tr><th style="width:22%">Options considered</th><td>(a) A global store such as Redux. (b) Keep shared data in one parent component (<code>App</code> / <code>DashboardPage</code>) and pass it down as props.</td></tr>
+  <tr><th>Selected</th><td><b>(b)</b>, per Juan F.'s frontend architecture plan.</td></tr>
+  <tr><th>Why it fits now</th><td>The app has a handful of pages sharing two pieces of data (categories and transactions), so a store library would add setup without benefit. When the parent's state changes after a save, React re-renders every component that uses it, so the list and the budget bars stay in sync automatically.</td></tr>
+</table>
+
+</body>
+</html>
