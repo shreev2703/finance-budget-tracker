@@ -6,12 +6,13 @@ Project SRD: https://docs.google.com/document/d/1Lc2qm145vXdAHm76jv-lCK-DichXJx5
 
 ## Course documents
 
-| Document                                                                        | File                                                                                                       |
-| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Design document: TE3 UML + TE4 design and architectural patterns (all diagrams) | [docs/design/LedgerLogic-Design-Document-TE3-TE4.pdf](docs/design/LedgerLogic-Design-Document-TE3-TE4.pdf) |
-| Software Requirements Specification (PDF copy of the SRD)                       | [docs/srd/LedgerLogic-SRD.pdf](docs/srd/LedgerLogic-SRD.pdf)                                               |
-| Diagram sources (Mermaid + PNG)                                                 | [docs/uml/](docs/uml/), [docs/te4/](docs/te4/)                                                             |
-| Architecture notes and design patterns                                          | [docs/architecture/](docs/architecture/)                                                                   |
+| Assignment                                                | Document                                                                                                 |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| TE3: UML class diagram                                    | [docs/te3/TE3-UML-Class-Diagram.pdf](docs/te3/TE3-UML-Class-Diagram.pdf)                                 |
+| TE4: Design and architectural patterns                    | [docs/te4/TE4-Design-and-Architectural-Patterns.pdf](docs/te4/TE4-Design-and-Architectural-Patterns.pdf) |
+| Software Requirements Specification (PDF copy of the SRD) | [docs/srd/LedgerLogic-SRD.pdf](docs/srd/LedgerLogic-SRD.pdf)                                             |
+
+Each assignment folder holds one PDF with all of its diagrams. The editable diagram sources (Mermaid + PNG + HTML) are in [docs/diagram-sources/](docs/diagram-sources/).
 
 ## Getting started
 

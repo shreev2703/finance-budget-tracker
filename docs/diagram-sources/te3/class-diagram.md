@@ -5,7 +5,7 @@
 Source: [`class-diagram.mmd`](class-diagram.mmd). Re-render the PNG after editing it:
 
 ```bash
-npx -y @mermaid-js/mermaid-cli -i docs/uml/class-diagram.mmd -o docs/uml/class-diagram.png -b white -s 2
+npx -y @mermaid-js/mermaid-cli -i docs/diagram-sources/te3/class-diagram.mmd -o docs/diagram-sources/te3/class-diagram.png -b white -s 2
 ```
 
 ```mermaid
