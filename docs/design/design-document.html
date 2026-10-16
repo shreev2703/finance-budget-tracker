@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>TE4 – Design and Architectural Patterns – LedgerLogic</title>
+<title>LedgerLogic Design Document – TE3 and TE4</title>
 <style>
   @page { size: Letter; margin: 0.75in 0.7in; }
   body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10.5pt; line-height: 1.45; color: #1f2933; }
@@ -19,7 +19,7 @@
   figure { margin: 8pt 0 12pt; text-align: center; page-break-inside: avoid; }
   figure img { max-width: 100%; max-height: 7.4in; width: auto; border: 1px solid #e4e7eb; }
   figure.side { display: flex; gap: 14pt; align-items: flex-start; text-align: left; }
-  figure.side img { max-height: 4.5in; flex: none; }
+  figure.side img { max-height: 3.9in; flex: none; }
   figure.side .t { font-size: 8.6pt; }
   figure.cor img { max-height: 4.6in; }
   figure.side figcaption { margin-top: 0; }
@@ -33,18 +33,67 @@
   li { margin: 2pt 0; }
   .note { font-size: 9.5pt; color: #3e4c59; background: #f8fafc; border-left: 3px solid #94a3b8; padding: 5pt 9pt; margin: 6pt 0 10pt; }
   .pb { page-break-before: always; }
+  h2.part { font-size: 16pt; margin-top: 26pt; border-bottom: 3px solid #0f2a6b; }
+  h2.part + p, h2.part + h3 { margin-top: 8pt; }
+  .contents td, .contents th { font-size: 9.5pt; }
 </style>
 </head>
 <body>
 
-<h1>TE4 – Design and Architectural Patterns</h1>
-<p class="sub">LedgerLogic (Finance Budget Tracker) · CSC 3100 · Fall 2026 · Team OpenAnthropic</p>
+<h1>LedgerLogic Design Document</h1>
+<p class="sub">TE3: UML Class Diagram · TE4: Design and Architectural Patterns · CSC 3100 · Fall 2026 · Team OpenAnthropic</p>
 <table class="meta">
   <tr><td><b>Team</b></td><td>Shreev B. (Lead Developer) · Juan S. (Scrum Master &amp; PM) · Juan F. (Project Tester)</td></tr>
   <tr><td><b>Repository</b></td><td>https://github.com/shreev2703/finance-budget-tracker</td></tr>
   <tr><td><b>Date</b></td><td>October 16, 2026</td></tr>
 </table>
-<p>LedgerLogic is a web app that helps college students log income and expenses, see their monthly balance, and stay under per-category spending limits, with a warning at 80% of a limit. This document records the architecture and design decisions we have made so far. Each item is labeled <span class="tag impl">IMPLEMENTED</span> (in the code on <code>main</code>) or <span class="tag plan">PLANNED</span>.</p>
+<p>LedgerLogic is a web app that helps college students log income and expenses, see their monthly balance, and stay under per-category spending limits, with a warning at 80% of a limit. This document collects all of our design diagrams in one place: the TE3 UML class diagrams (Part 1) and the TE4 architecture, high-level design, and design-pattern diagrams (Part 2).</p>
+
+<table class="t contents">
+  <tr><th style="width:22%">Part</th><th>Contents</th></tr>
+  <tr><td><b>Part 1: TE3</b></td><td>UML class diagram · Story → class traceability · Initial UML sketch</td></tr>
+  <tr><td><b>Part 2: TE4</b></td><td>1. Proposed architecture · 2. High-level design · 3. Design pattern (Chain of Responsibility) · 4. Design decisions and tradeoffs</td></tr>
+</table>
+
+<h2 class="part">Part 1 · TE3: UML Class Diagram</h2>
+
+<h3>Domain model</h3>
+<figure>
+  <img src="../uml/class-diagram.png" alt="LedgerLogic UML class diagram">
+  <figcaption>Figure A. LedgerLogic UML class diagram (domain model). Source: <code>docs/uml/class-diagram.mmd</code>.</figcaption>
+</figure>
+<table class="t">
+  <tr><th style="width:17%">Class</th><th>Responsibility</th><th style="width:26%">Stories</th></tr>
+  <tr><td><b>User</b></td><td>A registered student who owns all of their data, so records stay private. <code>register()</code>, <code>login()</code>.</td><td>US-01, US-02, US-07</td></tr>
+  <tr><td><b>Category</b></td><td>A user-defined bucket such as "Groceries" or "Part-time Job". <code>type</code> says whether it holds income or expenses.</td><td>US-01, US-02, US-05, US-06, US-08</td></tr>
+  <tr><td><b>Transaction</b></td><td>One income or expense entry with amount, date, category, and note.</td><td>US-01 – US-06</td></tr>
+  <tr><td><b>Budget</b></td><td>A monthly spending limit for one expense category (<code>period</code> = YYYY-MM). Derives spent, remaining, percent used, near limit (≥ 80%), and over limit.</td><td>US-08, US-09</td></tr>
+  <tr><td><b>CategoryType</b></td><td>Enumeration: <code>INCOME</code> or <code>EXPENSE</code>.</td><td>US-01, US-02</td></tr>
+</table>
+<p><b>Design notes.</b> Money is <code>decimal</code> in the model and stored as integer cents in the database. A user has at most one budget per category per month. Dashboard totals (US-04) and the spending-by-category chart (US-05) are computed from Transactions rather than stored, and filtering (US-06) is a query, not a class. A SavingsGoal class was considered and left out because no TE2 story requires it.</p>
+
+<h3>Story → class traceability</h3>
+<table class="t">
+  <tr><th style="width:9%">Story</th><th style="width:30%">Summary</th><th style="width:22%">Classes</th><th>Attributes / methods</th></tr>
+  <tr><td>US-01</td><td>Log an expense with amount, date, category, description</td><td>Transaction, Category, User</td><td><code>Transaction.amount</code>, <code>.date</code>, <code>.note</code>, <code>.type = EXPENSE</code>; Transaction → Category</td></tr>
+  <tr><td>US-02</td><td>Record paychecks and income sources</td><td>Transaction, Category, User</td><td><code>Transaction.type = INCOME</code>; income categories</td></tr>
+  <tr><td>US-03</td><td>Edit or delete a past transaction</td><td>Transaction</td><td><code>Transaction.id</code>; update/delete</td></tr>
+  <tr><td>US-04</td><td>Dashboard: income, expenses, remaining balance</td><td>Transaction</td><td>Derived: sum of <code>amount</code> by <code>type</code> for the month</td></tr>
+  <tr><td>US-05</td><td>Spending-by-category chart</td><td>Transaction, Category</td><td>Derived: expense <code>amount</code> grouped by Category</td></tr>
+  <tr><td>US-06</td><td>Filter history by category and date range</td><td>Transaction, Category</td><td>Query on <code>Transaction.date</code> and Category</td></tr>
+  <tr><td>US-07</td><td>Create an account and log in</td><td>User</td><td><code>User.email</code>, <code>.passwordHash</code>, <code>register()</code>, <code>login()</code></td></tr>
+  <tr><td>US-08</td><td>Monthly spending limit per category</td><td>Budget, Category</td><td><code>Budget.limitAmount</code>, <code>.period</code>; <code>remaining()</code>, <code>isOverLimit()</code></td></tr>
+  <tr><td>US-09</td><td>Warning at 80% of a category limit</td><td>Budget</td><td><code>percentUsed()</code>, <code>isNearLimit()</code></td></tr>
+</table>
+
+<h3>Initial UML sketch</h3>
+<figure>
+  <img src="../../finance_budget_tracker_uml.svg" alt="Initial UML sketch" style="max-height:3.6in">
+  <figcaption>Figure B. Initial UML sketch by Juan S. (User, Budget, Transaction). Figure A refines it: categories became their own class, budgets became per category per month, and the INCOME / EXPENSE type became an enumeration.</figcaption>
+</figure>
+
+<h2 class="part pb">Part 2 · TE4: Design and Architectural Patterns</h2>
+<p>Each item below is labeled <span class="tag impl">IMPLEMENTED</span> (in the code on <code>main</code>) or <span class="tag plan">PLANNED</span>.</p>
 
 <h2>1. Proposed Architecture</h2>
 <h3>Pattern: Layered architecture inside a client-server system <span class="tag impl">IMPLEMENTED</span></h3>
@@ -63,7 +112,7 @@
 <p><b>External systems:</b> none. Bank linking, automatic transaction import, and payments are explicitly <i>out of scope</i> in our SRS, and we build login ourselves (see Decision 4), so the app has no third-party services.</p>
 
 <figure class="side">
-  <img src="architecture.png" alt="Layered client-server architecture">
+  <img src="../te4/architecture.png" alt="Layered client-server architecture">
   <div>
     <table class="t">
       <tr><th style="width:24%">Layer</th><th>Responsibility</th><th style="width:34%">Where it lives</th></tr>
@@ -80,7 +129,7 @@
 
 <h2>2. High-Level Design</h2>
 <figure>
-  <img src="high-level-design.png" alt="High-level design diagram">
+  <img src="../te4/high-level-design.png" alt="High-level design diagram">
   <figcaption>Figure 2. High-level design: main pages, API routes, services, repositories, and storage. Dashed lines are planned.</figcaption>
 </figure>
 
@@ -140,7 +189,7 @@ export function demoUser(db) {
 </table>
 
 <figure class="cor">
-  <img src="chain-of-responsibility.png" alt="Chain of Responsibility UML">
+  <img src="../te4/chain-of-responsibility.png" alt="Chain of Responsibility UML">
   <figcaption>Figure 3. Chain of Responsibility in LedgerLogic. Every handler implements the same <code>handle(req, res, next)</code> interface.</figcaption>
 </figure>
 
