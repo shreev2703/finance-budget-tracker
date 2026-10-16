@@ -1,0 +1,50 @@
+%%{init: {"flowchart": {"wrappingWidth": 200, "nodeSpacing": 22, "rankSpacing": 40}}}%%
+flowchart TB
+  subgraph FE["FRONTEND · React · packages/frontend/src"]
+    direction TB
+    APP["App.jsx · shared state: page, categories"]
+    subgraph PAGES[" "]
+      direction LR
+      P1["Login"]
+      P2["Dashboard<br/>budget card · category bars<br/>recent transactions"]
+      P3["Transactions<br/>full history"]
+      P4["Create / Edit Category<br/>name + monthly limit"]
+    end
+    API["API client · fetch('/api/...') · <b>Planned</b>"]
+    APP --> PAGES
+    PAGES -.-> API
+  end
+
+  subgraph BE["BACKEND · Express · packages/backend/src"]
+    direction TB
+    MW["Middleware chain · app.js, middleware/"]
+    subgraph RT["Routes · routes/api.js"]
+      direction LR
+      T1["GET / POST<br/>/api/transactions"]
+      T2["GET<br/>/api/budgets/summary"]
+      T3["GET<br/>/api/categories"]
+      T4["/api/auth · /api/budgets<br/><b>Planned</b>"]
+    end
+    subgraph SVC["Services"]
+      direction LR
+      TS["TransactionService"]
+      BS["BudgetService<br/>+ domain/budget.js"]
+    end
+    subgraph REPO["Repositories"]
+      direction LR
+      TR["TransactionRepository"]
+      CR["CategoryRepository"]
+      BR["BudgetRepository"]
+    end
+    MW --> RT
+    T1 --> TS
+    T2 --> BS
+    T3 --> CR
+    TS --> TR & CR
+    BS --> TR & BR
+  end
+
+  DB[("SQLite · users · categories · transactions · budgets")]
+
+  API -.->|"JSON over HTTP"| MW
+  REPO -->|"SQL"| DB

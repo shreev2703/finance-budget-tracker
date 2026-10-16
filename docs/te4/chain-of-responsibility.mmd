@@ -1,0 +1,36 @@
+classDiagram
+  direction TB
+  class Handler {
+    <<interface>>
+    +handle(req, res, next)
+  }
+  class ExpressApp {
+    -handlers: Handler[]
+    +use(handler)
+    +dispatch(req, res)
+  }
+  class JsonBodyParser {
+    +handle(req, res, next)
+  }
+  class DemoUser {
+    +handle(req, res, next)
+  }
+  class ApiRouter {
+    +handle(req, res, next)
+  }
+  class NotFound {
+    +handle(req, res)
+  }
+  class ErrorHandler {
+    +handle(err, req, res, next)
+  }
+  ExpressApp o--> "1..*" Handler : chain
+  Handler <|.. JsonBodyParser
+  Handler <|.. DemoUser
+  Handler <|.. ApiRouter
+  Handler <|.. NotFound
+  Handler <|.. ErrorHandler
+  JsonBodyParser ..> DemoUser : next()
+  DemoUser ..> ApiRouter : next()
+  ApiRouter ..> NotFound : next() if no route
+  ApiRouter ..> ErrorHandler : next(err)
