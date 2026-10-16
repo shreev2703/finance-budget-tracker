@@ -4,6 +4,15 @@ A budget tracker for college students: log income and expenses, see your balance
 
 Project SRD: https://docs.google.com/document/d/1Lc2qm145vXdAHm76jv-lCK-DichXJx5tS8it1oxZaaQ/edit?usp=sharing
 
+## Course documents
+
+| Document                                                  | File                                                                                 |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| TE4: Design and Architectural Patterns                    | [docs/te4/TE4-Design-and-Architecture.pdf](docs/te4/TE4-Design-and-Architecture.pdf) |
+| Software Requirements Specification (PDF copy of the SRD) | [docs/srd/LedgerLogic-SRD.pdf](docs/srd/LedgerLogic-SRD.pdf)                         |
+| UML class diagram + traceability (TE3)                    | [docs/uml/](docs/uml/)                                                               |
+| Architecture notes and design patterns                    | [docs/architecture/](docs/architecture/)                                             |
+
 ## Getting started
 
 Requires Node.js 22.13 or newer.
