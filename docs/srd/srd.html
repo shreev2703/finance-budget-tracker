@@ -46,6 +46,8 @@
   <tr><td>10/07/2026</td><td>JUAN S.</td><td>SET UP REACT FRONTEND PROTOTYPE</td></tr>
   <tr><td>10/16/2026</td><td>JUAN F.</td><td>BUILD WORKING WEBSITE PROTOTYPE (LOGIN, DASHBOARD, TRANSACTIONS, CATEGORIES)</td></tr>
   <tr><td>10/16/2026</td><td>SHREEV B.</td><td>TE4: ADD ARCHITECTURE, DESIGN PATTERN, AND DESIGN DECISIONS; COMPLETE FUNCTIONAL REQUIREMENTS, NON-FUNCTIONAL REQUIREMENTS, DATA REQUIREMENTS, AND TRACEABILITY MATRIX</td></tr>
+  <tr><td>10/23/2026</td><td>SHREEV B., JUAN S., JUAN F.</td><td>TE5: CODE REVIEW AND REFACTORING TICKETS R-01 TO R-06 (#50–#55); R-01, R-04, AND R-05 SELECTED FOR THE REFACTORING SPRINT</td></tr>
+  <tr><td>10/23/2026</td><td>SHREEV B.</td><td>TE5 R-01: MOVE TRANSACTION VALIDATION INTO domain/transaction.js; UPDATE TRACEABILITY MATRIX LINE REFERENCES</td></tr>
   <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
   <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
 </table>
@@ -54,7 +56,7 @@
 <p class="pb"><b>LEDGERLOGIC (FINANCE BUDGET TRACKER)</b></p>
 <p><b>SOFTWARE REQUIREMENTS SPECIFICATION (SRS)</b></p>
 <p><b>COURSE: CSC 3100 — INTRODUCTION TO SOFTWARE ENGINEERING</b></p>
-<p><b>DATE: OCTOBER 16, 2026</b></p>
+<p><b>DATE: OCTOBER 23, 2026</b></p>
 <hr>
 <p><b><u>TABLE OF CONTENTS</u></b></p>
 <ol>
@@ -237,8 +239,8 @@
 <p><b>8. <u>TRACEABILITY MATRIX</u></b></p>
 <table>
   <tr><td style="width:12%">ID</td><td style="width:40%">REQUIREMENT</td><td>LINE OF CODE</td></tr>
-  <tr><td>US-01</td><td>Log a new expense with an amount, date, category, and description.</td><td>backend/src/routes/api.js:22; backend/src/services/transactionService.js:10</td></tr>
-  <tr><td>US-02</td><td>Record paychecks and income sources.</td><td>backend/src/services/transactionService.js:19; backend/src/routes/api.js:13</td></tr>
+  <tr><td>US-01</td><td>Log a new expense with an amount, date, category, and description.</td><td>backend/src/routes/api.js:22; backend/src/services/transactionService.js:9; backend/src/domain/transaction.js:51 (validateTransaction)</td></tr>
+  <tr><td>US-02</td><td>Record paychecks and income sources.</td><td>backend/src/domain/transaction.js:20 (typeError: INCOME / EXPENSE); backend/src/routes/api.js:13</td></tr>
   <tr><td>US-03</td><td>Edit or delete a past transaction.</td><td>Planned (not yet implemented)</td></tr>
   <tr><td>US-04</td><td>Dashboard with total income, total expenses, and remaining balance.</td><td>backend/src/routes/api.js:26; backend/src/services/budgetService.js:12</td></tr>
   <tr><td>US-05</td><td>Chart of spending by category.</td><td>backend/src/repositories/transactionRepository.js:25 (data query; chart planned)</td></tr>
@@ -252,6 +254,7 @@
 <ul>
   <li><b><u>TE3 DOCUMENT (UML CLASS DIAGRAM, TRACEABILITY, MOCKUPS):</u></b><u> docs/te3/TE3-UML-Class-Diagram.pdf</u></li>
   <li><b><u>TE4 DOCUMENT (ARCHITECTURE, HIGH-LEVEL DESIGN, DESIGN PATTERN, DECISIONS):</u></b><u> docs/te4/TE4-Design-and-Architectural-Patterns.pdf</u></li>
+  <li><b><u>TE5 REFACTORING TICKETS:</u></b><u> GITHUB ISSUES #50–#55 (LABEL "refactor", MILESTONE TE5)</u></li>
   <li><b><u>DIAGRAM SOURCES:</u></b><u> docs/diagram-sources/</u></li>
   <li><b><u>HOW TO RUN THE APP AND API REFERENCE:</u></b><u> README.md</u></li>
 </ul>
