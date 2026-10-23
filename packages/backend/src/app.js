@@ -24,7 +24,11 @@ export function createApp(db) {
         transactions,
         categories,
       }),
-      budgetService: createBudgetService({ transactions, budgets }),
+      budgetService: createBudgetService({
+        transactions,
+        budgets,
+        categories,
+      }),
       categories,
     }),
   );
