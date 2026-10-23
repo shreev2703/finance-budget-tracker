@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./index.css";
 import { api, centsToDollars } from "./api";
+import { validateCategory } from "./validation.js";
 
 const money = (cents = 0) => `$${centsToDollars(cents).toFixed(2)}`;
 
@@ -362,15 +363,7 @@ function Dashboard({ go }) {
  </div>
         <section className="table">
           {transactions.map((transaction) => (
-            <div key={transaction.id}>
-              <span>◉</span>
-              <b>{transaction.note || transaction.categoryName} · {formatTransactionDate(transaction.date)}</b>
-              <small>{transaction.categoryName}</small>
-
-              <strong className={transaction.type === "INCOME" ? "income" : ""}>
-                {transaction.type === "INCOME" ? "+" : "−"}{money(transaction.amountCents)}
-              </strong>
-            </div>
+            <TransactionRow key={transaction.id} transaction={transaction} />
           ))}
         </section>
         {transactions.length === 0 && (
@@ -808,6 +801,22 @@ function Funds({ go }) {
   );
 }
 
+/** One line in a transaction list: note (or category) and date, category, signed amount. */
+function TransactionRow({ transaction }) {
+  const isIncome = transaction.type === "INCOME";
+  return (
+    <div>
+      <span>◉</span>
+      <b>{transaction.note || transaction.categoryName} · {formatTransactionDate(transaction.date)}</b>
+      <small>{transaction.categoryName}</small>
+
+      <strong className={isIncome ? "income" : ""}>
+        {isIncome ? "+" : "−"}{money(transaction.amountCents)}
+      </strong>
+    </div>
+  );
+}
+
 function Transactions({ go }) {
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState("");
@@ -846,15 +855,7 @@ function Transactions({ go }) {
             <p className="dashboard-state">No transactions yet.</p>
           )}
           {transactions.map((transaction) => (
-            <div key={transaction.id}>
-              <span>◉</span>
-              <b>{transaction.note || transaction.categoryName} · {formatTransactionDate(transaction.date)}</b>
-              <small>{transaction.categoryName}</small>
-
-              <strong className={transaction.type === "INCOME" ? "income" : ""}>
-                {transaction.type === "INCOME" ? "+" : "−"}{money(transaction.amountCents)}
-              </strong>
-            </div>
+            <TransactionRow key={transaction.id} transaction={transaction} />
           ))}
         </section>
       </div>
@@ -878,33 +879,49 @@ function FormErrors({ errors }) {
   );
 }
 
-function CreateCategory({ go }) {
-  const [name, setName] = useState("");
-  const [budget, setBudget] = useState("");
+/**
+ * Name + monthly limit form shared by Create and Edit Category.
+ * `onSubmit` gets the cleaned { name, budget }; if it (or `onSecondary`)
+ * throws, the API's error messages are shown in the form.
+ */
+function CategoryForm({
+  title,
+  initialName = "",
+  initialBudget = "",
+  submitLabel,
+  onSubmit,
+  secondaryLabel,
+  onSecondary,
+  onClose,
+}) {
+  const [name, setName] = useState(initialName);
+  const [budget, setBudget] = useState(initialBudget);
   const [errors, setErrors] = useState([]);
 
-  async function handleCreateCategory() {
-    if (name.trim() === "" || Number(budget) <= 0) {
-      setErrors(["Enter a category name and a valid budget limit."]);
-      return;
-    }
-
+  async function attempt(action) {
     try {
-      const category = await api.createCategory({ name: name.trim() });
-      await api.createBudget({ categoryId: category.id, limit: Number(budget) });
-      go("dashboard");
+      await action();
     } catch (error) {
       setErrors(errorMessages(error));
     }
   }
 
+  function handleSubmit() {
+    const error = validateCategory({ name, budget });
+    if (error) {
+      setErrors([error]);
+      return;
+    }
+    attempt(() => onSubmit({ name: name.trim(), budget: Number(budget) }));
+  }
+
   return (
     <Modal>
-      <button className="close" onClick={() => go("dashboard")}>
+      <button className="close" onClick={onClose}>
         ×
       </button>
 
-      <h2>Create category</h2>
+      <h2>{title}</h2>
 
       <label>
         Category name
@@ -929,85 +946,53 @@ function CreateCategory({ go }) {
       <FormErrors errors={errors} />
 
       <div className="modal-actions">
-        <Button className="outline" onClick={() => go("dashboard")}>
-          Cancel
+        <Button className="outline" onClick={() => attempt(onSecondary)}>
+          {secondaryLabel}
         </Button>
 
-        <Button onClick={handleCreateCategory}>
-          Create category
-        </Button>
+        <Button onClick={handleSubmit}>{submitLabel}</Button>
       </div>
     </Modal>
   );
 }
 
-function EditCategory({ category, onClose, onSave, onDelete }) {
-  const [name, setName] = useState(category.name);
-  const [budget, setBudget] = useState(category.budget);
-  const [errors, setErrors] = useState([]);
-
-  async function handleSave() {
-    if (name.trim() === "" || Number(budget) <= 0) {
-      setErrors(["Enter a category name and a valid budget limit."]);
-      return;
-    }
-
-    try {
-      await onSave({
-        ...category,
-        name: name.trim(),
-        budget: Number(budget),
-      });
-    } catch (error) {
-      setErrors(errorMessages(error));
-    }
+function CreateCategory({ go }) {
+  async function create({ name, budget }) {
+    const category = await api.createCategory({ name });
+    await api.createBudget({ categoryId: category.id, limit: budget });
+    go("dashboard");
   }
 
-  async function handleDelete() {
-    if (!window.confirm(`Delete "${category.name}"?`)) return;
-    try {
+  return (
+    <CategoryForm
+      title="Create category"
+      submitLabel="Create category"
+      onSubmit={create}
+      secondaryLabel="Cancel"
+      onSecondary={() => go("dashboard")}
+      onClose={() => go("dashboard")}
+    />
+  );
+}
+
+function EditCategory({ category, onClose, onSave, onDelete }) {
+  async function remove() {
+    if (window.confirm(`Delete "${category.name}"?`)) {
       await onDelete(category.id);
-    } catch (error) {
-      setErrors(errorMessages(error));
     }
   }
 
   return (
-    <Modal>
-      <button className="close" onClick={onClose}>
-        ×
-      </button>
-
-      <h2>Edit category</h2>
-
-      <label>
-        Category name
-        <input
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-        />
-      </label>
-
-      <label>
-        Monthly budget limit
-        <input
-          type="number"
-          min="1"
-          value={budget}
-          onChange={(event) => setBudget(event.target.value)}
-        />
-      </label>
-
-      <FormErrors errors={errors} />
-
-      <div className="modal-actions">
-        <Button className="outline" onClick={handleDelete}>
-          Delete category
-        </Button>
-
-        <Button onClick={handleSave}>Save changes</Button>
-      </div>
-    </Modal>
+    <CategoryForm
+      title="Edit category"
+      initialName={category.name}
+      initialBudget={category.budget}
+      submitLabel="Save changes"
+      onSubmit={(changes) => onSave({ ...category, ...changes })}
+      secondaryLabel="Delete category"
+      onSecondary={remove}
+      onClose={onClose}
+    />
   );
 }
 
