@@ -20,13 +20,17 @@ Requires Node.js 22.13 or newer.
 
 ```bash
 npm install     # installs every workspace from the root
-npm run dev     # API on http://localhost:3001/api (restarts on file changes)
-npm test        # backend API tests
+npm run dev     # starts the API (http://localhost:3001/api) and the website (http://localhost:5173) together
+npm test        # backend tests
 npm run lint
 npm run seed    # reset the local database to demo data
 ```
 
+Open http://localhost:5173. The website calls `/api/...`, and Vite forwards those requests to the API on port 3001. To run one side only: `npm run dev:api` or `npm run dev:web`.
+
 The first start creates `packages/backend/data/ledger.db` and seeds a demo student with categories, budgets, and this month's transactions. Stop the server before running `npm run seed`.
+
+In the frontend, call the API through `packages/frontend/src/api.js` (`api.getSummary()`, `api.getTransactions()`, `api.getCategories()`, `api.addTransaction()`, `api.createBudget()`, `api.updateBudget()`). Failed requests throw an `ApiError` with `status` and a `details` list of validation problems.
 
 ## Layout
 
@@ -51,6 +55,8 @@ packages/
 | GET    | `/api/transactions?limit=50`          | Transactions, newest first                                                                                  |
 | POST   | `/api/transactions`                   | Create `{ amount, type, categoryId, date, note }` (`type` is `INCOME` or `EXPENSE`, `date` is `YYYY-MM-DD`) |
 | GET    | `/api/budgets/summary?period=YYYY-MM` | Monthly totals + per-category budget status (defaults to the current month)                                 |
-| GET    | `/api/categories`                     | The user's income and expense categories                                                                    |
+| GET    | `/api/categories`                     | The user's income and expense categories, each with `budgetId` and `limitCents` for this month (or `null`)  |
+| POST   | `/api/budgets`                        | Set a monthly limit `{ categoryId, limit, period? }` for an expense category (409 if one already exists)    |
+| PUT    | `/api/budgets/:id`                    | Change a budget's limit `{ limit }`                                                                         |
 
 Authentication (US-07) is not built yet: every request acts as the seeded demo user.
