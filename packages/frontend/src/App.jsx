@@ -2,6 +2,8 @@ import { useState } from "react";
 import "./index.css";
 import { api } from "./api.js";
 import { useLedgerData } from "./useLedgerData.js";
+import { sampleTransactions } from "./sampleData.js";
+import { validateCategory } from "./validation.js";
 
 const money = (n) => `$${Number(n).toFixed(2)}`;
 
@@ -159,13 +161,6 @@ function Dashboard({ go, ledger }) {
   const [editingCategory, setEditingCategory] = useState(null);
   const [addingTransaction, setAddingTransaction] = useState(false);
 
-  const transactions = [
-    ["Union Square · Yesterday", "Food & Dining", "−$12.84"],
-    ["Campus Market · Oct 13", "Shopping", "−$28.46"],
-    ["Amazon · Oct 12", "Entertainment", "−$19.99"],
-    ["Cal Poly Direct Deposit", "Income", "+$1,800.00"], 
-  ];
-
   return (
     <Shell page="dashboard" go={go}>
       <div className="dashboard">
@@ -307,21 +302,28 @@ function Dashboard({ go, ledger }) {
     View all transactions
   </Button>
  </div>
-        <section className="table">
-          {transactions.map((row) => (
-            <div key={row[0]}>
-              <span>◉</span>
-              <b>{row[0]}</b>
-              <small>{row[1]}</small>
-
-              <strong className={row[2][0] === "+" ? "income" : ""}>
-                {row[2]}
-              </strong>
-            </div>
-          ))}
-        </section>
+        <TransactionTable rows={sampleTransactions.slice(0, 4)} />
       </div>
     </Shell>
+  );
+}
+
+/** Rows of [description, category, signed amount]; income amounts start with "+". */
+function TransactionTable({ rows }) {
+  return (
+    <section className="table">
+      {rows.map(([description, category, amount]) => (
+        <div key={description}>
+          <span>◉</span>
+          <b>{description}</b>
+          <small>{category}</small>
+
+          <strong className={amount.startsWith("+") ? "income" : ""}>
+            {amount}
+          </strong>
+        </div>
+      ))}
+    </section>
   );
 }
 
@@ -751,15 +753,6 @@ function Funds({ go }) {
 }
 
 function Transactions({ go }) {
-  const transactions = [
-    ["Union Square · Yesterday", "Food & Dining", "−$12.84"],
-    ["Campus Market · Oct 13", "Shopping", "−$28.46"],
-    ["Amazon · Oct 12", "Entertainment", "−$19.99"],
-    ["Cal Poly Direct Deposit", "Income", "+$1,800.00"],
-    ["Netflix · Oct 9", "Entertainment", "−$15.49"],
-    ["Chase College Checking · Oct 7", "Transfer", "−$100.00"],
-  ];
-
   return (
     <Shell page="dashboard" go={go}>
       <div className="dashboard">
@@ -777,21 +770,7 @@ function Transactions({ go }) {
           </Button>
         </div>
 
-        <section className="table">
-          {transactions.map((transaction) => (
-            <div key={transaction[0]}>
-              <span>◉</span>
-              <b>{transaction[0]}</b>
-              <small>{transaction[1]}</small>
-
-              <strong
-                className={transaction[2][0] === "+" ? "income" : ""}
-              >
-                {transaction[2]}
-              </strong>
-            </div>
-          ))}
-        </section>
+        <TransactionTable rows={sampleTransactions} />
       </div>
     </Shell>
   );
@@ -813,34 +792,49 @@ function FormErrors({ errors }) {
   );
 }
 
-function CreateCategory({ go, onCreated }) {
-  const [name, setName] = useState("");
-  const [budget, setBudget] = useState("");
+/**
+ * Name + monthly limit form shared by Create and Edit Category.
+ * `onSubmit` gets the cleaned { name, budget }; if it (or `onSecondary`)
+ * throws, the API's error messages are shown in the form.
+ */
+function CategoryForm({
+  title,
+  initialName = "",
+  initialBudget = "",
+  submitLabel,
+  onSubmit,
+  secondaryLabel,
+  onSecondary,
+  onClose,
+}) {
+  const [name, setName] = useState(initialName);
+  const [budget, setBudget] = useState(initialBudget);
   const [errors, setErrors] = useState([]);
 
-  async function handleCreateCategory() {
-    if (name.trim() === "" || Number(budget) <= 0) {
-      setErrors(["Enter a category name and a valid budget limit."]);
-      return;
-    }
-
+  async function attempt(action) {
     try {
-      const category = await api.createCategory({ name: name.trim() });
-      await api.createBudget({ categoryId: category.id, limit: Number(budget) });
-      await onCreated();
-      go("dashboard");
+      await action();
     } catch (error) {
       setErrors(errorMessages(error));
     }
   }
 
+  function handleSubmit() {
+    const error = validateCategory({ name, budget });
+    if (error) {
+      setErrors([error]);
+      return;
+    }
+    attempt(() => onSubmit({ name: name.trim(), budget: Number(budget) }));
+  }
+
   return (
     <Modal>
-      <button className="close" onClick={() => go("dashboard")}>
+      <button className="close" onClick={onClose}>
         ×
       </button>
 
-      <h2>Create category</h2>
+      <h2>{title}</h2>
 
       <label>
         Category name
@@ -865,85 +859,54 @@ function CreateCategory({ go, onCreated }) {
       <FormErrors errors={errors} />
 
       <div className="modal-actions">
-        <Button className="outline" onClick={() => go("dashboard")}>
-          Cancel
+        <Button className="outline" onClick={() => attempt(onSecondary)}>
+          {secondaryLabel}
         </Button>
 
-        <Button onClick={handleCreateCategory}>
-          Create category
-        </Button>
+        <Button onClick={handleSubmit}>{submitLabel}</Button>
       </div>
     </Modal>
   );
 }
 
-function EditCategory({ category, onClose, onSave, onDelete }) {
-  const [name, setName] = useState(category.name);
-  const [budget, setBudget] = useState(category.budget);
-  const [errors, setErrors] = useState([]);
-
-  async function handleSave() {
-    if (name.trim() === "" || Number(budget) <= 0) {
-      setErrors(["Enter a category name and a valid budget limit."]);
-      return;
-    }
-
-    try {
-      await onSave({
-        ...category,
-        name: name.trim(),
-        budget: Number(budget),
-      });
-    } catch (error) {
-      setErrors(errorMessages(error));
-    }
+function CreateCategory({ go, onCreated }) {
+  async function create({ name, budget }) {
+    const category = await api.createCategory({ name });
+    await api.createBudget({ categoryId: category.id, limit: budget });
+    await onCreated();
+    go("dashboard");
   }
 
-  async function handleDelete() {
-    if (!window.confirm(`Delete "${category.name}"?`)) return;
-    try {
+  return (
+    <CategoryForm
+      title="Create category"
+      submitLabel="Create category"
+      onSubmit={create}
+      secondaryLabel="Cancel"
+      onSecondary={() => go("dashboard")}
+      onClose={() => go("dashboard")}
+    />
+  );
+}
+
+function EditCategory({ category, onClose, onSave, onDelete }) {
+  async function remove() {
+    if (window.confirm(`Delete "${category.name}"?`)) {
       await onDelete(category.id);
-    } catch (error) {
-      setErrors(errorMessages(error));
     }
   }
 
   return (
-    <Modal>
-      <button className="close" onClick={onClose}>
-        ×
-      </button>
-
-      <h2>Edit category</h2>
-
-      <label>
-        Category name
-        <input
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-        />
-      </label>
-
-      <label>
-        Monthly budget limit
-        <input
-          type="number"
-          min="1"
-          value={budget}
-          onChange={(event) => setBudget(event.target.value)}
-        />
-      </label>
-
-      <FormErrors errors={errors} />
-
-      <div className="modal-actions">
-        <Button className="outline" onClick={handleDelete}>
-          Delete category
-        </Button>
-
-        <Button onClick={handleSave}>Save changes</Button>
-      </div>
-    </Modal>
+    <CategoryForm
+      title="Edit category"
+      initialName={category.name}
+      initialBudget={category.budget}
+      submitLabel="Save changes"
+      onSubmit={(changes) => onSave({ ...category, ...changes })}
+      secondaryLabel="Delete category"
+      onSecondary={remove}
+      onClose={onClose}
+    />
   );
 }
 
