@@ -1,9 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./index.css";
-import { api } from "./api.js";
-import { useLedgerData } from "./useLedgerData.js";
+import { api, centsToDollars } from "./api";
 
-const money = (n) => `$${Number(n).toFixed(2)}`;
+const money = (cents = 0) => `$${centsToDollars(cents).toFixed(2)}`;
+
+const formatPeriod = (period) =>
+  new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(
+    new Date(`${period}-01T00:00:00`),
+  );
+
+const formatTransactionDate = (date) =>
+  new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(
+    new Date(`${date}T00:00:00`),
+  );
 
 function Mark() {
   return (
@@ -154,56 +163,72 @@ function Shell({ page, go, children }) {
   );
 }
 
-function Dashboard({ go, ledger }) {
-  const categories = ledger.budgetCategories;
+function Dashboard({ go }) {
+  const [summary, setSummary] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
   const [editingCategory, setEditingCategory] = useState(null);
   const [addingTransaction, setAddingTransaction] = useState(false);
 
-  const transactions = [
-    ["Union Square · Yesterday", "Food & Dining", "−$12.84"],
-    ["Campus Market · Oct 13", "Shopping", "−$28.46"],
-    ["Amazon · Oct 12", "Entertainment", "−$19.99"],
-    ["Cal Poly Direct Deposit", "Income", "+$1,800.00"], 
-  ];
+  // Re-runs the load below so totals, bars, and the list show a change right away.
+  const refresh = () => setReloadKey((key) => key + 1);
+
+  useEffect(() => {
+    let active = true;
+
+    Promise.all([api.getSummary(), api.getTransactions(4), api.getCategories()])
+      .then(([nextSummary, nextTransactions, nextCategories]) => {
+        if (!active) return;
+        setSummary(nextSummary);
+        setTransactions(nextTransactions);
+        setCategories(nextCategories);
+      })
+      .catch(() => {
+        if (active) setError("We could not load your budget data. Please try again.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [reloadKey]);
+
+  const totals = summary?.totals;
 
   return (
     <Shell page="dashboard" go={go}>
       <div className="dashboard">
         <div className="title">
-          <p>Overview · October 2025</p>
+          <p>Overview{summary ? ` · ${formatPeriod(summary.period)}` : ""}</p>
           <h1>Welcome back, Mustang!</h1>
           <span>Here’s your financial snapshot for the month.</span>
         </div>
 
+        {error ? (
+          <p className="dashboard-state error">{error}</p>
+        ) : loading ? (
+          <p className="dashboard-state">Loading your budget data…</p>
+        ) : (
+          <>
         <div className="stat-grid">
           <article>
             <small>Monthly budget</small>
-            <h2>$2,400.00</h2>
+            <h2>{money(totals.incomeCents)}</h2>
             <p>
-              $1,645.00 spent <b>$755.00 left</b>
+              {money(totals.expenseCents)} spent <b>{money(totals.balanceCents)} left</b>
             </p>
-          </article>
-
-          <article className="green-card">
-            <small>Investing frequency savings</small>
-            <h2>$250.00</h2>
-            <p>Set aside from your monthly income</p>
-          </article>
-
-          <article className="plan-mini">
-            <small>Ready to invest?</small>
-            <h2>$50.00</h2>
-
-            <Button onClick={() => go("investing")}>
-              Start investing
-            </Button>
           </article>
         </div>
 
         <div className="section-row">
           <div>
             <h2>Category Allocation Breakdown</h2>
-            <p>Track spending across the categories you care about.</p>
+            <p>Live spending and limits for this month.</p>
           </div>
 
           <div className="row-actions">
@@ -220,79 +245,107 @@ function Dashboard({ go, ledger }) {
           </div>
         </div>
 
-        {ledger.error && (
-          <p className="form-error" role="alert">
-            Can’t reach the server: {ledger.error}
-          </p>
-        )}
-
         <div className="category-grid">
-  {categories.map((category) => (
-    <article key={category.id}>
-      <div>
-        <b>{category.name}</b>
+          {summary.budgets.map((category) => {
+            const color =
+              category.status === "over"
+                ? "#cf4f48"
+                : category.status === "warning"
+                  ? "#d69b0c"
+                  : "#1c9457";
 
-        <Button
-          className="small outline"
-          onClick={() => setEditingCategory(category)}
-        >
-          Edit
-        </Button>
+            return (
+    <article
+      key={category.id}
+      className={`budget-card ${category.status}`}
+      style={{
+        borderColor: category.status === "over" ? "#d4564f" : category.status === "warning" ? "#e0ad31" : undefined,
+        background: category.status === "over" ? "#fff8f7" : category.status === "warning" ? "#fffdf6" : undefined,
+      }}
+    >
+      <div>
+        <b>{category.categoryName}</b>
+        <span className="card-tools">
+          <small>{category.status === "over" ? "Over budget" : category.status === "warning" ? "Near limit" : "On track"}</small>
+          <Button
+            className="small outline"
+            onClick={() =>
+              setEditingCategory({
+                id: category.categoryId,
+                budgetId: category.id,
+                name: category.categoryName,
+                budget: centsToDollars(category.limitCents),
+              })
+            }
+          >
+            Edit
+          </Button>
+        </span>
       </div>
 
       <span>
-        {money(category.spent)} of {money(category.budget)}
+        {money(category.spentCents)} of {money(category.limitCents)}
       </span>
 
       <i>
         <em
           style={{
             width: `${Math.min(
-              (category.spent / category.budget) * 100,
+              (category.spentCents / category.limitCents) * 100,
               100
             )}%`,
-            background: category.color,
+            background: color,
           }}
+          className={`budget-fill ${category.status}`}
         />
       </i>
 
       <small>
-        {money(category.budget - category.spent)} remaining
+        {category.remainingCents >= 0
+          ? `${money(category.remainingCents)} remaining`
+          : `${money(Math.abs(category.remainingCents))} over budget`}
       </small>
     </article>
-  ))}
+            );
+          })}
  </div>
- {editingCategory && (
-  <EditCategory
-    category={editingCategory}
-    onClose={() => setEditingCategory(null)}
-    onSave={async (updatedCategory) => {
-      if (updatedCategory.name !== editingCategory.name) {
-        await api.renameCategory(updatedCategory.id, updatedCategory.name);
-      }
-      if (updatedCategory.budget !== editingCategory.budget) {
-        await api.updateBudget(updatedCategory.budgetId, updatedCategory.budget);
-      }
-      await ledger.refresh();
-      setEditingCategory(null);
-    }}
-    onDelete={async (id) => {
-      await api.deleteCategory(id);
-      await ledger.refresh();
-      setEditingCategory(null);
-    }}
-  />
-)}
- {addingTransaction && (
-  <AddTransaction
-    categories={ledger.categories}
-    onClose={() => setAddingTransaction(false)}
-    onAdded={async () => {
-      await ledger.refresh();
-      setAddingTransaction(false);
-    }}
-  />
-)}
+
+        {summary.budgets.length === 0 && (
+          <p className="dashboard-state">No category budgets have been set for this month.</p>
+        )}
+
+        {editingCategory && (
+          <EditCategory
+            category={editingCategory}
+            onClose={() => setEditingCategory(null)}
+            onSave={async (updatedCategory) => {
+              if (updatedCategory.name !== editingCategory.name) {
+                await api.renameCategory(updatedCategory.id, updatedCategory.name);
+              }
+              if (updatedCategory.budget !== editingCategory.budget) {
+                await api.updateBudget(updatedCategory.budgetId, updatedCategory.budget);
+              }
+              setEditingCategory(null);
+              refresh();
+            }}
+            onDelete={async (id) => {
+              await api.deleteCategory(id);
+              setEditingCategory(null);
+              refresh();
+            }}
+          />
+        )}
+
+        {addingTransaction && (
+          <AddTransaction
+            categories={categories}
+            onClose={() => setAddingTransaction(false)}
+            onAdded={() => {
+              setAddingTransaction(false);
+              refresh();
+            }}
+          />
+        )}
 
  <div className="section-row">
   <div>
@@ -308,18 +361,23 @@ function Dashboard({ go, ledger }) {
   </Button>
  </div>
         <section className="table">
-          {transactions.map((row) => (
-            <div key={row[0]}>
+          {transactions.map((transaction) => (
+            <div key={transaction.id}>
               <span>◉</span>
-              <b>{row[0]}</b>
-              <small>{row[1]}</small>
+              <b>{transaction.note || transaction.categoryName} · {formatTransactionDate(transaction.date)}</b>
+              <small>{transaction.categoryName}</small>
 
-              <strong className={row[2][0] === "+" ? "income" : ""}>
-                {row[2]}
+              <strong className={transaction.type === "INCOME" ? "income" : ""}>
+                {transaction.type === "INCOME" ? "+" : "−"}{money(transaction.amountCents)}
               </strong>
             </div>
           ))}
         </section>
+        {transactions.length === 0 && (
+          <p className="dashboard-state">No transactions yet.</p>
+        )}
+        </>
+        )}
       </div>
     </Shell>
   );
@@ -751,14 +809,16 @@ function Funds({ go }) {
 }
 
 function Transactions({ go }) {
-  const transactions = [
-    ["Union Square · Yesterday", "Food & Dining", "−$12.84"],
-    ["Campus Market · Oct 13", "Shopping", "−$28.46"],
-    ["Amazon · Oct 12", "Entertainment", "−$19.99"],
-    ["Cal Poly Direct Deposit", "Income", "+$1,800.00"],
-    ["Netflix · Oct 9", "Entertainment", "−$15.49"],
-    ["Chase College Checking · Oct 7", "Transfer", "−$100.00"],
-  ];
+  const [transactions, setTransactions] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.getTransactions()
+      .then(setTransactions)
+      .catch(() => setError("We could not load your transactions. Please try again."))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <Shell page="dashboard" go={go}>
@@ -778,16 +838,21 @@ function Transactions({ go }) {
         </div>
 
         <section className="table">
+          {error && <p className="dashboard-state error">{error}</p>}
+          {!error && loading && (
+            <p className="dashboard-state">Loading transactions…</p>
+          )}
+          {!error && !loading && transactions.length === 0 && (
+            <p className="dashboard-state">No transactions yet.</p>
+          )}
           {transactions.map((transaction) => (
-            <div key={transaction[0]}>
+            <div key={transaction.id}>
               <span>◉</span>
-              <b>{transaction[0]}</b>
-              <small>{transaction[1]}</small>
+              <b>{transaction.note || transaction.categoryName} · {formatTransactionDate(transaction.date)}</b>
+              <small>{transaction.categoryName}</small>
 
-              <strong
-                className={transaction[2][0] === "+" ? "income" : ""}
-              >
-                {transaction[2]}
+              <strong className={transaction.type === "INCOME" ? "income" : ""}>
+                {transaction.type === "INCOME" ? "+" : "−"}{money(transaction.amountCents)}
               </strong>
             </div>
           ))}
@@ -813,7 +878,7 @@ function FormErrors({ errors }) {
   );
 }
 
-function CreateCategory({ go, onCreated }) {
+function CreateCategory({ go }) {
   const [name, setName] = useState("");
   const [budget, setBudget] = useState("");
   const [errors, setErrors] = useState([]);
@@ -827,7 +892,6 @@ function CreateCategory({ go, onCreated }) {
     try {
       const category = await api.createCategory({ name: name.trim() });
       await api.createBudget({ categoryId: category.id, limit: Number(budget) });
-      await onCreated();
       go("dashboard");
     } catch (error) {
       setErrors(errorMessages(error));
@@ -1071,7 +1135,6 @@ function AddTransaction({ categories, onClose, onAdded }) {
 }
 
 export default function App() {
-  const ledger = useLedgerData();
   const [page, go] = useState("login");
   const [step, setStep] = useState(0);
 
@@ -1092,8 +1155,8 @@ export default function App() {
   }
 
   if (page === "category") {
-    return <CreateCategory go={go} onCreated={ledger.refresh} />;
+    return <CreateCategory go={go} />;
   }
 
-  return <Dashboard go={go} ledger={ledger} />;
+  return <Dashboard go={go} />;
 }

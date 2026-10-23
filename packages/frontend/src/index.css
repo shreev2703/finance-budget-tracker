@@ -426,6 +426,27 @@ button {
   font-size: 11px;
 }
 
+.budget-card.warning {
+  border-color: #e0ad31;
+  background: #fffdf6;
+}
+
+.budget-card.over {
+  border-color: #d4564f;
+  background: #fff8f7;
+}
+
+.budget-card.warning > div small {
+  color: #9a6900;
+  font-weight: 700;
+}
+
+.budget-card.over > div small,
+.budget-card.over > small {
+  color: #b63b35;
+  font-weight: 700;
+}
+
 .category-grid span {
   color: #67746d;
 }
@@ -442,6 +463,18 @@ button {
   display: block;
   height: 100%;
   border-radius: inherit;
+}
+
+.budget-fill.ok {
+  background: #1c9457;
+}
+
+.budget-fill.warning {
+  background: #d69b0c;
+}
+
+.budget-fill.over {
+  background: #cf4f48;
 }
 
 .category-grid small {
@@ -468,6 +501,21 @@ button {
 
 .table small {
   color: #7b867f;
+}
+
+.dashboard-state {
+  margin: 28px 0;
+  padding: 14px;
+  color: #506057;
+  border: 1px solid #dce3dc;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.dashboard-state.error {
+  color: #a43631;
+  border-color: #e5bbb8;
+  background: #fff7f6;
 }
 
 .income {
@@ -871,11 +919,18 @@ button {
     font-size: 29px;
   }
 }
+
 /* Add transaction + category forms (Sprint 3 #45, #46) */
 .row-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.card-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .type-toggle {
