@@ -11,7 +11,7 @@ export function apiRouter({ transactionService, budgetService, categories }) {
   router.get('/health', (req, res) => res.json({ ok: true }));
 
   router.get('/categories', (req, res) => {
-    res.json(categories.listForUser(req.userId));
+    res.json(categories.listForUser(req.userId, currentPeriod()));
   });
 
   router.get('/transactions', (req, res) => {
@@ -28,6 +28,17 @@ export function apiRouter({ transactionService, budgetService, categories }) {
     if (!PERIOD_RE.test(period))
       throw new HttpError(400, 'period must be YYYY-MM');
     res.json(budgetService.summary(req.userId, period));
+  });
+
+  router.post('/budgets', (req, res) => {
+    const input = { ...req.body, period: req.body?.period ?? currentPeriod() };
+    res.status(201).json(budgetService.create(req.userId, input));
+  });
+
+  router.put('/budgets/:id', (req, res) => {
+    res.json(
+      budgetService.updateLimit(req.userId, req.params.id, req.body ?? {}),
+    );
   });
 
   return router;
