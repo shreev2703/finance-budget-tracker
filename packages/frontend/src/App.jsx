@@ -1,7 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./index.css";
+import { api, centsToDollars } from "./api";
 
-const money = (n) => `$${Number(n).toFixed(2)}`;
+const money = (cents = 0) => `$${centsToDollars(cents).toFixed(2)}`;
+
+const formatPeriod = (period) =>
+  new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(
+    new Date(`${period}-01T00:00:00`),
+  );
+
+const formatTransactionDate = (date) =>
+  new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(
+    new Date(`${date}T00:00:00`),
+  );
 
 function Mark() {
   return (
@@ -152,166 +163,120 @@ function Shell({ page, go, children }) {
   );
 }
 
-const initialCategories = [
-  {
-    id: 1,
-    name: "Food & Dining",
-    spent: 486.53,
-    budget: 600,
-    color: "#1c9457",
-  },
-  {
-    id: 2,
-    name: "Shopping",
-    spent: 250,
-    budget: 350,
-    color: "#d69b0c",
-  },
-  {
-    id: 3,
-    name: "Fixed & Recurring",
-    spent: 800,
-    budget: 900,
-    color: "#d66b38",
-  },
-  {
-    id: 4,
-    name: "Transportation",
-    spent: 180,
-    budget: 250,
-    color: "#15916c",
-  },
-  {
-    id: 5,
-    name: "Bills & Payments",
-    spent: 150,
-    budget: 200,
-    color: "#d28d07",
-  },
-  {
-    id: 6,
-    name: "Entertainment",
-    spent: 40,
-    budget: 100,
-    color: "#35a076",
-  },
-];
+function Dashboard({ go }) {
+  const [summary, setSummary] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
-function Dashboard({ go, categories, setCategories }) {
-  const [editingCategory, setEditingCategory] = useState(null);
+  useEffect(() => {
+    let active = true;
 
-  const transactions = [
-    ["Union Square · Yesterday", "Food & Dining", "−$12.84"],
-    ["Campus Market · Oct 13", "Shopping", "−$28.46"],
-    ["Amazon · Oct 12", "Entertainment", "−$19.99"],
-    ["Cal Poly Direct Deposit", "Income", "+$1,800.00"], 
-  ];
+    Promise.all([api.getSummary(), api.getTransactions(4)])
+      .then(([nextSummary, nextTransactions]) => {
+        if (!active) return;
+        setSummary(nextSummary);
+        setTransactions(nextTransactions);
+      })
+      .catch(() => {
+        if (active) setError("We could not load your budget data. Please try again.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const totals = summary?.totals;
 
   return (
     <Shell page="dashboard" go={go}>
       <div className="dashboard">
         <div className="title">
-          <p>Overview · October 2025</p>
+          <p>Overview{summary ? ` · ${formatPeriod(summary.period)}` : ""}</p>
           <h1>Welcome back, Mustang!</h1>
           <span>Here’s your financial snapshot for the month.</span>
         </div>
 
+        {error ? (
+          <p className="dashboard-state error">{error}</p>
+        ) : loading ? (
+          <p className="dashboard-state">Loading your budget data…</p>
+        ) : (
+          <>
         <div className="stat-grid">
           <article>
             <small>Monthly budget</small>
-            <h2>$2,400.00</h2>
+            <h2>{money(totals.incomeCents)}</h2>
             <p>
-              $1,645.00 spent <b>$755.00 left</b>
+              {money(totals.expenseCents)} spent <b>{money(totals.balanceCents)} left</b>
             </p>
-          </article>
-
-          <article className="green-card">
-            <small>Investing frequency savings</small>
-            <h2>$250.00</h2>
-            <p>Set aside from your monthly income</p>
-          </article>
-
-          <article className="plan-mini">
-            <small>Ready to invest?</small>
-            <h2>$50.00</h2>
-
-            <Button onClick={() => go("investing")}>
-              Start investing
-            </Button>
           </article>
         </div>
 
         <div className="section-row">
           <div>
             <h2>Category Allocation Breakdown</h2>
-            <p>Track spending across the categories you care about.</p>
+            <p>Live spending and limits for this month.</p>
           </div>
-
-          <Button className="small" onClick={() => go("category")}>
-            + Create category
-          </Button>
         </div>
 
         <div className="category-grid">
-  {categories.map((category) => (
-    <article key={category.id}>
-      <div>
-        <b>{category.name}</b>
+          {summary.budgets.map((category) => {
+            const color =
+              category.status === "over"
+                ? "#cf4f48"
+                : category.status === "warning"
+                  ? "#d69b0c"
+                  : "#1c9457";
 
-        <Button
-          className="small outline"
-          onClick={() => setEditingCategory(category)}
-        >
-          Edit
-        </Button>
+            return (
+    <article
+      key={category.id}
+      className={`budget-card ${category.status}`}
+      style={{
+        borderColor: category.status === "over" ? "#d4564f" : category.status === "warning" ? "#e0ad31" : undefined,
+        background: category.status === "over" ? "#fff8f7" : category.status === "warning" ? "#fffdf6" : undefined,
+      }}
+    >
+      <div>
+        <b>{category.categoryName}</b>
+        <small>{category.status === "over" ? "Over budget" : category.status === "warning" ? "Near limit" : "On track"}</small>
       </div>
 
       <span>
-        {money(category.spent)} of {money(category.budget)}
+        {money(category.spentCents)} of {money(category.limitCents)}
       </span>
 
       <i>
         <em
           style={{
             width: `${Math.min(
-              (category.spent / category.budget) * 100,
+              (category.spentCents / category.limitCents) * 100,
               100
             )}%`,
-            background: category.color,
+            background: color,
           }}
+          className={`budget-fill ${category.status}`}
         />
       </i>
 
       <small>
-        {money(category.budget - category.spent)} remaining
+        {category.remainingCents >= 0
+          ? `${money(category.remainingCents)} remaining`
+          : `${money(Math.abs(category.remainingCents))} over budget`}
       </small>
     </article>
-  ))}
+            );
+          })}
  </div>
- {editingCategory && (
-  <EditCategory
-    category={editingCategory}
-    onClose={() => setEditingCategory(null)}
-    onSave={(updatedCategory) => {
-      setCategories(
-        categories.map((category) =>
-          category.id === updatedCategory.id
-            ? updatedCategory
-            : category
-        )
-      );
 
-      setEditingCategory(null);
-    }}
-    onDelete={(id) => {
-      setCategories(
-        categories.filter((category) => category.id !== id)
-      );
-
-      setEditingCategory(null);
-    }}
-  />
-)}
+        {summary.budgets.length === 0 && (
+          <p className="dashboard-state">No category budgets have been set for this month.</p>
+        )}
 
  <div className="section-row">
   <div>
@@ -327,18 +292,23 @@ function Dashboard({ go, categories, setCategories }) {
   </Button>
  </div>
         <section className="table">
-          {transactions.map((row) => (
-            <div key={row[0]}>
+          {transactions.map((transaction) => (
+            <div key={transaction.id}>
               <span>◉</span>
-              <b>{row[0]}</b>
-              <small>{row[1]}</small>
+              <b>{transaction.note || transaction.categoryName} · {formatTransactionDate(transaction.date)}</b>
+              <small>{transaction.categoryName}</small>
 
-              <strong className={row[2][0] === "+" ? "income" : ""}>
-                {row[2]}
+              <strong className={transaction.type === "INCOME" ? "income" : ""}>
+                {transaction.type === "INCOME" ? "+" : "−"}{money(transaction.amountCents)}
               </strong>
             </div>
           ))}
         </section>
+        {transactions.length === 0 && (
+          <p className="dashboard-state">No transactions yet.</p>
+        )}
+        </>
+        )}
       </div>
     </Shell>
   );
@@ -770,14 +740,16 @@ function Funds({ go }) {
 }
 
 function Transactions({ go }) {
-  const transactions = [
-    ["Union Square · Yesterday", "Food & Dining", "−$12.84"],
-    ["Campus Market · Oct 13", "Shopping", "−$28.46"],
-    ["Amazon · Oct 12", "Entertainment", "−$19.99"],
-    ["Cal Poly Direct Deposit", "Income", "+$1,800.00"],
-    ["Netflix · Oct 9", "Entertainment", "−$15.49"],
-    ["Chase College Checking · Oct 7", "Transfer", "−$100.00"],
-  ];
+  const [transactions, setTransactions] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.getTransactions()
+      .then(setTransactions)
+      .catch(() => setError("We could not load your transactions. Please try again."))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <Shell page="dashboard" go={go}>
@@ -797,16 +769,21 @@ function Transactions({ go }) {
         </div>
 
         <section className="table">
+          {error && <p className="dashboard-state error">{error}</p>}
+          {!error && loading && (
+            <p className="dashboard-state">Loading transactions…</p>
+          )}
+          {!error && !loading && transactions.length === 0 && (
+            <p className="dashboard-state">No transactions yet.</p>
+          )}
           {transactions.map((transaction) => (
-            <div key={transaction[0]}>
+            <div key={transaction.id}>
               <span>◉</span>
-              <b>{transaction[0]}</b>
-              <small>{transaction[1]}</small>
+              <b>{transaction.note || transaction.categoryName} · {formatTransactionDate(transaction.date)}</b>
+              <small>{transaction.categoryName}</small>
 
-              <strong
-                className={transaction[2][0] === "+" ? "income" : ""}
-              >
-                {transaction[2]}
+              <strong className={transaction.type === "INCOME" ? "income" : ""}>
+                {transaction.type === "INCOME" ? "+" : "−"}{money(transaction.amountCents)}
               </strong>
             </div>
           ))}
@@ -817,132 +794,7 @@ function Transactions({ go }) {
 }
 
 
-function CreateCategory({ go, setCategories }) {
-  const [name, setName] = useState("");
-  const [budget, setBudget] = useState("");
-
-  function handleCreateCategory() {
-    if (name.trim() === "" || Number(budget) <= 0) {
-      alert("Enter a category name and a valid budget limit.");
-      return;
-    }
-
-    setCategories((currentCategories) => [
-      ...currentCategories,
-      {
-        id: Date.now(),
-        name: name.trim(),
-        spent: 0,
-        budget: Number(budget),
-        color: "#1c9457",
-      },
-    ]);
-
-    go("dashboard");
-  }
-
-  return (
-    <Modal>
-      <button className="close" onClick={() => go("dashboard")}>
-        ×
-      </button>
-
-      <h2>Create category</h2>
-
-      <label>
-        Category name
-        <input
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder="Example: Textbooks"
-        />
-      </label>
-
-      <label>
-        Monthly budget limit
-        <input
-          type="number"
-          min="1"
-          value={budget}
-          onChange={(event) => setBudget(event.target.value)}
-          placeholder="100"
-        />
-      </label>
-
-      <div className="modal-actions">
-        <Button className="outline" onClick={() => go("dashboard")}>
-          Cancel
-        </Button>
-
-        <Button onClick={handleCreateCategory}>
-          Create category
-        </Button>
-      </div>
-    </Modal>
-  );
-}
-
-function EditCategory({ category, onClose, onSave, onDelete }) {
-  const [name, setName] = useState(category.name);
-  const [budget, setBudget] = useState(category.budget);
-
-  function handleSave() {
-    if (name.trim() === "" || Number(budget) <= 0) {
-      alert("Enter a category name and a valid budget limit.");
-      return;
-    }
-
-    onSave({
-      ...category,
-      name: name.trim(),
-      budget: Number(budget),
-    });
-  }
-
-  function handleDelete() {
-    if (window.confirm(`Delete "${category.name}"?`)) {
-      onDelete(category.id);
-    }
-  }
-
-  return (
-    <Modal>
-      <button className="close" onClick={onClose}>
-        ×
-      </button>
-
-      <h2>Edit category</h2>
-
-      <label>
-        Category name
-        <input
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-        />
-      </label>
-
-      <label>
-        Monthly budget limit
-        <input
-          type="number"
-          min="1"
-          value={budget}
-          onChange={(event) => setBudget(event.target.value)}
-        />
-      </label>
-
-      <div className="modal-actions">
-        <Button className="outline" onClick={handleDelete}>
-          Delete category
-        </Button>
-
-        <Button onClick={handleSave}>Save changes</Button>
-      </div>
-    </Modal>
-  );
-}
 export default function App() {
-  const [categories, setCategories] = useState(initialCategories);
   const [page, go] = useState("login");
   const [step, setStep] = useState(0);
 
@@ -962,20 +814,5 @@ export default function App() {
     return <Transactions go={go} />;
   }
 
-  if (page === "category") {
-    return (
-      <CreateCategory
-        go={go}
-        setCategories={setCategories}
-      />
-    );
-  }
-
-  return (
-    <Dashboard
-      go={go}
-      categories={categories}
-      setCategories={setCategories}
-    />
-  );
+  return <Dashboard go={go} />;
 }
