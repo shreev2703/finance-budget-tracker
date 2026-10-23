@@ -871,3 +871,25 @@ button {
     font-size: 29px;
   }
 }
+/* Add transaction + category forms (Sprint 3 #45, #46) */
+.row-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.type-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.form-error {
+  margin: 4px 0 12px;
+  padding: 10px 14px 10px 28px;
+  border: 1px solid #b42318;
+  border-radius: 8px;
+  color: #b42318;
+  font-size: 14px;
+}

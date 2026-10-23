@@ -1,5 +1,7 @@
 import { useState } from "react";
 import "./index.css";
+import { api } from "./api.js";
+import { useLedgerData } from "./useLedgerData.js";
 
 const money = (n) => `$${Number(n).toFixed(2)}`;
 
@@ -152,53 +154,10 @@ function Shell({ page, go, children }) {
   );
 }
 
-const initialCategories = [
-  {
-    id: 1,
-    name: "Food & Dining",
-    spent: 486.53,
-    budget: 600,
-    color: "#1c9457",
-  },
-  {
-    id: 2,
-    name: "Shopping",
-    spent: 250,
-    budget: 350,
-    color: "#d69b0c",
-  },
-  {
-    id: 3,
-    name: "Fixed & Recurring",
-    spent: 800,
-    budget: 900,
-    color: "#d66b38",
-  },
-  {
-    id: 4,
-    name: "Transportation",
-    spent: 180,
-    budget: 250,
-    color: "#15916c",
-  },
-  {
-    id: 5,
-    name: "Bills & Payments",
-    spent: 150,
-    budget: 200,
-    color: "#d28d07",
-  },
-  {
-    id: 6,
-    name: "Entertainment",
-    spent: 40,
-    budget: 100,
-    color: "#35a076",
-  },
-];
-
-function Dashboard({ go, categories, setCategories }) {
+function Dashboard({ go, ledger }) {
+  const categories = ledger.budgetCategories;
   const [editingCategory, setEditingCategory] = useState(null);
+  const [addingTransaction, setAddingTransaction] = useState(false);
 
   const transactions = [
     ["Union Square · Yesterday", "Food & Dining", "−$12.84"],
@@ -247,10 +206,25 @@ function Dashboard({ go, categories, setCategories }) {
             <p>Track spending across the categories you care about.</p>
           </div>
 
-          <Button className="small" onClick={() => go("category")}>
-            + Create category
-          </Button>
+          <div className="row-actions">
+            <Button
+              className="small outline"
+              onClick={() => setAddingTransaction(true)}
+            >
+              + Add transaction
+            </Button>
+
+            <Button className="small" onClick={() => go("category")}>
+              + Create category
+            </Button>
+          </div>
         </div>
+
+        {ledger.error && (
+          <p className="form-error" role="alert">
+            Can’t reach the server: {ledger.error}
+          </p>
+        )}
 
         <div className="category-grid">
   {categories.map((category) => (
@@ -292,23 +266,30 @@ function Dashboard({ go, categories, setCategories }) {
   <EditCategory
     category={editingCategory}
     onClose={() => setEditingCategory(null)}
-    onSave={(updatedCategory) => {
-      setCategories(
-        categories.map((category) =>
-          category.id === updatedCategory.id
-            ? updatedCategory
-            : category
-        )
-      );
-
+    onSave={async (updatedCategory) => {
+      if (updatedCategory.name !== editingCategory.name) {
+        await api.renameCategory(updatedCategory.id, updatedCategory.name);
+      }
+      if (updatedCategory.budget !== editingCategory.budget) {
+        await api.updateBudget(updatedCategory.budgetId, updatedCategory.budget);
+      }
+      await ledger.refresh();
       setEditingCategory(null);
     }}
-    onDelete={(id) => {
-      setCategories(
-        categories.filter((category) => category.id !== id)
-      );
-
+    onDelete={async (id) => {
+      await api.deleteCategory(id);
+      await ledger.refresh();
       setEditingCategory(null);
+    }}
+  />
+)}
+ {addingTransaction && (
+  <AddTransaction
+    categories={ledger.categories}
+    onClose={() => setAddingTransaction(false)}
+    onAdded={async () => {
+      await ledger.refresh();
+      setAddingTransaction(false);
     }}
   />
 )}
@@ -817,28 +798,40 @@ function Transactions({ go }) {
 }
 
 
-function CreateCategory({ go, setCategories }) {
+function errorMessages(error) {
+  return error.details?.length ? error.details : [error.message];
+}
+
+function FormErrors({ errors }) {
+  if (errors.length === 0) return null;
+  return (
+    <ul className="form-error" role="alert">
+      {errors.map((message) => (
+        <li key={message}>{message}</li>
+      ))}
+    </ul>
+  );
+}
+
+function CreateCategory({ go, onCreated }) {
   const [name, setName] = useState("");
   const [budget, setBudget] = useState("");
+  const [errors, setErrors] = useState([]);
 
-  function handleCreateCategory() {
+  async function handleCreateCategory() {
     if (name.trim() === "" || Number(budget) <= 0) {
-      alert("Enter a category name and a valid budget limit.");
+      setErrors(["Enter a category name and a valid budget limit."]);
       return;
     }
 
-    setCategories((currentCategories) => [
-      ...currentCategories,
-      {
-        id: Date.now(),
-        name: name.trim(),
-        spent: 0,
-        budget: Number(budget),
-        color: "#1c9457",
-      },
-    ]);
-
-    go("dashboard");
+    try {
+      const category = await api.createCategory({ name: name.trim() });
+      await api.createBudget({ categoryId: category.id, limit: Number(budget) });
+      await onCreated();
+      go("dashboard");
+    } catch (error) {
+      setErrors(errorMessages(error));
+    }
   }
 
   return (
@@ -869,6 +862,8 @@ function CreateCategory({ go, setCategories }) {
         />
       </label>
 
+      <FormErrors errors={errors} />
+
       <div className="modal-actions">
         <Button className="outline" onClick={() => go("dashboard")}>
           Cancel
@@ -885,23 +880,31 @@ function CreateCategory({ go, setCategories }) {
 function EditCategory({ category, onClose, onSave, onDelete }) {
   const [name, setName] = useState(category.name);
   const [budget, setBudget] = useState(category.budget);
+  const [errors, setErrors] = useState([]);
 
-  function handleSave() {
+  async function handleSave() {
     if (name.trim() === "" || Number(budget) <= 0) {
-      alert("Enter a category name and a valid budget limit.");
+      setErrors(["Enter a category name and a valid budget limit."]);
       return;
     }
 
-    onSave({
-      ...category,
-      name: name.trim(),
-      budget: Number(budget),
-    });
+    try {
+      await onSave({
+        ...category,
+        name: name.trim(),
+        budget: Number(budget),
+      });
+    } catch (error) {
+      setErrors(errorMessages(error));
+    }
   }
 
-  function handleDelete() {
-    if (window.confirm(`Delete "${category.name}"?`)) {
-      onDelete(category.id);
+  async function handleDelete() {
+    if (!window.confirm(`Delete "${category.name}"?`)) return;
+    try {
+      await onDelete(category.id);
+    } catch (error) {
+      setErrors(errorMessages(error));
     }
   }
 
@@ -931,6 +934,8 @@ function EditCategory({ category, onClose, onSave, onDelete }) {
         />
       </label>
 
+      <FormErrors errors={errors} />
+
       <div className="modal-actions">
         <Button className="outline" onClick={handleDelete}>
           Delete category
@@ -941,8 +946,132 @@ function EditCategory({ category, onClose, onSave, onDelete }) {
     </Modal>
   );
 }
+
+// Today's date in the user's time zone, as YYYY-MM-DD.
+const todayIso = () => new Date().toLocaleDateString("en-CA");
+
+/** US-01 log an expense, US-02 record income. */
+function AddTransaction({ categories, onClose, onAdded }) {
+  const [type, setType] = useState("EXPENSE");
+  const [amount, setAmount] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [date, setDate] = useState(todayIso());
+  const [note, setNote] = useState("");
+  const [errors, setErrors] = useState([]);
+  const [saving, setSaving] = useState(false);
+
+  const options = categories.filter((category) => category.type === type);
+
+  function chooseType(nextType) {
+    setType(nextType);
+    setCategoryId("");
+  }
+
+  async function handleAdd() {
+    setSaving(true);
+    setErrors([]);
+    try {
+      await api.addTransaction({
+        type,
+        amount: Number(amount),
+        categoryId: Number(categoryId),
+        date,
+        note,
+      });
+      await onAdded();
+    } catch (error) {
+      setErrors(errorMessages(error));
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Modal>
+      <button className="close" onClick={onClose}>
+        ×
+      </button>
+
+      <h2>Add transaction</h2>
+
+      <div className="type-toggle" role="radiogroup" aria-label="Transaction type">
+        {["EXPENSE", "INCOME"].map((option) => (
+          <Button
+            key={option}
+            role="radio"
+            aria-checked={type === option}
+            className={type === option ? "small" : "small outline"}
+            onClick={() => chooseType(option)}
+          >
+            {option === "EXPENSE" ? "Expense" : "Income"}
+          </Button>
+        ))}
+      </div>
+
+      <label>
+        Amount ($)
+        <input
+          type="number"
+          min="0.01"
+          step="0.01"
+          value={amount}
+          onChange={(event) => setAmount(event.target.value)}
+          placeholder="0.00"
+        />
+      </label>
+
+      <label>
+        Category
+        <select
+          value={categoryId}
+          onChange={(event) => setCategoryId(event.target.value)}
+        >
+          <option value="" disabled>
+            Choose…
+          </option>
+          {options.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Date
+        <input
+          type="date"
+          value={date}
+          onChange={(event) => setDate(event.target.value)}
+        />
+      </label>
+
+      <label>
+        Note
+        <input
+          value={note}
+          maxLength={200}
+          onChange={(event) => setNote(event.target.value)}
+          placeholder="Example: Coffee before class"
+        />
+      </label>
+
+      <FormErrors errors={errors} />
+
+      <div className="modal-actions">
+        <Button className="outline" onClick={onClose}>
+          Cancel
+        </Button>
+
+        <Button onClick={handleAdd} disabled={saving}>
+          {saving ? "Saving…" : type === "EXPENSE" ? "Add expense" : "Add income"}
+        </Button>
+      </div>
+    </Modal>
+  );
+}
+
 export default function App() {
-  const [categories, setCategories] = useState(initialCategories);
+  const ledger = useLedgerData();
   const [page, go] = useState("login");
   const [step, setStep] = useState(0);
 
@@ -963,19 +1092,8 @@ export default function App() {
   }
 
   if (page === "category") {
-    return (
-      <CreateCategory
-        go={go}
-        setCategories={setCategories}
-      />
-    );
+    return <CreateCategory go={go} onCreated={ledger.refresh} />;
   }
 
-  return (
-    <Dashboard
-      go={go}
-      categories={categories}
-      setCategories={setCategories}
-    />
-  );
+  return <Dashboard go={go} ledger={ledger} />;
 }
