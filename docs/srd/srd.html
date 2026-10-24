@@ -48,9 +48,11 @@
   <tr><td>10/16/2026</td><td>SHREEV B.</td><td>TE4: ADD ARCHITECTURE, DESIGN PATTERN, AND DESIGN DECISIONS; COMPLETE FUNCTIONAL REQUIREMENTS, NON-FUNCTIONAL REQUIREMENTS, DATA REQUIREMENTS, AND TRACEABILITY MATRIX</td></tr>
   <tr><td>10/23/2026</td><td>SHREEV B., JUAN S., JUAN F.</td><td>TE5: CODE REVIEW AND REFACTORING TICKETS R-01 TO R-06 (#50–#55); R-01, R-04, AND R-05 SELECTED FOR THE REFACTORING SPRINT</td></tr>
   <tr><td>10/23/2026</td><td>SHREEV B.</td><td>SPRINT 3: CONNECT THE FRONTEND TO THE API (VITE PROXY, API CLIENT, ONE-COMMAND START); ADD BUDGETS API (POST/PUT /api/budgets) FOR US-08</td></tr>
+  <tr><td>10/23/2026</td><td>JUAN F.</td><td>SPRINT 3: DASHBOARD SHOWS LIVE TOTALS, BUDGET BARS WITH THE 80% WARNING, AND TRANSACTIONS FROM THE API (#43, #44)</td></tr>
   <tr><td>10/23/2026</td><td>SHREEV B.</td><td>TE5 R-01: MOVE TRANSACTION VALIDATION INTO domain/transaction.js; UPDATE TRACEABILITY MATRIX LINE REFERENCES</td></tr>
   <tr><td>10/23/2026</td><td>SHREEV B.</td><td>SPRINT 3: ADD TRANSACTION FORM THAT SAVES TO POST /api/transactions (US-01, US-02); CREATE / EDIT CATEGORY NOW SAVE THROUGH THE API (US-08); ADD POST, PUT, AND DELETE /api/categories</td></tr>
-  <tr><td>10/23/2026</td><td>SHREEV B.</td><td>TE5 R-05: SHARE ONE CATEGORY FORM AND ONE SAMPLE TRANSACTION LIST IN THE FRONTEND</td></tr>
+  <tr><td>10/23/2026</td><td>SHREEV B.</td><td>TE5 R-05: SHARE ONE CATEGORY FORM AND ONE TRANSACTION ROW IN THE FRONTEND</td></tr>
+  <tr><td>10/23/2026</td><td>SHREEV B.</td><td>TE5 R-04: SPLIT App.jsx INTO PAGE AND COMPONENT FILES; UPDATE TRACEABILITY MATRIX FOR THE NEW FILES</td></tr>
   <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
   <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
 </table>
@@ -229,7 +231,7 @@
 </ul>
 <p style="text-align:center;"><img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/1e20abde-bbb9-4a96-9aa3-dc2be5458236.png" alt="Budget screen mockup" width="200">&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/814d4683-6976-4850-b0b1-7019d1e0e62c.png" alt="Profile screen mockup" width="200"></p>
 <ul>
-  <li><b><u>WORKING PROTOTYPE (JUAN F.):</u></b><u> LOGIN AND DASHBOARD SCREENS OF THE REACT APP (CURRENTLY USING SAMPLE DATA).</u></li>
+  <li><b><u>WORKING PROTOTYPE (JUAN F.):</u></b><u> LOGIN AND DASHBOARD SCREENS OF THE REACT APP. SINCE SPRINT 3 THE DASHBOARD SHOWS LIVE DATA FROM THE API, AND TRANSACTIONS AND CATEGORIES ARE ADDED AND EDITED THROUGH IT.</u></li>
 </ul>
 <p style="text-align:center;"><img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/docs/srd/ui-login.png" alt="Login screen" width="290">&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/docs/srd/ui-dashboard.png" alt="Dashboard screen" width="290"></p>
 
@@ -246,15 +248,15 @@
 <p><b>8. <u>TRACEABILITY MATRIX</u></b></p>
 <table>
   <tr><td style="width:12%">ID</td><td style="width:40%">REQUIREMENT</td><td>LINE OF CODE</td></tr>
-  <tr><td>US-01</td><td>Log a new expense with an amount, date, category, and description.</td><td>backend/src/routes/api.js:40; backend/src/services/transactionService.js:9; backend/src/domain/transaction.js:51 (validateTransaction); frontend/src/App.jsx:917 (AddTransaction form)</td></tr>
-  <tr><td>US-02</td><td>Record paychecks and income sources.</td><td>backend/src/domain/transaction.js:20 (typeError: INCOME / EXPENSE); backend/src/routes/api.js:18; frontend/src/App.jsx:917 (AddTransaction income / expense toggle)</td></tr>
+  <tr><td>US-01</td><td>Log a new expense with an amount, date, category, and description.</td><td>backend/src/routes/api.js:40; backend/src/services/transactionService.js:9; backend/src/domain/transaction.js:51 (validateTransaction); frontend/src/components/AddTransaction.jsx:9 (Add Transaction form)</td></tr>
+  <tr><td>US-02</td><td>Record paychecks and income sources.</td><td>backend/src/domain/transaction.js:20 (typeError: INCOME / EXPENSE); backend/src/routes/api.js:18; frontend/src/components/AddTransaction.jsx:51 (income / expense toggle)</td></tr>
   <tr><td>US-03</td><td>Edit or delete a past transaction.</td><td>Planned (not yet implemented)</td></tr>
-  <tr><td>US-04</td><td>Dashboard with total income, total expenses, and remaining balance.</td><td>backend/src/routes/api.js:44; backend/src/services/budgetService.js:17; frontend/src/useLedgerData.js:13</td></tr>
+  <tr><td>US-04</td><td>Dashboard with total income, total expenses, and remaining balance.</td><td>backend/src/routes/api.js:44; backend/src/services/budgetService.js:17; frontend/src/pages/Dashboard.jsx:10</td></tr>
   <tr><td>US-05</td><td>Chart of spending by category.</td><td>backend/src/repositories/transactionRepository.js:25 (data query; chart planned)</td></tr>
   <tr><td>US-06</td><td>Filter transaction history by category and date range.</td><td>Planned (not yet implemented)</td></tr>
   <tr><td>US-07</td><td>Create an account and log in with an email and password.</td><td>backend/src/db/schema.sql:5 (users table); login planned</td></tr>
-  <tr><td>US-08</td><td>Set a monthly spending limit for individual categories.</td><td>backend/src/routes/api.js:51 (POST /budgets), :56 (PUT /budgets/:id), :22 (POST /categories); backend/src/services/budgetService.js:48; backend/src/services/categoryService.js:24; backend/src/domain/budget.js:26 (limitError); frontend/src/App.jsx:800 (CategoryForm)</td></tr>
-  <tr><td>US-09</td><td>Visual warning when spending exceeds 80% of a category's limit.</td><td>backend/src/domain/budget.js:2 (WARNING_THRESHOLD = 0.8); backend/src/domain/budget.js:16 (budgetStatus)</td></tr>
+  <tr><td>US-08</td><td>Set a monthly spending limit for individual categories.</td><td>backend/src/routes/api.js:51 (POST /budgets), :56 (PUT /budgets/:id), :22 (POST /categories); backend/src/services/budgetService.js:48; backend/src/services/categoryService.js:24; backend/src/domain/budget.js:26 (limitError); frontend/src/pages/CreateCategory.jsx:4; frontend/src/components/EditCategory.jsx:3; frontend/src/components/CategoryForm.jsx:13</td></tr>
+  <tr><td>US-09</td><td>Visual warning when spending exceeds 80% of a category's limit.</td><td>backend/src/domain/budget.js:2 (WARNING_THRESHOLD = 0.8); backend/src/domain/budget.js:16 (budgetStatus); frontend/src/pages/Dashboard.jsx:113 ("Near limit" / "Over budget" card)</td></tr>
 </table>
 
 <p><b>9. <u>APPENDICES</u></b></p>
