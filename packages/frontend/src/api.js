@@ -50,4 +50,15 @@ export const api = {
   /** Change an existing budget's monthly limit (dollars). */
   updateBudget: (budgetId, limit) =>
     request(`/budgets/${budgetId}`, { method: 'PUT', body: { limit } }),
+
+  /** { name, type?: 'EXPENSE' | 'INCOME' } (defaults to EXPENSE) */
+  createCategory: (category) =>
+    request('/categories', { method: 'POST', body: category }),
+
+  renameCategory: (categoryId, name) =>
+    request(`/categories/${categoryId}`, { method: 'PUT', body: { name } }),
+
+  /** Fails with 409 if the category still has transactions. */
+  deleteCategory: (categoryId) =>
+    request(`/categories/${categoryId}`, { method: 'DELETE' }),
 };
