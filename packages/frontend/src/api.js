@@ -28,6 +28,11 @@ async function request(path, { method = 'GET', body } = {}) {
 
 export const centsToDollars = (cents) => cents / 100;
 
+/** The messages to show for a failed request: each validation problem, or the error itself. */
+export function errorMessages(error) {
+  return error.details?.length ? error.details : [error.message];
+}
+
 export const api = {
   /** Monthly totals + every budget's spent / remaining / status ('ok' | 'warning' | 'over'). */
   getSummary: (period) =>
