@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TE3 – UML Class Diagram – LedgerLogic</title>
+<style>
+  @page { size: Letter; margin: 0.75in 0.7in; }
+  body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10.5pt; line-height: 1.45; color: #1f2933; }
+  h1 { font-size: 20pt; margin: 0 0 2pt; }
+  h2 { font-size: 14pt; margin: 22pt 0 6pt; padding-bottom: 3pt; border-bottom: 2px solid #1d4ed8; color: #0f2a6b; page-break-after: avoid; }
+  h3 { font-size: 11.5pt; margin: 14pt 0 4pt; page-break-after: avoid; }
+  p { margin: 4pt 0 6pt; }
+  .sub { color: #52606d; margin: 0 0 14pt; }
+  .meta { border-collapse: collapse; margin-bottom: 8pt; font-size: 9.5pt; }
+  .meta td { padding: 2pt 10pt 2pt 0; vertical-align: top; }
+  table.t { width: 100%; border-collapse: collapse; margin: 6pt 0 10pt; font-size: 9.5pt; page-break-inside: avoid; }
+  table.t th, table.t td { border: 1px solid #cbd2d9; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+  table.t th { background: #eef2f7; }
+  figure { margin: 8pt 0 12pt; text-align: center; page-break-inside: avoid; }
+  figure img { max-width: 100%; max-height: 7.4in; width: auto; border: 1px solid #e4e7eb; }
+  figure.side { display: flex; gap: 14pt; align-items: flex-start; text-align: left; }
+  figure.side img { max-height: 3.9in; flex: none; }
+  figure.side .t { font-size: 8.6pt; }
+  figure.cor img { max-height: 4.6in; }
+  figure.side figcaption { margin-top: 0; }
+  figcaption { font-size: 9pt; color: #52606d; margin-top: 3pt; }
+  pre { background: #f5f7fa; border: 1px solid #e4e7eb; border-radius: 4px; padding: 7pt 9pt; font-size: 8.8pt; line-height: 1.35; white-space: pre-wrap; page-break-inside: avoid; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 9pt; }
+  .tag { display: inline-block; font-size: 8pt; font-weight: 700; padding: 1pt 6pt; border-radius: 3pt; vertical-align: middle; }
+  .impl { background: #dcfce7; color: #166534; }
+  .plan { background: #fef3c7; color: #92400e; }
+  ul { margin: 3pt 0 6pt 16pt; padding: 0; }
+  li { margin: 2pt 0; }
+  .note { font-size: 9.5pt; color: #3e4c59; background: #f8fafc; border-left: 3px solid #94a3b8; padding: 5pt 9pt; margin: 6pt 0 10pt; }
+  .pb { page-break-before: always; }
+  h2.part { font-size: 16pt; margin-top: 26pt; border-bottom: 3px solid #0f2a6b; }
+  h2.part + p, h2.part + h3 { margin-top: 8pt; }
+  .contents td, .contents th { font-size: 9.5pt; }
+  @page wide { size: 11in 8.5in; margin: 0.45in 0.5in; }
+  .wide { page: wide; }
+  .wide figure img { max-height: 6.9in; max-width: 100%; }
+</style>
+</head>
+<body>
+
+<h1>TE3 – UML Class Diagram</h1>
+<p class="sub">LedgerLogic (Finance Budget Tracker) · CSC 3100 · Fall 2026 · Team OpenAnthropic</p>
+<table class="meta">
+  <tr><td><b>Team</b></td><td>Shreev B. (Lead Developer) · Juan S. (Scrum Master &amp; PM) · Juan F. (Project Tester)</td></tr>
+  <tr><td><b>Repository</b></td><td>https://github.com/shreev2703/finance-budget-tracker</td></tr>
+  <tr><td><b>Date</b></td><td>October 16, 2026</td></tr>
+</table>
+<p>LedgerLogic is a web app that helps college students log income and expenses, see their monthly balance, and stay under per-category spending limits, with a warning at 80% of a limit. This document contains all of our TE3 diagrams: the UML class diagram for our domain model, how each user story maps to the classes, our initial UML sketch, and our UI mockups.</p>
+
+
+
+
+
+<div class="wide">
+<h2>1. UML Class Diagram (Domain Model)</h2>
+<figure>
+  <img src="class-diagram.png" alt="LedgerLogic UML class diagram">
+  <figcaption>Figure A. LedgerLogic UML class diagram (domain model). Source: <code>docs/diagram-sources/te3/class-diagram.mmd</code>.</figcaption>
+</figure>
+</div>
+
+<h3>How to read the diagram</h3>
+<table class="t">
+  <tr><th style="width:22%">Notation</th><th>Meaning</th></tr>
+  <tr><td><code>-</code> (minus)</td><td><b>Private</b> attribute. Every attribute is private, so other classes cannot read or change an object's data directly.</td></tr>
+  <tr><td><code>+</code> (plus)</td><td><b>Public</b> method: the only way other classes use an object (getters such as <code>getAmount()</code>, and operations such as <code>setLimit()</code> and <code>validate()</code>).</td></tr>
+  <tr><td><code>1</code> / <code>M</code></td><td>Multiplicity: <code>1</code> = exactly one, <code>M</code> = many (zero or more). Example: one User records M Transactions; each Transaction belongs to 1 Category.</td></tr>
+  <tr><td>Solid arrow</td><td>Association: the class at the tail holds a reference to the class at the head.</td></tr>
+  <tr><td>Hollow diamond</td><td>Aggregation: a MonthlySummary includes the Budgets for that month.</td></tr>
+  <tr><td>Dashed arrow</td><td>Dependency: the class uses the enumeration or reads the other class's data.</td></tr>
+</table>
+
+<h3>Classes</h3>
+<table class="t">
+  <tr><th style="width:15%">Class</th><th>Responsibility and key data</th><th style="width:25%">In the app today</th><th style="width:13%">Stories</th></tr>
+  <tr><td><b>User</b></td><td>A registered student who owns all of their data. Stores email, a password hash (never the password), name, and when the account was created. <code>register()</code> and <code>login()</code> handle accounts; the getters return only that user's transactions, categories, and budgets.</td><td><code>users</code> table; the demo uses a seeded user until login is built</td><td>US-01, US-02, US-07</td></tr>
+  <tr><td><b>Category</b></td><td>A user-defined bucket such as "Groceries" or "Part-time Job". Belongs to one user (<code>userId</code>) and is typed INCOME or EXPENSE.</td><td><code>categories</code> table; <code>GET /api/categories</code>; Create / Edit Category screen</td><td>US-01, US-02, US-05, US-06, US-08</td></tr>
+  <tr><td><b>Transaction</b></td><td>One income or expense: the <b>amount</b> (stored in cents), the <b>date</b> it happened, a note, its type and category, the owner, and when it was entered (<code>createdAt</code>). <code>validate()</code> checks amount &gt; 0, a valid date, and that the category matches the type.</td><td><code>transactions</code> table; <code>GET / POST /api/transactions</code>; Transactions screen</td><td>US-01 – US-06</td></tr>
+  <tr><td><b>Budget</b></td><td>A monthly spending limit (in cents) for one expense category and one month (<code>period</code> = YYYY-MM). Calculates spent, remaining, and percent used, and returns a <code>BudgetStatus</code>.</td><td><code>budgets</code> table; <code>domain/budget.js</code>; dashboard category bars</td><td>US-08, US-09</td></tr>
+  <tr><td><b>MonthlySummary</b></td><td>The dashboard view for one month: total income, total expenses, remaining balance, and the status of every budget. Computed from Transactions and Budgets, not stored.</td><td><code>GET /api/budgets/summary</code>; dashboard budget card</td><td>US-04, US-08, US-09</td></tr>
+  <tr><td><b>CategoryType</b></td><td>Enumeration: <code>INCOME</code> or <code>EXPENSE</code>.</td><td>CHECK constraint on <code>type</code></td><td>US-01, US-02</td></tr>
+  <tr><td><b>BudgetStatus</b></td><td>Enumeration: <code>OK</code>, <code>WARNING</code> (80% or more used), <code>OVER</code> (above 100%).</td><td><code>budgetStatus()</code> in <code>domain/budget.js</code></td><td>US-09</td></tr>
+</table>
+<p><b>Design notes.</b> Money is stored as integer cents (<code>amountCents</code>, <code>limitAmountCents</code>) to avoid rounding errors; the public getters return dollars. Every class except the enumerations carries a <code>userId</code>, so each user only ever sees their own data. A user has at most one budget per category per month. Filtering history (US-06) is a query through <code>User.getTransactions(period)</code>, not a separate class. A SavingsGoal class was considered and left out because no TE2 story requires it.</p>
+
+<h2>2. Story → Class Traceability</h2>
+<table class="t">
+  <tr><th style="width:9%">Story</th><th style="width:28%">Summary</th><th style="width:22%">Classes</th><th>Attributes / methods</th></tr>
+  <tr><td>US-01</td><td>Log an expense with amount, date, category, description</td><td>Transaction, Category, User</td><td><code>Transaction.amountCents</code>, <code>date</code>, <code>note</code>, <code>type = EXPENSE</code>; <code>validate()</code>; Transaction → Category</td></tr>
+  <tr><td>US-02</td><td>Record paychecks and income sources</td><td>Transaction, Category, User</td><td><code>Transaction.type = INCOME</code>; income categories (e.g. "Part-time Job")</td></tr>
+  <tr><td>US-03</td><td>Edit or delete a past transaction</td><td>Transaction</td><td><code>update(amount, date, categoryId, note)</code>, <code>delete()</code></td></tr>
+  <tr><td>US-04</td><td>Dashboard: income, expenses, remaining balance</td><td>MonthlySummary, Transaction</td><td><code>getIncome()</code>, <code>getExpenses()</code>, <code>getBalance()</code></td></tr>
+  <tr><td>US-05</td><td>Spending-by-category chart</td><td>Transaction, Category</td><td>Expense <code>amountCents</code> grouped by Category for the month</td></tr>
+  <tr><td>US-06</td><td>Filter history by category and date range</td><td>User, Transaction, Category</td><td><code>User.getTransactions(period)</code> filtered by <code>categoryId</code> and <code>date</code></td></tr>
+  <tr><td>US-07</td><td>Create an account and log in</td><td>User</td><td><code>email</code>, <code>passwordHash</code>, <code>register()</code>, <code>login()</code></td></tr>
+  <tr><td>US-08</td><td>Monthly spending limit per category</td><td>Budget, Category</td><td><code>limitAmountCents</code>, <code>period</code>; <code>setLimit()</code>, <code>remaining()</code>, <code>isOverLimit()</code></td></tr>
+  <tr><td>US-09</td><td>Warning at 80% of a category limit</td><td>Budget, BudgetStatus</td><td><code>percentUsed()</code>, <code>isNearLimit()</code>, <code>getStatus()</code> → <code>WARNING</code></td></tr>
+</table>
+
+<h2>3. Initial UML Sketch</h2>
+<figure>
+  <img src="../../../finance_budget_tracker_uml.svg" alt="Initial UML sketch" style="max-height:3.6in">
+  <figcaption>Figure B. Initial UML sketch by Juan S. (User, Budget, Transaction). Figure A refines it: categories became their own class, budgets became per category per month, attributes became private with public methods, and the INCOME / EXPENSE type and budget status became enumerations.</figcaption>
+</figure>
+
+<h2>4. UI Mockups (Wireframes)</h2>
+<figure>
+  <img src="../../../1e20abde-bbb9-4a96-9aa3-dc2be5458236.png" alt="Budget screen mockup" style="max-height:4.4in; margin-right:14pt"><img src="../../../814d4683-6976-4850-b0b1-7019d1e0e62c.png" alt="Profile screen mockup" style="max-height:4.4in">
+  <figcaption>Figure C. UI mockups by Juan S.: Budget screen (monthly budget, category bars, over-budget state) and Profile screen.</figcaption>
+</figure>
+
+</body>
+</html>

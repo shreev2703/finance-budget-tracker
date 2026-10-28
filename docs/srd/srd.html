@@ -1,0 +1,267 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>Team OpenAnthropic SRD</title>
+<style>
+  @page { size: Letter; margin: 1in; }
+  body, p, li, td, th { font-family: "Times New Roman", Times, serif; font-size: 12pt; line-height: 1.5; }
+  p { margin: 0 0 8pt; }
+  table { border-collapse: collapse; width: 100%; margin: 4pt 0 12pt; }
+  td, th { border: 1px solid #000; padding: 3pt 6pt; vertical-align: top; text-align: left; font-weight: normal; }
+  td.c { text-align: center; }
+  ul, ol { margin-top: 0; }
+  img { border: 1px solid #999; }
+  .pb { page-break-before: always; }
+</style>
+</head>
+<body style="font-family: 'Times New Roman', Times, serif; font-size: 12pt;">
+
+<p><b><u>STUDENT PROJECT TEMPLATE (SRS)</u></b><br><i><u>(INSTRUCTION FOR STUDENTS: THIS DOCUMENT SERVES AS THE FORMAL 'CONTRACT' FOR YOUR TEAM PROJECT. IT MUST BE MAINTAINED IN YOUR GITHUB REPOSITORY.)</u></i></p>
+<p><b><u>OPENANTHROPIC (FINANCE BUDGET TRACKER)</u></b></p>
+<p><b>SOFTWARE REQUIREMENTS SPECIFICATION</b></p>
+<p><b>INSTRUCTOR:</b> LARA NICHOLS-BROWN</p>
+<p><b>TERM:</b> FALL 2026</p>
+<p><b>SECTION:</b> 11</p>
+<br>
+<p><b>THE ENGINEERING TEAM:</b></p>
+<ol>
+  <li><b>STUDENT A:</b> SHREEV B. — LEAD DEVELOPER</li>
+  <li><b>STUDENT B:</b> JUAN S. — SCRUM MASTER &amp; PROJECT MANAGER</li>
+  <li><b>STUDENT C:</b> JUAN F. — PROJECT TESTER</li>
+</ol>
+<br>
+<p><b>PROJECT ASSETS:</b></p>
+<ul>
+  <li><b>GITHUB:</b> https://github.com/shreev2703/finance-budget-tracker</li>
+  <li><b>DEPLOYMENT:</b> TBD</li>
+</ul>
+<br>
+<p><b>DOCUMENT HISTORY:</b></p>
+<table>
+  <tr><td style="width:28%">LAST DATE CHANGED:</td><td style="width:28%">WHO:</td><td>WHAT WAS CHANGED:</td></tr>
+  <tr><td>09/18/2026</td><td>SHREEV B., JUAN S., JUAN F.</td><td>COMPLETE TE1 MONOREPO SETUP</td></tr>
+  <tr><td>09/25/2026</td><td>SHREEV B., JUAN S., JUAN F.</td><td>ADD TE2 SRS DOCUMENT WITH PRODUCT VISION AND USER STORIES</td></tr>
+  <tr><td>10/02/2026</td><td>SHREEV B.</td><td>TE3: ADD UML CLASS DIAGRAM, DATABASE SCHEMA, AND REST API ENDPOINTS</td></tr>
+  <tr><td>10/02/2026</td><td>JUAN S.</td><td>TE3: ADD UI MOCKUPS AND INITIAL UML SKETCH</td></tr>
+  <tr><td>10/07/2026</td><td>JUAN S.</td><td>SET UP REACT FRONTEND PROTOTYPE</td></tr>
+  <tr><td>10/16/2026</td><td>JUAN F.</td><td>BUILD WORKING WEBSITE PROTOTYPE (LOGIN, DASHBOARD, TRANSACTIONS, CATEGORIES)</td></tr>
+  <tr><td>10/16/2026</td><td>SHREEV B.</td><td>TE4: ADD ARCHITECTURE, DESIGN PATTERN, AND DESIGN DECISIONS; COMPLETE FUNCTIONAL REQUIREMENTS, NON-FUNCTIONAL REQUIREMENTS, DATA REQUIREMENTS, AND TRACEABILITY MATRIX</td></tr>
+  <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+  <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+</table>
+<hr>
+
+<p class="pb"><b>LEDGERLOGIC (FINANCE BUDGET TRACKER)</b></p>
+<p><b>SOFTWARE REQUIREMENTS SPECIFICATION (SRS)</b></p>
+<p><b>COURSE: CSC 3100 — INTRODUCTION TO SOFTWARE ENGINEERING</b></p>
+<p><b>DATE: OCTOBER 16, 2026</b></p>
+<hr>
+<p><b><u>TABLE OF CONTENTS</u></b></p>
+<ol>
+  <li><b><u>INTRODUCTION ...................................................................................... [PAGE #]</u></b>
+    <ul style="list-style-type: circle;">
+      <li><b><u>1.1 PROJECT PURPOSE</u></b></li>
+      <li><b><u>1.2 INTENDED AUDIENCE</u></b></li>
+      <li><b><u>1.3 PROJECT SCOPE</u></b></li>
+    </ul></li>
+  <li><b><u>USER STORIES ..................................................................................... [PAGE #]</u></b>
+    <ul style="list-style-type: circle;">
+      <li><b><u>2.1 USER FEATURES (THE "SHALL" STATEMENTS)</u></b></li>
+      <li><b><u>2.2 ADMIN FEATURES</u></b></li>
+    </ul></li>
+  <li><b><u>FUNCTIONAL REQUIREMENTS....................................................... [PAGE #]</u></b></li>
+  <li><b><u>NON-FUNCTIONAL REQUIREMENTS ............................................ [PAGE #]</u></b>
+    <ul style="list-style-type: circle;">
+      <li><b><u>4.1 DATA INTEGRITY &amp; SECURITY</u></b></li>
+      <li><b><u>4.2 PERFORMANCE &amp; USABILITY</u></b></li>
+    </ul></li>
+  <li><b><u>SYSTEM ARCHITECTURE ................................................................ [PAGE #]</u></b>
+    <ul style="list-style-type: circle;">
+      <li><b><u>5.1 REST API ENDPOINTS</u></b></li>
+      <li><b><u>5.2 DATABASE SCHEMA (MYSQL)</u></b></li>
+      <li><b><u>5.3 UML CLASS DIAGRAM</u></b></li>
+      <li><b><u>5.4 ARCHITECTURE &amp; DESIGN PATTERNS</u></b></li>
+    </ul></li>
+  <li><b><u>USER INTERFACE (UI) ...................................................................... [PAGE #]</u></b>
+    <ul style="list-style-type: circle;">
+      <li><b><u>6.1 WIREFRAMES / MOCKUPS</u></b></li>
+    </ul></li>
+  <li><b><u>DATA REQUIREMENTS ..................................................................... [PAGE #]</u></b>
+    <ul style="list-style-type: circle;">
+      <li><b><u>7.1 LIST OF PERSISTENT DATA</u></b></li>
+    </ul></li>
+  <li><b><u>TRACEABILITY MATRIX ................................................................. [PAGE #]</u></b></li>
+  <li><b><u>APPENDICES ....................................................................................... [PAGE #]</u></b></li>
+  <li><b><u>AI USAGE &amp; DISCLOSURE (MANDATORY) ..................................... [PAGE #]</u></b></li>
+</ol>
+<hr>
+
+<p class="pb"><b>1. <u>INTRODUCTION</u></b></p>
+<p><b><u>1.1 PROJECT PURPOSE</u></b></p>
+<ul>
+  <li><b><u>PROBLEM STATEMENT:</u></b><u> COLLEGE STUDENTS AND YOUNG ADULTS OFTEN LOSE TRACK OF SMALL DAILY PURCHASES AND OVERSPEND THEIR MONTHLY ALLOWANCE OR PART-TIME INCOME. EXISTING OPTIONS ARE EITHER TEDIOUS MANUAL SPREADSHEETS OR PAID APPS THAT REQUIRE LINKING A BANK ACCOUNT.</u></li>
+  <li><b><u>PRODUCT VISION:</u></b><u> FOR COLLEGE STUDENTS AND YOUNG ADULTS WHO STRUGGLE TO TRACK DAILY EXPENSES AND STICK TO A MONTHLY ALLOWANCE, LEDGERLOGIC IS A PERSONAL FINANCE AND BUDGET TRACKING WEB APPLICATION WHICH SIMPLIFIES DAILY TRANSACTION LOGGING AND PROVIDES INSTANT VISUAL INSIGHTS INTO SPENDING HABITS. UNLIKE COMPLEX MANUAL SPREADSHEETS OR PAID SUBSCRIPTION APPS THAT REQUIRE INVASIVE BANK ACCOUNT LINKING, OUR PRODUCT OFFERS A FAST, CLUTTER-FREE INTERFACE FOR MANUAL EXPENSE TRACKING AND GOAL SETTING WITHOUT SUBSCRIPTION FEES OR PRIVACY RISKS.</u></li>
+</ul>
+<p><b><u>1.2 INTENDED AUDIENCE</u></b></p>
+<ul>
+  <li><b><u>TARGET AUDIENCE:</u></b><u> PRIMARY USERS ARE COLLEGE STUDENTS AND YOUNG ADULTS MANAGING A FIXED MONTHLY ALLOWANCE OR PART-TIME INCOME. STAKEHOLDERS INCLUDE THESE END USERS, THE LEDGERLOGIC ENGINEERING TEAM, AND THE CSC 3100 INSTRUCTOR AS PROJECT CLIENT AND EVALUATOR.</u></li>
+</ul>
+<p><b><u>1.3 PROJECT SCOPE</u></b></p>
+<ul>
+  <li><b><u>SCOPE:</u></b><u> IN SCOPE: ACCOUNT REGISTRATION AND LOGIN; MANUAL LOGGING, EDITING, AND DELETING OF INCOME AND EXPENSE TRANSACTIONS; A DASHBOARD WITH TOTALS AND REMAINING BALANCE; A SPENDING-BY-CATEGORY CHART; FILTERED TRANSACTION HISTORY; AND PER-CATEGORY MONTHLY SPENDING LIMITS WITH AN 80% WARNING. OUT OF SCOPE: BANK ACCOUNT LINKING, AUTOMATIC TRANSACTION IMPORT, MULTI-CURRENCY SUPPORT, SHARED OR HOUSEHOLD BUDGETS, AND NATIVE MOBILE APPS.</u></li>
+</ul>
+
+<p><b>2. <u>USER STORIES</u></b></p>
+<p><i><u>USER STORIES FOLLOW THE FORMAT: </u></i><b><i><u>"AS A [TYPE OF USER], I WANT TO [ACTION] SO THAT [VALUE/BENEFIT]."</u></i></b><i><u>...</u></i></p>
+<p><b><u>2.1 USER FEATURES (THE "SHALL" STATEMENTS)</u></b></p>
+<ul>
+  <li><b><u>US-01:</u></b><u> LOG AN EXPENSE — MAIN AUTHOR: SHREEV B.</u></li>
+  <li><b><u>US-02:</u></b><u> RECORD INCOME — MAIN AUTHOR: SHREEV B.</u></li>
+  <li><b><u>US-03:</u></b><u> EDIT / DELETE TRANSACTIONS — MAIN AUTHOR: SHREEV B.</u></li>
+  <li><b><u>US-04:</u></b><u> DASHBOARD SUMMARY — MAIN AUTHOR: JUAN F.</u></li>
+  <li><b><u>US-05:</u></b><u> SPENDING-BY-CATEGORY CHART — MAIN AUTHOR: JUAN F.</u></li>
+  <li><b><u>US-06:</u></b><u> FILTER TRANSACTION HISTORY — MAIN AUTHOR: JUAN F.</u></li>
+  <li><b><u>US-07:</u></b><u> ACCOUNT &amp; AUTHENTICATION — MAIN AUTHOR: JUAN S.</u></li>
+  <li><b><u>US-08:</u></b><u> CATEGORY SPENDING LIMITS — MAIN AUTHOR: JUAN S.</u></li>
+  <li><b><u>US-09:</u></b><u> BUDGET WARNING AT 80% — MAIN AUTHOR: JUAN S.</u></li>
+</ul>
+<table>
+  <tr><td style="width:10%">ID</td><td style="width:14%">MAIN AUTHOR</td><td>REQUIREMENT</td><td style="width:13%">PRIORITY</td></tr>
+  <tr><td>US-01</td><td>SHREEV B.</td><td>As a budget-conscious student, I want to log a new expense with an amount, date, category, and description so that I can track where my money goes each day.</td><td class="c">1</td></tr>
+  <tr><td>US-02</td><td>SHREEV B.</td><td>As a working student, I want to record my paychecks and income sources so that my total available monthly funds are accurately calculated.</td><td class="c">1</td></tr>
+  <tr><td>US-03</td><td>SHREEV B.</td><td>As a registered user, I want to edit or delete a past transaction so that I can fix typos or remove duplicate entries.</td><td class="c">2</td></tr>
+  <tr><td>US-04</td><td>JUAN F.</td><td>As a daily user, I want to view a home dashboard showing my total income, total expenses, and remaining balance so that I can see my financial standing at a glance.</td><td class="c">1</td></tr>
+  <tr><td>US-05</td><td>JUAN F.</td><td>As a visual planner, I want to see a chart breaking down my spending by category so that I can identify which areas consume most of my budget.</td><td class="c">2</td></tr>
+  <tr><td>US-06</td><td>JUAN F.</td><td>As a returning user, I want to filter my transaction history by category and date range so that I can quickly find specific past purchases.</td><td class="c">3</td></tr>
+  <tr><td>US-07</td><td>JUAN S.</td><td>As a privacy-conscious user, I want to create an account and log in with an email and password so that my financial records stay private and saved across sessions.</td><td class="c">1</td></tr>
+  <tr><td>US-08</td><td>JUAN S.</td><td>As a user on a strict budget, I want to set a monthly spending limit for individual categories so that I can keep my discretionary spending under control.</td><td class="c">2</td></tr>
+  <tr><td>US-09</td><td>JUAN S.</td><td>As a proactive saver, I want to see a visual warning when my spending exceeds 80% of a category's limit so that I can slow down before going over budget.</td><td class="c">3</td></tr>
+</table>
+<p><b><u>2.2 ADMIN FEATURES</u></b></p>
+<ul>
+  <li><u>NONE IN THE CURRENT SCOPE. LEDGERLOGIC IS A SINGLE-USER PERSONAL TOOL; EVERY USER MANAGES ONLY THEIR OWN DATA.</u></li>
+</ul>
+
+<p><b>3. <u>FUNCTIONAL REQUIREMENTS</u></b></p>
+<p><i>THE SYSTEM SHALL...</i></p>
+<table>
+  <tr><td style="width:14%">ID</td><td>REQUIREMENT</td><td style="width:14%">PRIORITY</td></tr>
+  <tr><td>FR-01</td><td>Allow a user to log an expense with an amount, date, category, and description. (US-01)</td><td class="c">1</td></tr>
+  <tr><td>FR-02</td><td>Allow a user to record income with an amount, date, income source, and description. (US-02)</td><td class="c">1</td></tr>
+  <tr><td>FR-03</td><td>Allow a user to edit or delete any of their own past transactions. (US-03)</td><td class="c">2</td></tr>
+  <tr><td>FR-04</td><td>Show a dashboard with the current month's total income, total expenses, and remaining balance. (US-04)</td><td class="c">1</td></tr>
+  <tr><td>FR-05</td><td>Show a chart of the current month's spending broken down by category. (US-05)</td><td class="c">2</td></tr>
+  <tr><td>FR-06</td><td>Filter the transaction history by category and by date range. (US-06)</td><td class="c">3</td></tr>
+  <tr><td>FR-07</td><td>Authenticate users with an email and password, and show each user only their own data. (US-07)</td><td class="c">1</td></tr>
+  <tr><td>FR-08</td><td>Let a user set a monthly spending limit for each expense category and show the amount spent and remaining. (US-08)</td><td class="c">2</td></tr>
+  <tr><td>FR-09</td><td>Show a visual warning when spending in a category reaches 80% of its limit, and an over-limit state above 100%. (US-09)</td><td class="c">3</td></tr>
+</table>
+
+<p><b>4. <u>NON-FUNCTIONAL REQUIREMENTS</u></b></p>
+<p><b><u>4.1 DATA INTEGRITY &amp; SECURITY</u></b></p>
+<ul>
+  <li><b><u>INTEGRITY:</u></b><u> HANDLING ERRORS AND BAD DATA. THE API REJECTS INVALID INPUT WITH A CLEAR LIST OF ERRORS (HTTP 400): AMOUNTS MUST BE POSITIVE AND AT MOST $1,000,000, DATES MUST BE VALID (YYYY-MM-DD), AND A TRANSACTION'S CATEGORY MUST BELONG TO THE USER AND MATCH THE TRANSACTION TYPE. THE DATABASE ENFORCES THE SAME RULES WITH CHECK AND FOREIGN KEY CONSTRAINTS. MONEY IS STORED AS INTEGER CENTS TO AVOID ROUNDING ERRORS.</u></li>
+  <li><b><u>SECURITY:</u></b><u> IMPLEMENT BCRYPT FOR PASSWORD HASHING AND ENVIRONMENT VARIABLES FOR DB CREDENTIALS. EVERY QUERY IS SCOPED TO THE LOGGED-IN USER, AND ALL SQL USES PARAMETERIZED QUERIES TO PREVENT SQL INJECTION.</u></li>
+</ul>
+<p><b><u>4.2 PERFORMANCE &amp; USABILITY</u></b></p>
+<ul>
+  <li><b><u>PERFORMANCE:</u></b><u> THE DASHBOARD LOADS ITS TOTALS AND BUDGET STATUS FROM A SINGLE API CALL, AND API RESPONSES SHOULD RETURN IN UNDER 500 MS ON A LOCAL MACHINE.</u></li>
+  <li><b><u>USABILITY:</u></b><u> LOGGING A TRANSACTION TAKES ONE SHORT FORM (AMOUNT, CATEGORY, DATE, OPTIONAL NOTE). ERRORS ARE SHOWN IN PLAIN LANGUAGE, BUDGET STATUS USES BOTH COLOR AND TEXT (E.G. "OVER BUDGET"), AND THE LAYOUT WORKS ON DESKTOP AND PHONE-WIDTH SCREENS.</u></li>
+</ul>
+
+<p><b>5. <u>SYSTEM ARCHITECTURE</u></b></p>
+<p><b><u>5.1 REST API ENDPOINTS</u></b></p>
+<ul>
+  <li><b><u>REST ENDPOINTS:</u></b><u> (LIST METHOD | URL | DESCRIPTION) — BASE URL: http://localhost:3001/api</u></li>
+  <li><b><u>IMPLEMENTED ENDPOINTS:</u></b>
+    <ul style="list-style-type: circle;">
+      <li><b><u>GET /api/transactions — FETCHES THE USER'S TRANSACTIONS, NEWEST FIRST.</u></b></li>
+      <li><b><u>POST /api/transactions — CREATES A NEW INCOME OR EXPENSE (RETURNS 400 WITH A LIST OF ERRORS IF INVALID).</u></b></li>
+      <li><b><u>GET /api/budgets/summary — FETCHES MONTHLY TOTALS AND EACH CATEGORY'S LIMIT, SPENT, REMAINING, AND STATUS (OK / WARNING / OVER).</u></b></li>
+      <li><b><u>GET /api/categories — FETCHES THE USER'S INCOME AND EXPENSE CATEGORIES.</u></b></li>
+    </ul></li>
+  <li><b><u>PLANNED ENDPOINTS:</u></b>
+    <ul style="list-style-type: circle;">
+      <li><b><u>PUT / DELETE /api/transactions/:id — EDITS OR DELETES A TRANSACTION (US-03).</u></b></li>
+      <li><b><u>GET /api/transactions?category=&amp;from=&amp;to= — FILTERS TRANSACTION HISTORY (US-06).</u></b></li>
+      <li><b><u>GET /api/reports/spending-by-category — FETCHES SPENDING PER CATEGORY FOR THE CHART (US-05).</u></b></li>
+      <li><b><u>POST /api/auth/register, POST /api/auth/login — CREATES AN ACCOUNT AND LOGS IN (US-07).</u></b></li>
+      <li><b><u>POST / PUT /api/budgets — SETS A CATEGORY'S MONTHLY LIMIT (US-08).</u></b></li>
+    </ul></li>
+</ul>
+<p><b><u>5.2 DATABASE SCHEMA (MYSQL)</u></b></p>
+<ul>
+  <li><u>DEFINED IN packages/backend/src/db/schema.sql. DEVELOPMENT AND DEMOS USE SQLITE (NO DATABASE SERVER NEEDED); EVERY TABLE AND COLUMN MAPS ONE-TO-ONE TO MYSQL FOR PRODUCTION.</u></li>
+</ul>
+<table>
+  <tr><td style="width:16%">TABLE</td><td style="width:40%">COLUMNS</td><td>KEYS / CONSTRAINTS</td></tr>
+  <tr><td>users</td><td>id, email, password_hash, name, created_at</td><td>PK id; email UNIQUE</td></tr>
+  <tr><td>categories</td><td>id, user_id, name, type</td><td>PK id; FK user_id → users; type IN (INCOME, EXPENSE)</td></tr>
+  <tr><td>transactions</td><td>id, user_id, category_id, type, amount_cents, date, note, created_at</td><td>PK id; FK user_id → users; FK category_id → categories; amount_cents &gt; 0</td></tr>
+  <tr><td>budgets</td><td>id, user_id, category_id, period (YYYY-MM), limit_amount_cents</td><td>PK id; FK user_id → users; FK category_id → categories; one per category per month</td></tr>
+</table>
+<p><b><u>5.3 UML CLASS DIAGRAM</u></b></p>
+<ul>
+  <li><b><u>UML:</u></b><u> (ATTACH A DIAGRAM) — LEDGERLOGIC DOMAIN MODEL: USER, CATEGORY, TRANSACTION, BUDGET, AND THE CATEGORYTYPE ENUMERATION.</u></li>
+</ul>
+<p style="text-align:center;"><img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/docs/diagram-sources/te3/class-diagram.png" alt="UML class diagram" width="600"></p>
+<p><b><u>5.4 ARCHITECTURE &amp; DESIGN PATTERNS</u></b></p>
+<ul>
+  <li><b><u>ARCHITECTURE:</u></b><u> LAYERED ARCHITECTURE INSIDE A CLIENT-SERVER SYSTEM: REACT CLIENT → EXPRESS MIDDLEWARE → ROUTES → SERVICES → REPOSITORIES → DATABASE. NO EXTERNAL SYSTEMS.</u></li>
+  <li><b><u>DESIGN PATTERN:</u></b><u> CHAIN OF RESPONSIBILITY (GANG OF FOUR), IMPLEMENTED AS THE EXPRESS MIDDLEWARE CHAIN.</u></li>
+  <li><b><u>DESIGN DECISIONS:</u></b><u> SERVICE AND REPOSITORY LAYERS; SQLITE NOW WITH A MYSQL-COMPATIBLE SCHEMA; MONEY STORED AS INTEGER CENTS; BCRYPT LOGIN BUILT AFTER THE CORE BUDGETING FLOW; SHARED REACT STATE IN THE TOP-LEVEL COMPONENT.</u></li>
+  <li><b><u>FULL TE4 DOCUMENT (ALL TE4 DIAGRAMS):</u></b><u> docs/te4/TE4-Design-and-Architectural-Patterns.pdf</u></li>
+</ul>
+
+<p><b>6. <u>USER INTERFACE (UI)</u></b></p>
+<p><b><u>6.1 WIREFRAMES / MOCKUPS</u></b></p>
+<ul>
+  <li><b><u>MOCKUPS (JUAN S.):</u></b><u> BUDGET SCREEN AND PROFILE SCREEN.</u></li>
+</ul>
+<p style="text-align:center;"><img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/1e20abde-bbb9-4a96-9aa3-dc2be5458236.png" alt="Budget screen mockup" width="200">&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/814d4683-6976-4850-b0b1-7019d1e0e62c.png" alt="Profile screen mockup" width="200"></p>
+<ul>
+  <li><b><u>WORKING PROTOTYPE (JUAN F.):</u></b><u> LOGIN AND DASHBOARD SCREENS OF THE REACT APP (CURRENTLY USING SAMPLE DATA).</u></li>
+</ul>
+<p style="text-align:center;"><img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/docs/srd/ui-login.png" alt="Login screen" width="290">&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/docs/srd/ui-dashboard.png" alt="Dashboard screen" width="290"></p>
+
+<p><b>7. <u>DATA REQUIREMENTS</u></b></p>
+<p><b><u>7.1 LIST OF PERSISTENT DATA</u></b></p>
+<ul>
+  <li><b><u>USER ACCOUNT:</u></b><u> EMAIL (UNIQUE), PASSWORD HASH (NEVER PLAIN TEXT), DISPLAY NAME.</u></li>
+  <li><b><u>CATEGORY:</u></b><u> NAME (UNIQUE PER USER), TYPE (INCOME OR EXPENSE).</u></li>
+  <li><b><u>TRANSACTION:</u></b><u> AMOUNT (&gt; 0), TYPE, CATEGORY, DATE (YYYY-MM-DD), NOTE (UP TO 200 CHARACTERS).</u></li>
+  <li><b><u>BUDGET:</u></b><u> CATEGORY, MONTH (YYYY-MM), LIMIT AMOUNT (&gt; 0); ONE BUDGET PER CATEGORY PER MONTH.</u></li>
+  <li><b><u>NOT STORED (COMPUTED ON REQUEST):</u></b><u> MONTHLY TOTALS, REMAINING BALANCE, PERCENT OF BUDGET USED, BUDGET STATUS, SPENDING BY CATEGORY.</u></li>
+</ul>
+
+<p><b>8. <u>TRACEABILITY MATRIX</u></b></p>
+<table>
+  <tr><td style="width:12%">ID</td><td style="width:40%">REQUIREMENT</td><td>LINE OF CODE</td></tr>
+  <tr><td>US-01</td><td>Log a new expense with an amount, date, category, and description.</td><td>backend/src/routes/api.js:22; backend/src/services/transactionService.js:10</td></tr>
+  <tr><td>US-02</td><td>Record paychecks and income sources.</td><td>backend/src/services/transactionService.js:19; backend/src/routes/api.js:13</td></tr>
+  <tr><td>US-03</td><td>Edit or delete a past transaction.</td><td>Planned (not yet implemented)</td></tr>
+  <tr><td>US-04</td><td>Dashboard with total income, total expenses, and remaining balance.</td><td>backend/src/routes/api.js:26; backend/src/services/budgetService.js:12</td></tr>
+  <tr><td>US-05</td><td>Chart of spending by category.</td><td>backend/src/repositories/transactionRepository.js:25 (data query; chart planned)</td></tr>
+  <tr><td>US-06</td><td>Filter transaction history by category and date range.</td><td>Planned (not yet implemented)</td></tr>
+  <tr><td>US-07</td><td>Create an account and log in with an email and password.</td><td>backend/src/db/schema.sql:5 (users table); login planned</td></tr>
+  <tr><td>US-08</td><td>Set a monthly spending limit for individual categories.</td><td>backend/src/db/schema.sql:33; backend/src/domain/budget.js:4</td></tr>
+  <tr><td>US-09</td><td>Visual warning when spending exceeds 80% of a category's limit.</td><td>backend/src/domain/budget.js:2; backend/src/domain/budget.js:13</td></tr>
+</table>
+
+<p><b>9. <u>APPENDICES</u></b></p>
+<ul>
+  <li><b><u>TE3 DOCUMENT (UML CLASS DIAGRAM, TRACEABILITY, MOCKUPS):</u></b><u> docs/te3/TE3-UML-Class-Diagram.pdf</u></li>
+  <li><b><u>TE4 DOCUMENT (ARCHITECTURE, HIGH-LEVEL DESIGN, DESIGN PATTERN, DECISIONS):</u></b><u> docs/te4/TE4-Design-and-Architectural-Patterns.pdf</u></li>
+  <li><b><u>DIAGRAM SOURCES:</u></b><u> docs/diagram-sources/</u></li>
+  <li><b><u>HOW TO RUN THE APP AND API REFERENCE:</u></b><u> README.md</u></li>
+</ul>
+
+<p><b>10. <u>AI USAGE &amp; DISCLOSURE (MANDATORY)</u></b></p>
+<ul>
+  <li><b><u>MODEL(S) USED:</u></b><u> CLAUDE OPUS 5.5 (ANTHROPIC); GEMINI (GOOGLE)</u></li>
+  <li><b><u>PROMPTS USED DURING CODING/DOCUMENTATION:</u></b><u> "POPULATE OUR CSC 3100 SRS TEMPLATE WITH OUR TEAM'S PRODUCT VISION STATEMENT AND 9 USER STORIES."</u></li>
+  <li><b><u>TE3–TE4 (SHREEV B.):</u></b><u> CLAUDE (ANTHROPIC), USED THROUGH CLAUDE CODE, HELPED WRITE THE BACKEND AND ITS TESTS, GENERATE THE UML AND ARCHITECTURE DIAGRAMS, DRAFT THE TE3/TE4 DESIGN DOCUMENT, AND ORGANIZE THIS SRD UPDATE. THE TEAM REVIEWED, RAN, AND TESTED THE CODE AND CHECKED THE DOCUMENTS.</u></li>
+</ul>
+
+</body>
+</html>

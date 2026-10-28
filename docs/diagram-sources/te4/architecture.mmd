@@ -1,0 +1,25 @@
+%%{init: {"flowchart": {"wrappingWidth": 320, "nodeSpacing": 30, "rankSpacing": 38}}}%%
+flowchart TB
+  U(["Student (web browser)"])
+
+  subgraph C["CLIENT TIER · React SPA (Vite) · packages/frontend"]
+    V["Presentation layer: pages + components"]
+  end
+
+  subgraph S["SERVER TIER · Node.js + Express REST API · packages/backend"]
+    direction TB
+    M["Middleware layer: JSON parsing · current user · error handling"]
+    R["Route / controller layer: HTTP → service calls"]
+    SV["Service layer: validation · business rules (80% warning)"]
+    RP["Repository layer: all SQL queries"]
+    M --> R --> SV --> RP
+  end
+
+  DB[("DATA TIER · SQLite (dev/demo) → MySQL (production)")]
+  X["External systems: none (no bank linking,<br/>payments, or third-party auth: out of SRS scope)"]
+
+  U --> V
+  V <-->|"HTTP + JSON"| M
+  RP <-->|"SQL"| DB
+  DB ~~~ X
+  style X fill:#f8fafc,stroke:#94a3b8,stroke-dasharray: 4 3,color:#334155

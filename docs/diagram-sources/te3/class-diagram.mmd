@@ -1,0 +1,105 @@
+%%{init: {"class": {"hideEmptyMembersBox": true}}}%%
+classDiagram
+  direction LR
+
+  class User {
+    -int id
+    -String email
+    -String passwordHash
+    -String name
+    -DateTime createdAt
+    +register(email, password, name) User
+    +login(email, password) bool
+    +getId() int
+    +getEmail() String
+    +getName() String
+    +getTransactions(period) List~Transaction~
+    +getCategories() List~Category~
+    +getBudgets(period) List~Budget~
+  }
+
+  class Category {
+    -int id
+    -int userId
+    -String name
+    -CategoryType type
+    +getId() int
+    +getName() String
+    +getType() CategoryType
+    +rename(name) void
+  }
+
+  class Transaction {
+    -int id
+    -int userId
+    -int categoryId
+    -CategoryType type
+    -int amountCents
+    -Date date
+    -String note
+    -DateTime createdAt
+    +getId() int
+    +getAmount() decimal
+    +getDate() Date
+    +getType() CategoryType
+    +getCategory() Category
+    +getNote() String
+    +isExpense() bool
+    +validate() List~String~
+    +update(amount, date, categoryId, note) void
+    +delete() void
+  }
+
+  class Budget {
+    -int id
+    -int userId
+    -int categoryId
+    -String period
+    -int limitAmountCents
+    +getLimit() decimal
+    +getPeriod() String
+    +setLimit(amount) void
+    +spent() decimal
+    +remaining() decimal
+    +percentUsed() float
+    +isNearLimit() bool
+    +isOverLimit() bool
+    +getStatus() BudgetStatus
+  }
+
+  class MonthlySummary {
+    -String period
+    -int incomeCents
+    -int expenseCents
+    -int balanceCents
+    -List~Budget~ budgets
+    +getIncome() decimal
+    +getExpenses() decimal
+    +getBalance() decimal
+    +getBudgets() List~Budget~
+  }
+
+  class CategoryType {
+    <<enumeration>>
+    INCOME
+    EXPENSE
+  }
+
+  class BudgetStatus {
+    <<enumeration>>
+    OK
+    WARNING
+    OVER
+  }
+
+  User "1" --> "M" Transaction : records
+  User "1" --> "M" Category : owns
+  User "1" --> "M" Budget : sets
+  User "1" --> "M" MonthlySummary : views
+  Transaction "M" --> "1" Category : classified as
+  Budget "M" --> "1" Category : limits
+  MonthlySummary "1" o-- "M" Budget : includes
+  MonthlySummary ..> Transaction : totals
+  Category ..> CategoryType
+  Transaction ..> CategoryType
+  Budget ..> BudgetStatus

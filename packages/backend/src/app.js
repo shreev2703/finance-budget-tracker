@@ -4,6 +4,7 @@ import { createCategoryRepository } from './repositories/categoryRepository.js';
 import { createBudgetRepository } from './repositories/budgetRepository.js';
 import { createTransactionService } from './services/transactionService.js';
 import { createBudgetService } from './services/budgetService.js';
+import { createCategoryService } from './services/categoryService.js';
 import { apiRouter } from './routes/api.js';
 import { demoUser } from './middleware/demoUser.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
@@ -24,7 +25,12 @@ export function createApp(db) {
         transactions,
         categories,
       }),
-      budgetService: createBudgetService({ transactions, budgets }),
+      budgetService: createBudgetService({
+        transactions,
+        budgets,
+        categories,
+      }),
+      categoryService: createCategoryService({ categories }),
       categories,
     }),
   );
