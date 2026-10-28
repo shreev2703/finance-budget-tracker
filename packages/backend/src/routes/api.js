@@ -5,13 +5,31 @@ import { currentPeriod } from '../db/seed-data.js';
 const PERIOD_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 /** Thin controllers: parse the request, call a service, send JSON. */
-export function apiRouter({ transactionService, budgetService, categories }) {
+export function apiRouter({
+  transactionService,
+  budgetService,
+  categoryService,
+  categories,
+}) {
   const router = Router();
 
   router.get('/health', (req, res) => res.json({ ok: true }));
 
   router.get('/categories', (req, res) => {
     res.json(categories.listForUser(req.userId, currentPeriod()));
+  });
+
+  router.post('/categories', (req, res) => {
+    res.status(201).json(categoryService.create(req.userId, req.body ?? {}));
+  });
+
+  router.put('/categories/:id', (req, res) => {
+    res.json(categoryService.rename(req.userId, req.params.id, req.body ?? {}));
+  });
+
+  router.delete('/categories/:id', (req, res) => {
+    categoryService.remove(req.userId, req.params.id);
+    res.status(204).end();
   });
 
   router.get('/transactions', (req, res) => {

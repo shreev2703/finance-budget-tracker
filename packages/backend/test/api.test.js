@@ -171,3 +171,40 @@ test('PUT /budgets/:id returns 404 for an unknown budget and 400 for a bad limit
     400,
   );
 });
+
+const del = (path) => fetch(base + path, { method: 'DELETE' });
+
+test('POST /categories creates an expense category (and rejects duplicates)', async () => {
+  const res = await post('/categories', { name: '  Coffee  ' });
+  assert.equal(res.status, 201);
+  const coffee = await res.json();
+  assert.equal(coffee.name, 'Coffee');
+  assert.equal(coffee.type, 'EXPENSE');
+
+  assert.equal((await post('/categories', { name: 'coffee' })).status, 409);
+  const bad = await post('/categories', { name: '   ' });
+  assert.equal(bad.status, 400);
+  assert.deepEqual((await bad.json()).details, ['name is required']);
+});
+
+test('PUT /categories/:id renames a category', async () => {
+  const coffee = await categoryNamed('Coffee');
+  const res = await put(`/categories/${coffee.id}`, {
+    name: 'Coffee & Snacks',
+  });
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).name, 'Coffee & Snacks');
+  assert.equal((await put('/categories/99999', { name: 'x' })).status, 404);
+});
+
+test('DELETE /categories/:id removes an unused category and its budget', async () => {
+  const snacks = await categoryNamed('Coffee & Snacks');
+  await post('/budgets', { categoryId: snacks.id, limit: 40 });
+  assert.equal((await del(`/categories/${snacks.id}`)).status, 204);
+  assert.equal(await categoryNamed('Coffee & Snacks'), undefined);
+});
+
+test('DELETE /categories/:id refuses a category that has transactions (409)', async () => {
+  const groceries = await categoryNamed('Groceries');
+  assert.equal((await del(`/categories/${groceries.id}`)).status, 409);
+});
