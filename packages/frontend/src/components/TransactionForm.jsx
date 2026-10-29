@@ -1,17 +1,25 @@
 import { useState } from "react";
-import { api, errorMessages } from "../api";
+import { api, centsToDollars, errorMessages } from "../api";
 import { Button } from "./Button.jsx";
 import { FormErrors } from "./FormErrors.jsx";
 import { Modal } from "./Modal.jsx";
 import { todayIso } from "../format.js";
 
-/** US-01 log an expense, US-02 record income. */
-export function AddTransaction({ categories, onClose, onAdded }) {
-  const [type, setType] = useState("EXPENSE");
-  const [amount, setAmount] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [date, setDate] = useState(todayIso());
-  const [note, setNote] = useState("");
+/**
+ * US-01 log an expense, US-02 record income, US-03 edit a transaction.
+ * Pass `transaction` to edit it; leave it out to add a new one.
+ */
+export function TransactionForm({ categories, transaction, onClose, onSaved }) {
+  const isEdit = Boolean(transaction);
+  const [type, setType] = useState(transaction?.type ?? "EXPENSE");
+  const [amount, setAmount] = useState(
+    isEdit ? String(centsToDollars(transaction.amountCents)) : "",
+  );
+  const [categoryId, setCategoryId] = useState(
+    isEdit ? String(transaction.categoryId) : "",
+  );
+  const [date, setDate] = useState(transaction?.date ?? todayIso());
+  const [note, setNote] = useState(transaction?.note ?? "");
   const [errors, setErrors] = useState([]);
   const [saving, setSaving] = useState(false);
 
@@ -22,23 +30,34 @@ export function AddTransaction({ categories, onClose, onAdded }) {
     setCategoryId("");
   }
 
-  async function handleAdd() {
+  async function handleSave() {
     setSaving(true);
     setErrors([]);
+    const fields = {
+      type,
+      amount: Number(amount),
+      categoryId: Number(categoryId),
+      date,
+      note,
+    };
     try {
-      await api.addTransaction({
-        type,
-        amount: Number(amount),
-        categoryId: Number(categoryId),
-        date,
-        note,
-      });
-      await onAdded();
+      if (isEdit) {
+        await api.updateTransaction(transaction.id, fields);
+      } else {
+        await api.addTransaction(fields);
+      }
+      await onSaved();
     } catch (error) {
       setErrors(errorMessages(error));
       setSaving(false);
     }
   }
+
+  const saveLabel = isEdit
+    ? "Save changes"
+    : type === "EXPENSE"
+      ? "Add expense"
+      : "Add income";
 
   return (
     <Modal>
@@ -46,7 +65,7 @@ export function AddTransaction({ categories, onClose, onAdded }) {
         ×
       </button>
 
-      <h2>Add transaction</h2>
+      <h2>{isEdit ? "Edit transaction" : "Add transaction"}</h2>
 
       <div className="type-toggle" role="radiogroup" aria-label="Transaction type">
         {["EXPENSE", "INCOME"].map((option) => (
@@ -117,8 +136,8 @@ export function AddTransaction({ categories, onClose, onAdded }) {
           Cancel
         </Button>
 
-        <Button onClick={handleAdd} disabled={saving}>
-          {saving ? "Saving…" : type === "EXPENSE" ? "Add expense" : "Add income"}
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? "Saving…" : saveLabel}
         </Button>
       </div>
     </Modal>

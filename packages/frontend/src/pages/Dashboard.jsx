@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { api, centsToDollars } from "../api";
-import { AddTransaction } from "../components/AddTransaction.jsx";
 import { Button } from "../components/Button.jsx";
 import { EditCategory } from "../components/EditCategory.jsx";
 import { Shell } from "../components/Shell.jsx";
-import { TransactionRow } from "../components/TransactionRow.jsx";
+import { TransactionForm } from "../components/TransactionForm.jsx";
+import { TransactionList } from "../components/TransactionList.jsx";
 import { formatPeriod, money } from "../format.js";
 
 export function Dashboard({ go }) {
@@ -181,10 +181,10 @@ export function Dashboard({ go }) {
         )}
 
         {addingTransaction && (
-          <AddTransaction
+          <TransactionForm
             categories={categories}
             onClose={() => setAddingTransaction(false)}
-            onAdded={() => {
+            onSaved={() => {
               setAddingTransaction(false);
               refresh();
             }}
@@ -204,11 +204,11 @@ export function Dashboard({ go }) {
     View all transactions
   </Button>
  </div>
-        <section className="table">
-          {transactions.map((transaction) => (
-            <TransactionRow key={transaction.id} transaction={transaction} />
-          ))}
-        </section>
+        <TransactionList
+          transactions={transactions}
+          categories={categories}
+          onChanged={refresh}
+        />
         {transactions.length === 0 && (
           <p className="dashboard-state">No transactions yet.</p>
         )}
