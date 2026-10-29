@@ -214,6 +214,34 @@ function makeSummary(data, period = currentPeriod()) {
 
 const delay = (value) => Promise.resolve(value);
 
+// Same rules as the add form; used by addTransaction and updateTransaction.
+function transactionErrors(data, { amount, type, categoryId, date }) {
+  const category = categoryFor(data, categoryId);
+  const errors = [];
+
+  if (!category || category.type !== type) {
+    errors.push("Choose a valid category.");
+  }
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    errors.push("Enter an amount greater than 0.");
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? "")) {
+    errors.push("Choose a valid date.");
+  }
+
+  return errors;
+}
+
+const transactionFields = ({ amount, type, categoryId, date, note }) => ({
+  categoryId: Number(categoryId),
+  type,
+  amountCents: Math.round(amount * 100),
+  date,
+  note: String(note ?? "").trim(),
+});
+
 export const api = {
   getSummary: (period) => delay(makeSummary(readData(), period)),
 
@@ -223,22 +251,9 @@ export const api = {
   getCategories: () =>
     delay(readData().categories.map((category) => ({ ...category }))),
 
-  addTransaction: ({ amount, type, categoryId, date, note }) => {
+  addTransaction: (input) => {
     const data = readData();
-    const category = categoryFor(data, categoryId);
-    const errors = [];
-
-    if (!category || category.type !== type) {
-      errors.push("Choose a valid category.");
-    }
-
-    if (!Number.isFinite(amount) || amount <= 0) {
-      errors.push("Enter an amount greater than 0.");
-    }
-
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? "")) {
-      errors.push("Choose a valid date.");
-    }
+    const errors = transactionErrors(data, input);
 
     if (errors.length) {
       return Promise.reject(
@@ -248,17 +263,54 @@ export const api = {
 
     const transaction = {
       id: data.nextTransactionId++,
-      categoryId: Number(categoryId),
-      type,
-      amountCents: Math.round(amount * 100),
-      date,
-      note: String(note ?? "").trim(),
+      ...transactionFields(input),
     };
 
     data.transactions.push(transaction);
     writeData(data);
 
     return delay({ ...transaction });
+  },
+
+  /** US-03: same fields as addTransaction. */
+  updateTransaction: (transactionId, input) => {
+    const data = readData();
+    const transaction = data.transactions.find(
+      (item) => item.id === Number(transactionId),
+    );
+
+    if (!transaction) {
+      return Promise.reject(new ApiError(404, "Transaction not found"));
+    }
+
+    const errors = transactionErrors(data, input);
+
+    if (errors.length) {
+      return Promise.reject(
+        new ApiError(400, "Invalid transaction", errors),
+      );
+    }
+
+    Object.assign(transaction, transactionFields(input));
+    writeData(data);
+
+    return delay({ ...transaction });
+  },
+
+  deleteTransaction: (transactionId) => {
+    const data = readData();
+    const id = Number(transactionId);
+
+    if (!data.transactions.some((transaction) => transaction.id === id)) {
+      return Promise.reject(new ApiError(404, "Transaction not found"));
+    }
+
+    data.transactions = data.transactions.filter(
+      (transaction) => transaction.id !== id,
+    );
+    writeData(data);
+
+    return delay();
   },
 
   createCategory: ({ name, type = "EXPENSE" }) => {
