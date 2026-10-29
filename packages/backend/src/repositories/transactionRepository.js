@@ -17,6 +17,13 @@ export function createTransactionRepository(db) {
   const insert = db.prepare(`
     INSERT INTO transactions (user_id, category_id, type, amount_cents, date, note)
     VALUES (?, ?, ?, ?, ?, ?)`);
+  const update = db.prepare(`
+    UPDATE transactions
+       SET category_id = ?, type = ?, amount_cents = ?, date = ?, note = ?
+     WHERE id = ? AND user_id = ?`);
+  const remove = db.prepare(
+    'DELETE FROM transactions WHERE id = ? AND user_id = ?',
+  );
   const totalsForPeriod = db.prepare(`
     SELECT type, SUM(amount_cents) AS totalCents
       FROM transactions
@@ -41,6 +48,21 @@ export function createTransactionRepository(db) {
       );
       return findById.get(Number(lastInsertRowid));
     },
+    /** Returns the updated transaction, or undefined if the user has no transaction with this id. */
+    update(id, userId, { categoryId, type, amountCents, date, note }) {
+      const { changes } = update.run(
+        categoryId,
+        type,
+        amountCents,
+        date,
+        note,
+        id,
+        userId,
+      );
+      return changes ? findById.get(id) : undefined;
+    },
+    /** Returns true if a transaction was deleted. */
+    remove: (id, userId) => remove.run(id, userId).changes > 0,
     totalsForPeriod: (userId, period) => totalsForPeriod.all(userId, period),
     spentByCategory: (userId, period) => spentByCategory.all(userId, period),
   };
