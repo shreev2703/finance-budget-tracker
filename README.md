@@ -54,6 +54,8 @@ packages/
 | ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | GET    | `/api/transactions?limit=50`          | Transactions, newest first                                                                                  |
 | POST   | `/api/transactions`                   | Create `{ amount, type, categoryId, date, note }` (`type` is `INCOME` or `EXPENSE`, `date` is `YYYY-MM-DD`) |
+| PUT    | `/api/transactions/:id`               | Edit a transaction; same body and rules as POST (404 if it isn't yours)                                     |
+| DELETE | `/api/transactions/:id`               | Delete a transaction (404 if it isn't yours)                                                                |
 | GET    | `/api/budgets/summary?period=YYYY-MM` | Monthly totals + per-category budget status (defaults to the current month)                                 |
 | GET    | `/api/categories`                     | The user's income and expense categories, each with `budgetId` and `limitCents` for this month (or `null`)  |
 | POST   | `/api/budgets`                        | Set a monthly limit `{ categoryId, limit, period? }` for an expense category (409 if one already exists)    |

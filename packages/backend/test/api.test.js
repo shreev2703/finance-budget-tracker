@@ -208,3 +208,72 @@ test('DELETE /categories/:id refuses a category that has transactions (409)', as
   const groceries = await categoryNamed('Groceries');
   assert.equal((await del(`/categories/${groceries.id}`)).status, 409);
 });
+
+const transactionWithNote = async (note) =>
+  (await getJson('/transactions?limit=200')).find((t) => t.note === note);
+
+test('PUT /transactions/:id edits a transaction and the summary follows', async () => {
+  const pizza = await transactionWithNote('Pizza with roommates');
+  const groceries = await categoryNamed('Groceries');
+  const before = await getJson(
+    `/budgets/summary?period=${pizza.date.slice(0, 7)}`,
+  );
+
+  const res = await put(`/transactions/${pizza.id}`, {
+    amount: 20,
+    type: 'EXPENSE',
+    categoryId: groceries.id,
+    date: pizza.date,
+    note: '  Pizza ingredients  ',
+  });
+  assert.equal(res.status, 200);
+  const edited = await res.json();
+  assert.equal(edited.id, pizza.id);
+  assert.equal(edited.amountCents, 2000);
+  assert.equal(edited.categoryName, 'Groceries');
+  assert.equal(edited.note, 'Pizza ingredients');
+
+  const after = await getJson(
+    `/budgets/summary?period=${pizza.date.slice(0, 7)}`,
+  );
+  assert.equal(
+    after.totals.expenseCents,
+    before.totals.expenseCents - pizza.amountCents + 2000,
+  );
+});
+
+test('PUT /transactions/:id rejects an invalid edit (400) and leaves it unchanged', async () => {
+  const groceriesRun = await transactionWithNote('Weekly groceries');
+  const res = await put(`/transactions/${groceriesRun.id}`, {
+    amount: 0,
+    type: 'EXPENSE',
+    categoryId: groceriesRun.categoryId,
+    date: 'tomorrow',
+  });
+  assert.equal(res.status, 400);
+  assert.deepEqual((await res.json()).details, [
+    'amount must be a positive number',
+    'date must be YYYY-MM-DD',
+  ]);
+  assert.deepEqual(await transactionWithNote('Weekly groceries'), groceriesRun);
+});
+
+test('DELETE /transactions/:id deletes a transaction', async () => {
+  const subscription = await transactionWithNote('Streaming subscription');
+  const res = await del(`/transactions/${subscription.id}`);
+  assert.equal(res.status, 204);
+  assert.equal(await transactionWithNote('Streaming subscription'), undefined);
+});
+
+test('PUT and DELETE /transactions/:id return 404 for an unknown id', async () => {
+  const groceries = await categoryNamed('Groceries');
+  const valid = {
+    amount: 5,
+    type: 'EXPENSE',
+    categoryId: groceries.id,
+    date: '2026-10-01',
+  };
+  assert.equal((await put('/transactions/99999', valid)).status, 404);
+  assert.equal((await del('/transactions/99999')).status, 404);
+  assert.equal((await del('/transactions/not-a-number')).status, 404);
+});

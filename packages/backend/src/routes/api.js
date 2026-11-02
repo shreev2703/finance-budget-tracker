@@ -41,6 +41,15 @@ export function apiRouter({
     res.status(201).json(transactionService.create(req.userId, req.body));
   });
 
+  router.put('/transactions/:id', (req, res) => {
+    res.json(transactionService.update(req.userId, req.params.id, req.body));
+  });
+
+  router.delete('/transactions/:id', (req, res) => {
+    transactionService.remove(req.userId, req.params.id);
+    res.status(204).end();
+  });
+
   router.get('/budgets/summary', (req, res) => {
     const period = req.query.period ?? currentPeriod();
     if (!PERIOD_RE.test(period))

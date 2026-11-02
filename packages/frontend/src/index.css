@@ -948,3 +948,31 @@ button {
   color: #b42318;
   font-size: 14px;
 }
+
+/* Edit / Delete on each transaction row (Sprint 4 #68, US-03) */
+.table div.editable {
+  grid-template-columns: 25px 1fr 130px 100px auto;
+  column-gap: 8px;
+}
+
+.row-tools {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.row-tools .button.small {
+  padding: 6px 10px;
+  font-size: 11px;
+}
+
+@media (max-width: 800px) {
+  .table div.editable {
+    grid-template-columns: 22px 1fr auto;
+    padding: 6px 0;
+  }
+
+  .table div.editable .row-tools {
+    grid-column: 2 / -1;
+  }
+}
