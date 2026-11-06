@@ -13,7 +13,7 @@
     "dev:web": "npm run dev -w frontend",
     "seed": "npm run seed -w backend",
     "test": "npm test -w backend",
-    "lint": "npm run lint -w backend",
+    "lint": "npm run lint -w backend && npm run lint -w frontend",
     "format": "prettier --write ."
   },
   "engines": {
