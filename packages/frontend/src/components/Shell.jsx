@@ -1,3 +1,5 @@
+import { useContext } from "react";
+import { UserContext } from "../UserContext.js";
 import { Mark } from "./Mark.jsx";
 
 function Side({ page, go }) {
@@ -37,13 +39,25 @@ function Side({ page, go }) {
   );
 }
 
+const initials = (name) =>
+  name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word[0].toUpperCase())
+    .join("");
+
 function Top() {
+  const { user, logOut } = useContext(UserContext);
+
   return (
     <header className="top">
       <b>Learn by Doing.</b>
 
       <span>
-        Mustang Student <i>MS</i> ◌
+        {user.name} <i>{initials(user.name)}</i>
+        <button className="log-out" onClick={logOut}>
+          Log Out
+        </button>
       </span>
     </header>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { api, centsToDollars } from "../api";
 import { Button } from "../components/Button.jsx";
 import { EditCategory } from "../components/EditCategory.jsx";
@@ -6,8 +6,10 @@ import { Shell } from "../components/Shell.jsx";
 import { TransactionForm } from "../components/TransactionForm.jsx";
 import { TransactionList } from "../components/TransactionList.jsx";
 import { formatPeriod, money } from "../format.js";
+import { UserContext } from "../UserContext.js";
 
 export function Dashboard({ go }) {
+  const { user } = useContext(UserContext);
   const [summary, setSummary] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -43,13 +45,16 @@ export function Dashboard({ go }) {
   }, [reloadKey]);
 
   const totals = summary?.totals;
+  const withoutLimit = categories.filter(
+    (category) => category.type === "EXPENSE" && !category.budgetId,
+  );
 
   return (
     <Shell page="dashboard" go={go}>
       <div className="dashboard">
         <div className="title">
           <p>Overview{summary ? ` · ${formatPeriod(summary.period)}` : ""}</p>
-          <h1>Welcome back, Mustang!</h1>
+          <h1>Welcome back, {user.name}!</h1>
           <span>Here’s your financial snapshot for the month.</span>
         </div>
 
@@ -158,6 +163,28 @@ export function Dashboard({ go }) {
           <p className="dashboard-state">No category budgets have been set for this month.</p>
         )}
 
+        {withoutLimit.length > 0 && (
+          <div className="no-limit">
+            <small>Set a monthly limit:</small>
+            {withoutLimit.map((category) => (
+              <Button
+                key={category.id}
+                className="small outline"
+                onClick={() =>
+                  setEditingCategory({
+                    id: category.id,
+                    budgetId: null,
+                    name: category.name,
+                    budget: "",
+                  })
+                }
+              >
+                {category.name}
+              </Button>
+            ))}
+          </div>
+        )}
+
         {editingCategory && (
           <EditCategory
             category={editingCategory}
@@ -166,7 +193,12 @@ export function Dashboard({ go }) {
               if (updatedCategory.name !== editingCategory.name) {
                 await api.renameCategory(updatedCategory.id, updatedCategory.name);
               }
-              if (updatedCategory.budget !== editingCategory.budget) {
+              if (updatedCategory.budgetId === null) {
+                await api.createBudget({
+                  categoryId: updatedCategory.id,
+                  limit: updatedCategory.budget,
+                });
+              } else if (updatedCategory.budget !== editingCategory.budget) {
                 await api.updateBudget(updatedCategory.budgetId, updatedCategory.budget);
               }
               setEditingCategory(null);
