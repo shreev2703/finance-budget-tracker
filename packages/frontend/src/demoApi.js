@@ -239,8 +239,43 @@ export const demoApi = {
 
   getSummary: (period) => delay(makeSummary(readData(), period)),
 
-  getTransactions: (limit = 50) =>
-    delay(transactionsForDisplay(readData(), limit)),
+  getTransactions: (limit = 50, { categoryId, from, to } = {}) => {
+    if (from && to && from > to) {
+      return Promise.reject(
+        new ApiError(400, "Invalid filter", ["The From date must not be after the To date."]),
+      );
+    }
+    const rows = transactionsForDisplay(readData()).filter(
+      (transaction) =>
+        (!categoryId || transaction.categoryId === Number(categoryId)) &&
+        (!from || transaction.date >= from) &&
+        (!to || transaction.date <= to),
+    );
+    return delay(rows.slice(0, limit));
+  },
+
+  getSpendingByCategory: (period = currentPeriod()) => {
+    const data = readData();
+    const spent = new Map();
+    for (const transaction of data.transactions) {
+      if (transaction.type === "EXPENSE" && transaction.date.startsWith(period)) {
+        spent.set(
+          transaction.categoryId,
+          (spent.get(transaction.categoryId) ?? 0) + transaction.amountCents,
+        );
+      }
+    }
+    const totalCents = [...spent.values()].reduce((sum, cents) => sum + cents, 0);
+    const categories = [...spent]
+      .map(([categoryId, spentCents]) => ({
+        categoryId,
+        categoryName: categoryFor(data, categoryId)?.name ?? "Uncategorized",
+        spentCents,
+        percent: Math.round((spentCents / totalCents) * 100),
+      }))
+      .sort((a, b) => b.spentCents - a.spentCents);
+    return delay({ period, totalCents, categories });
+  },
 
   getCategories: () => {
     const data = readData();

@@ -1,10 +1,11 @@
 import { todayLabel } from "../format.js";
 import { Shell } from "../components/Shell.jsx";
 import { PlanCard } from "./investing/PlanCard.jsx";
+import { PAGES } from "./pages.js";
 
 export function Funds({ go }) {
   return (
-    <Shell page="funds" go={go}>
+    <Shell page={PAGES.FUNDS} go={go}>
       <div className="funds">
         <div className="title">
           <p>Investing · {todayLabel()}</p>

@@ -1,5 +1,6 @@
 import { todayLabel } from "../../format.js";
 import { Shell } from "../../components/Shell.jsx";
+import { PAGES } from "../pages.js";
 import { Account } from "./Account.jsx";
 import { Amount } from "./Amount.jsx";
 import { ChooseFund } from "./ChooseFund.jsx";
@@ -18,7 +19,7 @@ export function Investing({ go, step = 0, setStep }) {
   ];
 
   return (
-    <Shell page="investing" go={go}>
+    <Shell page={PAGES.INVESTING} go={go}>
       <div className="investing">
         <div className="title">
           <p>Investing · {todayLabel()}</p>

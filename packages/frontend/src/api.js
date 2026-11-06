@@ -70,8 +70,15 @@ const httpApi = {
   getSummary: (period) =>
     request(`/budgets/summary${period ? `?period=${period}` : ""}`),
 
-  /** Transactions, newest first. */
-  getTransactions: (limit = 50) => request(`/transactions?limit=${limit}`),
+  /** Transactions, newest first. Optional filters: { categoryId, from, to } (blank means no filter). */
+  getTransactions: (limit = 50, filters = {}) =>
+    request(`/transactions?${new URLSearchParams({ limit, ...filters })}`),
+
+  /** { period, totalCents, categories: [{ categoryId, categoryName, spentCents, percent }] }, largest first. */
+  getSpendingByCategory: (period) =>
+    request(
+      `/reports/spending-by-category${period ? `?period=${period}` : ""}`,
+    ),
 
   /** Income and expense categories, each with its budgetId and limitCents for this month. */
   getCategories: () => request("/categories"),
