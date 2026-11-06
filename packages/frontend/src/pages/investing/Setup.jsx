@@ -1,3 +1,4 @@
+import { firstTransferLabel } from "../../format.js";
 import { Button } from "../../components/Button.jsx";
 import { PlanCard } from "./PlanCard.jsx";
 
@@ -27,7 +28,7 @@ export function Setup({ setStep }) {
 
           <label>
             Start date
-            <input value="Nov 5, 2025" readOnly />
+            <input value={firstTransferLabel()} readOnly />
           </label>
         </div>
 

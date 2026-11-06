@@ -1,6 +1,21 @@
 import { centsToDollars } from "./api";
 
-export const money = (cents = 0) => `$${centsToDollars(cents).toFixed(2)}`;
+export const money = (cents = 0) =>
+  `${cents < 0 ? "-" : ""}$${centsToDollars(Math.abs(cents)).toFixed(2)}`;
+
+const longDate = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+});
+
+export const todayLabel = () => longDate.format(new Date());
+
+// The investing mockup's first transfer: the 5th of next month.
+export const firstTransferLabel = () => {
+  const today = new Date();
+  return longDate.format(new Date(today.getFullYear(), today.getMonth() + 1, 5));
+};
 
 export const formatPeriod = (period) =>
   new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(

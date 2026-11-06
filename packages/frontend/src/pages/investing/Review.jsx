@@ -1,3 +1,4 @@
+import { firstTransferLabel } from "../../format.js";
 import { Button } from "../../components/Button.jsx";
 import { Modal } from "../../components/Modal.jsx";
 
@@ -30,7 +31,7 @@ export function Review({ setStep, go }) {
         </p>
 
         <p>
-          First transfer <b>Nov 5, 2025</b>
+          First transfer <b>{firstTransferLabel()}</b>
         </p>
       </div>
 

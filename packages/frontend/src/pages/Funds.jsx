@@ -1,3 +1,4 @@
+import { todayLabel } from "../format.js";
 import { Shell } from "../components/Shell.jsx";
 import { PlanCard } from "./investing/PlanCard.jsx";
 
@@ -6,7 +7,7 @@ export function Funds({ go }) {
     <Shell page="funds" go={go}>
       <div className="funds">
         <div className="title">
-          <p>Investing · Oct 14, 2025</p>
+          <p>Investing · {todayLabel()}</p>
           <h1>My funds</h1>
           <span>
             See what you’ve invested and how your funds have changed.

@@ -3,6 +3,7 @@ import { api } from "../api";
 import { Button } from "../components/Button.jsx";
 import { Shell } from "../components/Shell.jsx";
 import { TransactionList } from "../components/TransactionList.jsx";
+import { formatPeriod, todayIso } from "../format.js";
 
 export function Transactions({ go }) {
   const [transactions, setTransactions] = useState([]);
@@ -28,7 +29,7 @@ export function Transactions({ go }) {
     <Shell page="dashboard" go={go}>
       <div className="dashboard">
         <div className="title">
-          <p>Overview · October 2025</p>
+          <p>Overview · {formatPeriod(todayIso().slice(0, 7))}</p>
           <h1>All transactions</h1>
           <span>Review your complete recent account activity.</span>
         </div>
