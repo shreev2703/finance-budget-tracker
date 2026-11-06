@@ -57,6 +57,11 @@
   <tr><td>10/28/2026</td><td>JUAN F.</td><td>SPRINT 4: FRONTEND DEMO DATA STORED IN THE BROWSER, WITH THE OPTION TO START WITH OR WITHOUT SAMPLE DATA (#63, #64); FIX A BLANK-SCREEN BUG IN THE VITE CONFIG. SWITCHING BACK TO THE LIVE API BY DEFAULT IS #67</td></tr>
   <tr><td>10/29/2026</td><td>SHREEV B.</td><td>SPRINT 4: EDIT AND DELETE A TRANSACTION (US-03, FR-03) WITH PUT AND DELETE /api/transactions/:id AND EDIT / DELETE BUTTONS ON EACH TRANSACTION ROW (#68); UPDATE TRACEABILITY MATRIX</td></tr>
   <tr><td>11/02/2026</td><td>SHREEV B.</td><td>WEEKLY UPDATE FOR OCT 26–30: US-03 MERGED INTO MAIN (#72); RE-CHECKED TRACEABILITY MATRIX LINE REFERENCES AGAINST MAIN</td></tr>
+  <tr><td>11/06/2026</td><td>SHREEV B.</td><td>TE6: ACCESS CONTROL (US-07, FR-07): SIGN-UP AND SIGN-IN ENDPOINTS, BCRYPT PASSWORD HASHING, JWT TOKENS, AND AN AUTH CHECK ON EVERY DATA ROUTE; LOGIN AND SIGN-UP SCREENS; TOKEN STORED IN THE BROWSER AND SENT WITH EVERY API CALL; SEQUENCE DIAGRAMS IN SECTION 5.5 (#77, #78, #79)</td></tr>
+  <tr><td>11/06/2026</td><td>SHREEV B.</td><td>THE FRONTEND USES THE LIVE API BY DEFAULT AGAIN; JUAN F.'S BROWSER DEMO DATA IS KEPT BEHIND VITE_DEMO=1 (#67)</td></tr>
+  <tr><td>11/06/2026</td><td>SHREEV B.</td><td>UNPLANNED FIXES NEEDED TO DEMO THE APP (#80): DEMO ACCOUNT WAS EMPTY AFTER THE MONTH CHANGED; NEW ACCOUNTS COULD NOT SET A LIMIT ON THEIR STARTING CATEGORIES; NEGATIVE BALANCES SHOWED AS $-85.00; HARD-CODED 2025 DATES; REMOVED LOGIN BUTTONS THAT DID NOTHING</td></tr>
+  <tr><td>11/06/2026</td><td>SHREEV B.</td><td>TE1 AND TE4 FOLLOW-UPS: WROTE CONTRIBUTING.MD (#81); ADDED THE FRONTEND ARCHITECTURE DOCUMENT (#26) AND THE ADD-TRANSACTION SEQUENCE DIAGRAM (#27)</td></tr>
+  <tr><td>11/06/2026</td><td>SHREEV B.</td><td>WEEKLY UPDATE FOR NOV 2–6 (#75): RE-CHECKED ALL TRACEABILITY MATRIX LINE REFERENCES; NEW LOGIN AND DASHBOARD SCREENSHOTS</td></tr>
   <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
   <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
 </table>
@@ -65,7 +70,7 @@
 <p class="pb"><b>LEDGERLOGIC (FINANCE BUDGET TRACKER)</b></p>
 <p><b>SOFTWARE REQUIREMENTS SPECIFICATION (SRS)</b></p>
 <p><b>COURSE: CSC 3100 — INTRODUCTION TO SOFTWARE ENGINEERING</b></p>
-<p><b>DATE: OCTOBER 23, 2026</b></p>
+<p><b>DATE: NOVEMBER 6, 2026</b></p>
 <hr>
 <p><b><u>TABLE OF CONTENTS</u></b></p>
 <ol>
@@ -92,6 +97,7 @@
       <li><b><u>5.2 DATABASE SCHEMA (MYSQL)</u></b></li>
       <li><b><u>5.3 UML CLASS DIAGRAM</u></b></li>
       <li><b><u>5.4 ARCHITECTURE &amp; DESIGN PATTERNS</u></b></li>
+      <li><b><u>5.5 ACCESS CONTROL</u></b></li>
     </ul></li>
   <li><b><u>USER INTERFACE (UI) ...................................................................... [PAGE #]</u></b>
     <ul style="list-style-type: circle;">
@@ -172,7 +178,7 @@
 <p><b><u>4.1 DATA INTEGRITY &amp; SECURITY</u></b></p>
 <ul>
   <li><b><u>INTEGRITY:</u></b><u> HANDLING ERRORS AND BAD DATA. THE API REJECTS INVALID INPUT WITH A CLEAR LIST OF ERRORS (HTTP 400): AMOUNTS MUST BE POSITIVE AND AT MOST $1,000,000, DATES MUST BE VALID (YYYY-MM-DD), AND A TRANSACTION'S CATEGORY MUST BELONG TO THE USER AND MATCH THE TRANSACTION TYPE. THE DATABASE ENFORCES THE SAME RULES WITH CHECK AND FOREIGN KEY CONSTRAINTS. MONEY IS STORED AS INTEGER CENTS TO AVOID ROUNDING ERRORS.</u></li>
-  <li><b><u>SECURITY:</u></b><u> IMPLEMENT BCRYPT FOR PASSWORD HASHING AND ENVIRONMENT VARIABLES FOR DB CREDENTIALS. EVERY QUERY IS SCOPED TO THE LOGGED-IN USER, AND ALL SQL USES PARAMETERIZED QUERIES TO PREVENT SQL INJECTION.</u></li>
+  <li><b><u>SECURITY:</u></b><u> PASSWORDS ARE HASHED WITH BCRYPT AND NEVER RETURNED BY THE API. EVERY DATA ROUTE REQUIRES A SIGNED JWT THAT EXPIRES AFTER ONE DAY, AND THE SIGNING KEY COMES FROM THE TOKEN_SECRET ENVIRONMENT VARIABLE, NOT THE CODE. EVERY QUERY IS SCOPED TO THE LOGGED-IN USER, AND ALL SQL USES PARAMETERIZED QUERIES TO PREVENT SQL INJECTION.</u></li>
 </ul>
 <p><b><u>4.2 PERFORMANCE &amp; USABILITY</u></b></p>
 <ul>
@@ -184,8 +190,15 @@
 <p><b><u>5.1 REST API ENDPOINTS</u></b></p>
 <ul>
   <li><b><u>REST ENDPOINTS:</u></b><u> (LIST METHOD | URL | DESCRIPTION) — BASE URL: http://localhost:3001/api</u></li>
-  <li><b><u>IMPLEMENTED ENDPOINTS:</u></b>
+  <li><b><u>PUBLIC ENDPOINTS:</u></b>
     <ul style="list-style-type: circle;">
+      <li><b><u>POST /api/auth/register — CREATES AN ACCOUNT AND RETURNS A TOKEN (400 IF INVALID, 409 IF THE EMAIL IS TAKEN).</u></b></li>
+      <li><b><u>POST /api/auth/login — CHECKS THE HASHED PASSWORD AND RETURNS A TOKEN (401 IF WRONG).</u></b></li>
+      <li><b><u>GET /api/health — CONFIRMS THE API IS RUNNING.</u></b></li>
+    </ul></li>
+  <li><b><u>PROTECTED ENDPOINTS (REQUIRE AUTHORIZATION: BEARER TOKEN; 401 WITHOUT A VALID ONE):</u></b>
+    <ul style="list-style-type: circle;">
+      <li><b><u>GET /api/auth/me — FETCHES THE LOGGED-IN USER.</u></b></li>
       <li><b><u>GET /api/transactions — FETCHES THE USER'S TRANSACTIONS, NEWEST FIRST.</u></b></li>
       <li><b><u>POST /api/transactions — CREATES A NEW INCOME OR EXPENSE (RETURNS 400 WITH A LIST OF ERRORS IF INVALID).</u></b></li>
       <li><b><u>PUT /api/transactions/:id — EDITS A TRANSACTION WITH THE SAME RULES AS POST (404 IF IT IS NOT THE USER'S).</u></b></li>
@@ -202,7 +215,6 @@
     <ul style="list-style-type: circle;">
       <li><b><u>GET /api/transactions?category=&amp;from=&amp;to= — FILTERS TRANSACTION HISTORY (US-06).</u></b></li>
       <li><b><u>GET /api/reports/spending-by-category — FETCHES SPENDING PER CATEGORY FOR THE CHART (US-05).</u></b></li>
-      <li><b><u>POST /api/auth/register, POST /api/auth/login — CREATES AN ACCOUNT AND LOGS IN (US-07).</u></b></li>
     </ul></li>
 </ul>
 <p><b><u>5.2 DATABASE SCHEMA (MYSQL)</u></b></p>
@@ -226,8 +238,25 @@
   <li><b><u>ARCHITECTURE:</u></b><u> LAYERED ARCHITECTURE INSIDE A CLIENT-SERVER SYSTEM: REACT CLIENT → EXPRESS MIDDLEWARE → ROUTES → SERVICES → REPOSITORIES → DATABASE. NO EXTERNAL SYSTEMS.</u></li>
   <li><b><u>DESIGN PATTERN:</u></b><u> CHAIN OF RESPONSIBILITY (GANG OF FOUR), IMPLEMENTED AS THE EXPRESS MIDDLEWARE CHAIN.</u></li>
   <li><b><u>DESIGN DECISIONS:</u></b><u> SERVICE AND REPOSITORY LAYERS; SQLITE NOW WITH A MYSQL-COMPATIBLE SCHEMA; MONEY STORED AS INTEGER CENTS; BCRYPT LOGIN BUILT AFTER THE CORE BUDGETING FLOW; SHARED REACT STATE IN THE TOP-LEVEL COMPONENT.</u></li>
+  <li><b><u>FRONTEND ARCHITECTURE (COMPONENT TREE AND STATE):</u></b><u> docs/architecture/frontend.md</u></li>
   <li><b><u>FULL TE4 DOCUMENT (ALL TE4 DIAGRAMS):</u></b><u> docs/te4/TE4-Design-and-Architectural-Patterns.pdf</u></li>
 </ul>
+
+<p><b><u>5.5 ACCESS CONTROL</u></b></p>
+<ul>
+  <li><b><u>DESIGN:</u></b><u> SIGN-UP AND SIGN-IN RETURN A JWT THAT EXPIRES AFTER ONE DAY. THE FRONTEND STORES IT IN LOCALSTORAGE SO A PAGE REFRESH STAYS LOGGED IN, AND api.js SENDS IT AS AN AUTHORIZATION: BEARER HEADER WITH EVERY CALL. THE AUTHENTICATE MIDDLEWARE VERIFIES IT BEFORE ANY DATA ROUTE RUNS AND TAKES THE USER ID FROM THE TOKEN, NEVER FROM THE REQUEST BODY.</u></li>
+  <li><b><u>FAILURES:</u></b><u> A MISSING, INVALID, OR EXPIRED TOKEN RETURNS 401, AND THE FRONTEND THEN CLEARS THE TOKEN AND SHOWS THE LOGIN PAGE. ANOTHER USER'S RECORD RETURNS 404, SO THE API DOES NOT REVEAL THAT IT EXISTS. A WRONG PASSWORD AND AN UNKNOWN EMAIL RETURN THE SAME MESSAGE.</u></li>
+  <li><b><u>SIGN-UP FLOW:</u></b></li>
+</ul>
+<p style="text-align:center;"><img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/docs/architecture/sequence-signup.png" alt="Sign-up sequence diagram" width="560"></p>
+<ul>
+  <li><b><u>SIGN-IN FLOW:</u></b></li>
+</ul>
+<p style="text-align:center;"><img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/docs/architecture/sequence-signin.png" alt="Sign-in sequence diagram" width="560"></p>
+<ul>
+  <li><b><u>PROTECTED API CALL (ADD A TRANSACTION):</u></b></li>
+</ul>
+<p style="text-align:center;"><img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/docs/architecture/sequence-protected-call.png" alt="Protected API call sequence diagram" width="560"></p>
 
 <p><b>6. <u>USER INTERFACE (UI)</u></b></p>
 <p><b><u>6.1 WIREFRAMES / MOCKUPS</u></b></p>
@@ -236,7 +265,7 @@
 </ul>
 <p style="text-align:center;"><img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/1e20abde-bbb9-4a96-9aa3-dc2be5458236.png" alt="Budget screen mockup" width="200">&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/814d4683-6976-4850-b0b1-7019d1e0e62c.png" alt="Profile screen mockup" width="200"></p>
 <ul>
-  <li><b><u>WORKING PROTOTYPE (JUAN F.):</u></b><u> LOGIN AND DASHBOARD SCREENS OF THE REACT APP. SINCE SPRINT 3 THE DASHBOARD SHOWS LIVE DATA FROM THE API, AND TRANSACTIONS AND CATEGORIES ARE ADDED AND EDITED THROUGH IT.</u></li>
+  <li><b><u>WORKING PROTOTYPE (JUAN F.):</u></b><u> LOGIN AND DASHBOARD SCREENS OF THE REACT APP. THE DASHBOARD SHOWS THE LOGGED-IN USER'S LIVE DATA FROM THE API, AND TRANSACTIONS AND CATEGORIES ARE ADDED AND EDITED THROUGH IT. THE INVESTING PAGES ARE A MOCKUP THAT DOES NOT SAVE DATA.</u></li>
 </ul>
 <p style="text-align:center;"><img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/docs/srd/ui-login.png" alt="Login screen" width="290">&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/shreev2703/finance-budget-tracker/main/docs/srd/ui-dashboard.png" alt="Dashboard screen" width="290"></p>
 
@@ -256,12 +285,12 @@
   <tr><td>US-01</td><td>Log a new expense with an amount, date, category, and description.</td><td>backend/src/routes/api.js:40; backend/src/services/transactionService.js:22; backend/src/domain/transaction.js:51 (validateTransaction); frontend/src/components/TransactionForm.jsx:12 (Add Transaction form)</td></tr>
   <tr><td>US-02</td><td>Record paychecks and income sources.</td><td>backend/src/domain/transaction.js:20 (typeError: INCOME / EXPENSE); backend/src/routes/api.js:18; frontend/src/components/TransactionForm.jsx:70 (income / expense toggle)</td></tr>
   <tr><td>US-03</td><td>Edit or delete a past transaction.</td><td>backend/src/routes/api.js:44 (PUT /transactions/:id), :48 (DELETE /transactions/:id); backend/src/services/transactionService.js:26 (update), :36 (remove); backend/src/repositories/transactionRepository.js:52, :65; frontend/src/components/TransactionList.jsx:12; frontend/src/components/TransactionRow.jsx:8 (Edit / Delete buttons); frontend/src/components/TransactionForm.jsx:12 (edit mode)</td></tr>
-  <tr><td>US-04</td><td>Dashboard with total income, total expenses, and remaining balance.</td><td>backend/src/routes/api.js:53; backend/src/services/budgetService.js:17; frontend/src/pages/Dashboard.jsx:10</td></tr>
+  <tr><td>US-04</td><td>Dashboard with total income, total expenses, and remaining balance.</td><td>backend/src/routes/api.js:53; backend/src/services/budgetService.js:17; frontend/src/pages/Dashboard.jsx:11</td></tr>
   <tr><td>US-05</td><td>Chart of spending by category.</td><td>backend/src/repositories/transactionRepository.js:32 (data query; chart planned)</td></tr>
   <tr><td>US-06</td><td>Filter transaction history by category and date range.</td><td>Planned (not yet implemented)</td></tr>
-  <tr><td>US-07</td><td>Create an account and log in with an email and password.</td><td>backend/src/db/schema.sql:5 (users table); login planned</td></tr>
-  <tr><td>US-08</td><td>Set a monthly spending limit for individual categories.</td><td>backend/src/routes/api.js:60 (POST /budgets), :65 (PUT /budgets/:id), :22 (POST /categories); backend/src/services/budgetService.js:48; backend/src/services/categoryService.js:24; backend/src/domain/budget.js:26 (limitError); frontend/src/pages/CreateCategory.jsx:4; frontend/src/components/EditCategory.jsx:3; frontend/src/components/CategoryForm.jsx:13</td></tr>
-  <tr><td>US-09</td><td>Visual warning when spending exceeds 80% of a category's limit.</td><td>backend/src/domain/budget.js:2 (WARNING_THRESHOLD = 0.8); backend/src/domain/budget.js:16 (budgetStatus); frontend/src/pages/Dashboard.jsx:113 ("Near limit" / "Over budget" card)</td></tr>
+  <tr><td>US-07</td><td>Create an account and log in with an email and password.</td><td>backend/src/routes/auth.js:7 (POST /auth/register), :11 (POST /auth/login); backend/src/services/authService.js:36 (register), :63 (login), :74 (userFromToken); backend/src/middleware/authenticate.js:4; backend/src/app.js:30 (protects every data route); backend/src/repositories/userRepository.js:1; backend/src/db/schema.sql:5 (users table); frontend/src/pages/Login.jsx:7; frontend/src/token.js:14 (setToken); frontend/src/api.js:25 (Bearer header), :34 (401 handling)</td></tr>
+  <tr><td>US-08</td><td>Set a monthly spending limit for individual categories.</td><td>backend/src/routes/api.js:60 (POST /budgets), :65 (PUT /budgets/:id), :22 (POST /categories); backend/src/services/budgetService.js:48; backend/src/services/categoryService.js:24; backend/src/domain/budget.js:26 (limitError); frontend/src/pages/CreateCategory.jsx:4; frontend/src/components/EditCategory.jsx:3; frontend/src/components/CategoryForm.jsx:13; frontend/src/pages/Dashboard.jsx:48 (categories with no limit yet)</td></tr>
+  <tr><td>US-09</td><td>Visual warning when spending exceeds 80% of a category's limit.</td><td>backend/src/domain/budget.js:2 (WARNING_THRESHOLD = 0.8); backend/src/domain/budget.js:16 (budgetStatus); frontend/src/pages/Dashboard.jsx:118 ("Near limit" / "Over budget" card)</td></tr>
 </table>
 
 <p><b>9. <u>APPENDICES</u></b></p>
@@ -269,7 +298,9 @@
   <li><b><u>TE3 DOCUMENT (UML CLASS DIAGRAM, TRACEABILITY, MOCKUPS):</u></b><u> docs/te3/TE3-UML-Class-Diagram.pdf</u></li>
   <li><b><u>TE4 DOCUMENT (ARCHITECTURE, HIGH-LEVEL DESIGN, DESIGN PATTERN, DECISIONS):</u></b><u> docs/te4/TE4-Design-and-Architectural-Patterns.pdf</u></li>
   <li><b><u>TE5 REFACTORING TICKETS:</u></b><u> GITHUB ISSUES #50–#55 (LABEL "refactor", MILESTONE TE5)</u></li>
-  <li><b><u>DIAGRAM SOURCES:</u></b><u> docs/diagram-sources/</u></li>
+  <li><b><u>TE6 ACCESS CONTROL:</u></b><u> SEQUENCE DIAGRAMS IN SECTION 5.5 AND ON THE README; SOURCES IN docs/architecture/</u></li>
+  <li><b><u>UNPLANNED WORK:</u></b><u> CHANGES OUTSIDE THE SPRINT PLAN THAT WERE NEEDED TO DEMO THE APP. SPRINT 4 (JUAN F.): BLANK-SCREEN FIX AND BROWSER DEMO DATA (#63, #64). SPRINT 5 (SHREEV B.): THE DEMO FIXES LISTED IN THE 11/06/2026 DOCUMENT HISTORY (#80).</u></li>
+  <li><b><u>DIAGRAM SOURCES:</u></b><u> docs/diagram-sources/, docs/architecture/</u></li>
   <li><b><u>HOW TO RUN THE APP AND API REFERENCE:</u></b><u> README.md</u></li>
 </ul>
 
@@ -278,6 +309,7 @@
   <li><b><u>MODEL(S) USED:</u></b><u> CLAUDE OPUS 5.5 (ANTHROPIC); GEMINI (GOOGLE)</u></li>
   <li><b><u>PROMPTS USED DURING CODING/DOCUMENTATION:</u></b><u> "POPULATE OUR CSC 3100 SRS TEMPLATE WITH OUR TEAM'S PRODUCT VISION STATEMENT AND 9 USER STORIES."</u></li>
   <li><b><u>TE3–TE4 (SHREEV B.):</u></b><u> CLAUDE (ANTHROPIC), USED THROUGH CLAUDE CODE, HELPED WRITE THE BACKEND AND ITS TESTS, GENERATE THE UML AND ARCHITECTURE DIAGRAMS, DRAFT THE TE3/TE4 DESIGN DOCUMENT, AND ORGANIZE THIS SRD UPDATE. THE TEAM REVIEWED, RAN, AND TESTED THE CODE AND CHECKED THE DOCUMENTS.</u></li>
+  <li><b><u>TE5–TE6 (SHREEV B.):</u></b><u> CLAUDE (ANTHROPIC), USED THROUGH CLAUDE CODE, HELPED WRITE THE REFACTORING, THE ACCESS CONTROL CODE AND ITS TESTS, THE SEQUENCE DIAGRAMS, AND UPDATES TO THIS DOCUMENT.</u></li>
 </ul>
 
 </body>
