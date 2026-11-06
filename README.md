@@ -1,5 +1,7 @@
 # LedgerLogic (finance-budget-tracker)
 
+[![CI](https://github.com/shreev2703/finance-budget-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/shreev2703/finance-budget-tracker/actions/workflows/ci.yml)
+
 A budget tracker for college students: log income and expenses, see your balance, and get warned before you blow a category budget.
 
 Project SRD: https://docs.google.com/document/d/1Lc2qm145vXdAHm76jv-lCK-DichXJx5tS8it1oxZaaQ/edit?usp=sharing
@@ -38,6 +40,8 @@ The first start creates `packages/backend/data/ledger.db` and seeds a demo stude
 
 In the frontend, call the API through `packages/frontend/src/api.js` (`api.login()`, `api.getSummary()`, `api.addTransaction()`, and so on). It adds the auth token to every call. Failed requests throw an `ApiError` with `status` and a `details` list of validation problems.
 
+To present the app, follow [DEMO.md](DEMO.md).
+
 ## Layout
 
 ```
@@ -63,11 +67,12 @@ Every route except `/api/health`, `/api/auth/register`, and `/api/auth/login` re
 | POST   | `/api/auth/register`                  | Create an account `{ name, email, password }`; returns `201 { token, user }` (400 invalid, 409 email taken) |
 | POST   | `/api/auth/login`                     | Log in `{ email, password }`; returns `200 { token, user }` (401 if wrong)                                  |
 | GET    | `/api/auth/me`                        | The logged-in user                                                                                          |
-| GET    | `/api/transactions?limit=50`          | Transactions, newest first                                                                                  |
+| GET    | `/api/transactions?categoryId=&from=&to=&limit=50` | Transactions, newest first; filters are optional (400 for a bad date or unknown category)                                                                                  |
 | POST   | `/api/transactions`                   | Create `{ amount, type, categoryId, date, note }` (`type` is `INCOME` or `EXPENSE`, `date` is `YYYY-MM-DD`) |
 | PUT    | `/api/transactions/:id`               | Edit a transaction; same body and rules as POST (404 if it isn't yours)                                     |
 | DELETE | `/api/transactions/:id`               | Delete a transaction (404 if it isn't yours)                                                                |
 | GET    | `/api/budgets/summary?period=YYYY-MM` | Monthly totals + per-category budget status (defaults to the current month)                                 |
+| GET    | `/api/reports/spending-by-category?period=YYYY-MM` | The month's spending per category, largest first (defaults to the current month) |
 | GET    | `/api/categories`                     | The user's income and expense categories, each with `budgetId` and `limitCents` for this month (or `null`)  |
 | POST   | `/api/budgets`                        | Set a monthly limit `{ categoryId, limit, period? }` for an expense category (409 if one already exists)    |
 | PUT    | `/api/budgets/:id`                    | Change a budget's limit `{ limit }`                                                                         |
@@ -75,6 +80,12 @@ Every route except `/api/health`, `/api/auth/register`, and `/api/auth/login` re
 ## Access control (TE6)
 
 Passwords are hashed with bcrypt and never returned. Sign-up and login return a JWT that lasts one day. The frontend keeps it in `localStorage` and sends it with every call. The backend's `authenticate` middleware checks it before any data route runs, and every query filters by the token's user.
+
+### Overview
+
+![Overview sequence diagram](docs/architecture/sequence-overview.png)
+
+Adapted from Juan S.'s [original draft](docs/architecture/sequence-overview-juan-s-draft.pdf), which showed a Microsoft sign-in. The app uses email and password, so this version matches what was built.
 
 ### Sign-up
 

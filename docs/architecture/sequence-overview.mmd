@@ -1,0 +1,33 @@
+sequenceDiagram
+    title Finance Budget Tracker: sign-in and adding a financial transaction
+    autonumber
+    actor User
+    participant FE as React frontend
+    participant BE as Backend API
+    participant DB as Database
+
+    rect rgb(240, 247, 243)
+    Note over User,DB: Authentication
+    User->>FE: Enter email and password, select Log In
+    FE->>BE: POST /api/auth/login { email, password }
+    BE->>DB: Find user by email
+    DB-->>BE: User with password hash
+    BE->>BE: Check password with bcrypt, sign a JWT
+    BE-->>FE: 200 { token, user }
+    FE->>FE: Store token in localStorage
+    end
+
+    rect rgb(245, 245, 240)
+    Note over User,DB: Create transaction
+    User->>FE: Submit income or expense form
+    FE->>BE: POST /api/transactions (Bearer token + form data)
+    BE->>BE: Verify token, validate data
+    BE->>DB: Save with the token's user id
+    DB-->>BE: Saved record
+    BE-->>FE: 201 saved transaction
+    FE->>BE: GET summary, transactions, categories, and spending report
+    BE-->>FE: 200 with this user's data
+    FE-->>User: Refresh dashboard and chart
+    end
+
+    Note over User,DB: Error paths: 401 for a wrong password or a missing, invalid, or expired token (the frontend returns to login). 400 with reasons for invalid data.
