@@ -148,6 +148,11 @@ test('every data route returns 401 without a token', async () => {
   }
 });
 
+test('API responses tell the browser not to cache them', async () => {
+  const res = await send('GET', '/transactions', undefined, await demoToken());
+  assert.equal(res.headers.get('cache-control'), 'no-store');
+});
+
 test('health stays public', async () => {
   assert.equal((await send('GET', '/health')).status, 200);
 });

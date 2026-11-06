@@ -75,7 +75,7 @@ export function Dashboard({ go }) {
           <>
         <div className="stat-grid">
           <article>
-            <small>Monthly budget</small>
+            <small>Monthly income</small>
             <h2>{money(totals.incomeCents)}</h2>
             <p>
               {money(totals.expenseCents)} spent <b>{money(totals.balanceCents)} left</b>

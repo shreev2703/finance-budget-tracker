@@ -24,6 +24,11 @@ export function createApp(db, { tokenSecret }) {
 
   const app = express();
   app.use(express.json());
+  // Financial data must not stay in the browser's cache after logging out.
+  app.use('/api', (req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+  });
   app.get('/api/health', (req, res) => res.json({ ok: true }));
   app.use('/api', authRouter({ authService }));
   // Everything mounted after this line requires a valid token.

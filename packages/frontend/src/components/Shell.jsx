@@ -23,15 +23,12 @@ function Side({ page, go }) {
           ⌁ <span>Investing</span>
         </button>
 
-        <button>
-          ◌ <span>Tutorial Help</span>
-        </button>
       </nav>
 
       <div className="portal">
         ●
         <span>
-          Mustang Portal
+          LedgerLogic
           <br />
           <small>Finance Workspace</small>
         </span>
@@ -52,7 +49,7 @@ function Top() {
 
   return (
     <header className="top">
-      <b>Learn by Doing.</b>
+      <b>LedgerLogic</b>
 
       <span>
         {user.name} <i>{initials(user.name)}</i>

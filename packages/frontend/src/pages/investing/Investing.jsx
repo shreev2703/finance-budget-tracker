@@ -10,12 +10,12 @@ import { Setup } from "./Setup.jsx";
 
 export function Investing({ go, step = 0, setStep }) {
   const screens = [
-    <Setup go={go} setStep={setStep} />,
-    <ChooseFund setStep={setStep} />,
-    <Amount setStep={setStep} />,
-    <Schedule setStep={setStep} />,
-    <Account setStep={setStep} />,
-    <Review setStep={setStep} go={go} />,
+    <Setup key="setup" go={go} setStep={setStep} />,
+    <ChooseFund key="fund" setStep={setStep} />,
+    <Amount key="amount" setStep={setStep} />,
+    <Schedule key="schedule" setStep={setStep} />,
+    <Account key="account" setStep={setStep} />,
+    <Review key="review" setStep={setStep} go={go} />,
   ];
 
   return (

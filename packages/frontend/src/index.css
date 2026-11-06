@@ -880,8 +880,8 @@ button {
     display: none;
   }
 
-  .side .mark b {
-    font-size: 9px;
+  .side .mark {
+    display: none;
   }
 
   .side nav {
@@ -913,7 +913,7 @@ button {
   }
 
   .category-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
   .table div {
@@ -1059,6 +1059,25 @@ button {
 }
 
 @media (max-width: 800px) {
+  .spending-chart li {
+    gap: 4px 12px;
+    grid-template-columns: 1fr auto;
+  }
+
+  .spending-chart i {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .filters > * {
+    flex: 1 1 140px;
+  }
+
+  .filters select,
+  .filters input {
+    width: 100%;
+  }
+
   .table div.editable {
     grid-template-columns: 22px 1fr auto;
     padding: 6px 0;
