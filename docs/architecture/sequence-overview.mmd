@@ -1,0 +1,47 @@
+sequenceDiagram
+    title LedgerLogic: sign-in and adding a transaction (traced from the running app)
+    actor User
+    participant FE as React frontend<br/>Login.jsx<br/>TransactionForm<br/>api.js, token.js
+    participant BE as Backend API<br/>authenticate<br/>routes<br/>services
+    participant DB as Database<br/>repositories<br/>SQLite
+
+    rect rgb(240, 247, 243)
+    Note over User,DB: Sign-in
+    User->>FE: 1. Enter email and password, select Log In
+    FE->>BE: 2. POST /api/auth/login { email, password }
+    BE->>DB: 3. Find user by email
+    DB-->>BE: 4. User with password hash
+    Note over BE: 5. bcrypt.compare,<br/>sign a one-day JWT
+    alt Wrong email or password
+        BE-->>FE: 401 { error }
+        FE-->>User: Show "Incorrect email or password."
+    else Correct
+        BE-->>FE: 6. 200 { token, user }
+        Note over FE: 7. Save token<br/>in localStorage
+    end
+    end
+
+    rect rgb(245, 245, 240)
+    Note over User,DB: Add a transaction
+    User->>FE: 8. Submit the income or expense form
+    FE->>BE: 9. POST /api/transactions<br/>Authorization: Bearer token
+    Note over BE: 10. Verify token,<br/>set req.userId
+    alt Missing, invalid, or expired token
+        BE-->>FE: 401 { error }
+        Note over FE: Clear token,<br/>show login page
+    else Valid token
+        BE->>DB: 11. Find the category for this user
+        DB-->>BE: 12. Category, or nothing
+        alt Invalid data or not this user's category
+            BE-->>FE: 400 { error, details }
+            FE-->>User: Show the reasons on the form
+        else Valid data
+            BE->>DB: 13. INSERT with user_id from the token
+            DB-->>BE: 14. Saved record
+            BE-->>FE: 15. 201 saved transaction
+            FE->>BE: 16. GET summary, transactions, categories,<br/>and spending report (each with the token)
+            BE-->>FE: 17. 200 with this user's data only
+            FE-->>User: 18. Totals, chart, bars, and list update
+        end
+    end
+    end

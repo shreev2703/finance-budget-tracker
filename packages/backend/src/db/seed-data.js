@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import { DEFAULT_CATEGORIES } from '../domain/category.js';
+import { currentPeriod } from '../domain/period.js';
 import { BCRYPT_ROUNDS } from '../domain/user.js';
 
 export const DEMO_USER_EMAIL = 'demo@ledgerlogic.app';
@@ -14,10 +15,6 @@ function dayThisMonth(day, now = new Date()) {
   const m = String(now.getMonth() + 1).padStart(2, '0');
   const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
   return `${y}-${m}-${String(Math.min(day, lastDay, now.getDate())).padStart(2, '0')}`;
-}
-
-export function currentPeriod(now = new Date()) {
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }
 
 /** This month's budgets and transactions for the demo user. Skips any category they removed. */

@@ -1,4 +1,5 @@
 import { useContext } from "react";
+import { PAGES } from "../pages/pages.js";
 import { UserContext } from "../UserContext.js";
 import { Mark } from "./Mark.jsx";
 
@@ -9,28 +10,25 @@ function Side({ page, go }) {
 
       <nav>
         <button
-          onClick={() => go("dashboard")}
-          className={page === "dashboard" ? "selected" : ""}
+          onClick={() => go(PAGES.DASHBOARD)}
+          className={page === PAGES.DASHBOARD ? "selected" : ""}
         >
           ⌂ <span>Home</span>
         </button>
 
         <button
-          onClick={() => go("investing")}
-          className={page === "investing" || page === "funds" ? "selected" : ""}
+          onClick={() => go(PAGES.INVESTING)}
+          className={page === PAGES.INVESTING || page === PAGES.FUNDS ? "selected" : ""}
         >
           ⌁ <span>Investing</span>
         </button>
 
-        <button>
-          ◌ <span>Tutorial Help</span>
-        </button>
       </nav>
 
       <div className="portal">
         ●
         <span>
-          Mustang Portal
+          LedgerLogic
           <br />
           <small>Finance Workspace</small>
         </span>
@@ -51,7 +49,7 @@ function Top() {
 
   return (
     <header className="top">
-      <b>Learn by Doing.</b>
+      <b>LedgerLogic</b>
 
       <span>
         {user.name} <i>{initials(user.name)}</i>

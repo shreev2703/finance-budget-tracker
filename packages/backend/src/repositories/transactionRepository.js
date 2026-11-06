@@ -1,18 +1,20 @@
+const SELECT_TRANSACTION = `
+    SELECT t.id, t.type, t.amount_cents AS amountCents, t.date, t.note,
+           c.id AS categoryId, c.name AS categoryName
+      FROM transactions t
+      JOIN categories c ON c.id = t.category_id`;
+
 /** Repository pattern: all SQL for transactions lives here. */
 export function createTransactionRepository(db) {
-  const list = db.prepare(`
-    SELECT t.id, t.type, t.amount_cents AS amountCents, t.date, t.note,
-           c.id AS categoryId, c.name AS categoryName
-      FROM transactions t
-      JOIN categories c ON c.id = t.category_id
-     WHERE t.user_id = ?
+  // A filter set to NULL matches every row.
+  const list = db.prepare(`${SELECT_TRANSACTION}
+     WHERE t.user_id = :userId
+       AND (:categoryId IS NULL OR t.category_id = :categoryId)
+       AND (:from IS NULL OR t.date >= :from)
+       AND (:to IS NULL OR t.date <= :to)
      ORDER BY t.date DESC, t.id DESC
-     LIMIT ?`);
-  const findById = db.prepare(`
-    SELECT t.id, t.type, t.amount_cents AS amountCents, t.date, t.note,
-           c.id AS categoryId, c.name AS categoryName
-      FROM transactions t
-      JOIN categories c ON c.id = t.category_id
+     LIMIT :limit`);
+  const findById = db.prepare(`${SELECT_TRANSACTION}
      WHERE t.id = ?`);
   const insert = db.prepare(`
     INSERT INTO transactions (user_id, category_id, type, amount_cents, date, note)
@@ -34,9 +36,24 @@ export function createTransactionRepository(db) {
       FROM transactions
      WHERE user_id = ? AND type = 'EXPENSE' AND substr(date, 1, 7) = ?
      GROUP BY category_id`);
+  const spendingByCategory = db.prepare(`
+    SELECT c.id AS categoryId, c.name AS categoryName,
+           SUM(t.amount_cents) AS spentCents
+      FROM transactions t
+      JOIN categories c ON c.id = t.category_id
+     WHERE t.user_id = ? AND t.type = 'EXPENSE' AND substr(t.date, 1, 7) = ?
+     GROUP BY c.id
+     ORDER BY spentCents DESC, c.name`);
 
   return {
-    listForUser: (userId, limit = 50) => list.all(userId, limit),
+    listForUser: (userId, limit, { categoryId, from, to } = {}) =>
+      list.all({
+        userId,
+        limit,
+        categoryId: categoryId ?? null,
+        from: from ?? null,
+        to: to ?? null,
+      }),
     create({ userId, categoryId, type, amountCents, date, note }) {
       const { lastInsertRowid } = insert.run(
         userId,
@@ -65,5 +82,7 @@ export function createTransactionRepository(db) {
     remove: (id, userId) => remove.run(id, userId).changes > 0,
     totalsForPeriod: (userId, period) => totalsForPeriod.all(userId, period),
     spentByCategory: (userId, period) => spentByCategory.all(userId, period),
+    spendingByCategory: (userId, period) =>
+      spendingByCategory.all(userId, period),
   };
 }

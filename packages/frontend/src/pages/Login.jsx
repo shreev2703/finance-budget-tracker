@@ -41,7 +41,7 @@ export function Login({ onLogin }) {
         <div className="rays" />
 
         <div className="login-message">
-          <h1>Learn by Doing.</h1>
+          <h1>Know where your money goes.</h1>
           <p>
             Track your income and spending, set monthly budgets, and get warned
             before you go over.

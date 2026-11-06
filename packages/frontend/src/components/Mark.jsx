@@ -1,8 +1,8 @@
 export function Mark() {
   return (
     <div className="mark">
-      <b>CAL POLY</b>
-      <span>SAN LUIS OBISPO</span>
+      <b>LEDGERLOGIC</b>
+      <span>STUDENT BUDGET TRACKER</span>
       <i />
     </div>
   );

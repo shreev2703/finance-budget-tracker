@@ -3,16 +3,19 @@ import { api, centsToDollars } from "../api";
 import { Button } from "../components/Button.jsx";
 import { EditCategory } from "../components/EditCategory.jsx";
 import { Shell } from "../components/Shell.jsx";
+import { SpendingChart } from "../components/SpendingChart.jsx";
 import { TransactionForm } from "../components/TransactionForm.jsx";
 import { TransactionList } from "../components/TransactionList.jsx";
 import { formatPeriod, money } from "../format.js";
 import { UserContext } from "../UserContext.js";
+import { PAGES } from "./pages.js";
 
 export function Dashboard({ go }) {
   const { user } = useContext(UserContext);
   const [summary, setSummary] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [spending, setSpending] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
@@ -25,12 +28,18 @@ export function Dashboard({ go }) {
   useEffect(() => {
     let active = true;
 
-    Promise.all([api.getSummary(), api.getTransactions(4), api.getCategories()])
-      .then(([nextSummary, nextTransactions, nextCategories]) => {
+    Promise.all([
+      api.getSummary(),
+      api.getTransactions(4),
+      api.getCategories(),
+      api.getSpendingByCategory(),
+    ])
+      .then(([nextSummary, nextTransactions, nextCategories, nextSpending]) => {
         if (!active) return;
         setSummary(nextSummary);
         setTransactions(nextTransactions);
         setCategories(nextCategories);
+        setSpending(nextSpending);
       })
       .catch(() => {
         if (active) setError("We could not load your budget data. Please try again.");
@@ -50,7 +59,7 @@ export function Dashboard({ go }) {
   );
 
   return (
-    <Shell page="dashboard" go={go}>
+    <Shell page={PAGES.DASHBOARD} go={go}>
       <div className="dashboard">
         <div className="title">
           <p>Overview{summary ? ` · ${formatPeriod(summary.period)}` : ""}</p>
@@ -66,13 +75,22 @@ export function Dashboard({ go }) {
           <>
         <div className="stat-grid">
           <article>
-            <small>Monthly budget</small>
+            <small>Monthly income</small>
             <h2>{money(totals.incomeCents)}</h2>
             <p>
               {money(totals.expenseCents)} spent <b>{money(totals.balanceCents)} left</b>
             </p>
           </article>
         </div>
+
+        <div className="section-row">
+          <div>
+            <h2>Spending by Category</h2>
+            <p>Where your {money(spending.totalCents)} went this month.</p>
+          </div>
+        </div>
+
+        <SpendingChart spending={spending} />
 
         <div className="section-row">
           <div>
@@ -88,7 +106,7 @@ export function Dashboard({ go }) {
               + Add transaction
             </Button>
 
-            <Button className="small" onClick={() => go("category")}>
+            <Button className="small" onClick={() => go(PAGES.CATEGORY)}>
               + Create category
             </Button>
           </div>
@@ -231,7 +249,7 @@ export function Dashboard({ go }) {
 
   <Button
     className="small outline"
-    onClick={() => go("transactions")}
+    onClick={() => go(PAGES.TRANSACTIONS)}
   >
     View all transactions
   </Button>

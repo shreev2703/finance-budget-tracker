@@ -7,30 +7,24 @@ import { Funds } from "./pages/Funds.jsx";
 import { Login } from "./pages/Login.jsx";
 import { Transactions } from "./pages/Transactions.jsx";
 import { Investing } from "./pages/investing/Investing.jsx";
+import { PAGES } from "./pages/pages.js";
 import { clearToken, getToken } from "./token.js";
 import { UserContext } from "./UserContext.js";
 
+const PAGE_COMPONENTS = {
+  [PAGES.DASHBOARD]: Dashboard,
+  [PAGES.TRANSACTIONS]: Transactions,
+  [PAGES.CATEGORY]: CreateCategory,
+  [PAGES.INVESTING]: Investing,
+  [PAGES.FUNDS]: Funds,
+};
+
 function Pages() {
-  const [page, go] = useState("dashboard");
+  const [page, go] = useState(PAGES.DASHBOARD);
   const [step, setStep] = useState(0);
+  const Page = PAGE_COMPONENTS[page];
 
-  if (page === "investing") {
-    return <Investing go={go} step={step} setStep={setStep} />;
-  }
-
-  if (page === "funds") {
-    return <Funds go={go} />;
-  }
-
-  if (page === "transactions") {
-    return <Transactions go={go} />;
-  }
-
-  if (page === "category") {
-    return <CreateCategory go={go} />;
-  }
-
-  return <Dashboard go={go} />;
+  return <Page go={go} step={step} setStep={setStep} />;
 }
 
 export default function App() {

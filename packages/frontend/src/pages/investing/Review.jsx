@@ -1,6 +1,7 @@
 import { firstTransferLabel } from "../../format.js";
 import { Button } from "../../components/Button.jsx";
 import { Modal } from "../../components/Modal.jsx";
+import { PAGES } from "../pages.js";
 
 export function Review({ setStep, go }) {
   return (
@@ -50,7 +51,7 @@ export function Review({ setStep, go }) {
           Back to edit
         </Button>
 
-        <Button onClick={() => go("funds")}>Authorize $50 monthly</Button>
+        <Button onClick={() => go(PAGES.FUNDS)}>Authorize $50 monthly</Button>
       </div>
     </Modal>
   );
