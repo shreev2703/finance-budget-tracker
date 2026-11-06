@@ -79,13 +79,13 @@ Every route except `/api/health`, `/api/auth/register`, and `/api/auth/login` re
 
 ## Access control (TE6)
 
-Passwords are hashed with bcrypt and never returned. Sign-up and login return a JWT that lasts one day. The frontend keeps it in `localStorage` and sends it with every call. The backend's `authenticate` middleware checks it before any data route runs, and every query filters by the token's user.
+Passwords are hashed with bcrypt and never returned. Sign-up and login return a JWT that lasts one day. The frontend keeps it in `localStorage` and sends it with every call. The backend's `authenticate` middleware checks it before any data route runs, and every query filters by the token's user. API responses are sent with `Cache-Control: no-store`, so financial data doesn't stay in the browser's cache.
 
 ### Overview
 
 ![Overview sequence diagram](docs/architecture/sequence-overview.png)
 
-Adapted from Juan S.'s [original draft](docs/architecture/sequence-overview-juan-s-draft.pdf), which showed a Microsoft sign-in. The app uses email and password, so this version matches what was built.
+Drawn from the requests the running app actually makes. It replaces Juan S.'s [first draft](docs/architecture/sequence-overview-juan-s-draft.pdf), which showed a Microsoft sign-in the app doesn't have.
 
 ### Sign-up
 

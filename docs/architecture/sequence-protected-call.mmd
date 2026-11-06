@@ -30,9 +30,9 @@ sequenceDiagram
             BE->>DB: INSERT transaction with user_id = req.userId
             DB-->>BE: New transaction
             BE-->>FE: 201 { transaction }
-            FE->>AU: GET /api/budgets/summary and /api/transactions<br/>Authorization: Bearer token
+            FE->>AU: GET /api/budgets/summary, /api/transactions, /api/categories,<br/>and /api/reports/spending-by-category, each with Authorization: Bearer token
             Note over FE,DB: Each request goes through the same token check,<br/>and every query filters by user_id
             AU-->>FE: 200 with this user's data only
-            FE-->>User: Totals, budget bars, and the list update
+            FE-->>User: Totals, chart, budget bars, and the list update
         end
     end
