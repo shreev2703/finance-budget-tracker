@@ -1,3 +1,4 @@
+import { firstTransferLabel } from "../../format.js";
 import { Button } from "../../components/Button.jsx";
 import { Modal } from "../../components/Modal.jsx";
 
@@ -42,7 +43,7 @@ export function Schedule({ setStep }) {
       </button>
 
       <div className="notice">
-        ◉ &nbsp; Your first transfer will be scheduled for Nov 5, 2025.
+        ◉ &nbsp; Your first transfer will be scheduled for {firstTransferLabel()}.
       </div>
 
       <div className="modal-actions">

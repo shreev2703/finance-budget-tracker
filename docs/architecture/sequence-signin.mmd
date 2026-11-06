@@ -1,0 +1,25 @@
+sequenceDiagram
+    title Sign-in: POST /api/auth/login
+    actor User
+    participant FE as Frontend<br/>Login.jsx<br/>api.js
+    participant LS as Browser<br/>localStorage
+    participant BE as Backend<br/>routes/auth.js<br/>authService
+    participant DB as Database<br/>userRepository<br/>SQLite
+
+    User->>FE: Enter email and password, click Log In
+    FE->>BE: POST /api/auth/login { email, password }
+    BE->>DB: Find user by email
+    DB-->>BE: User with password_hash, or nothing
+    BE->>BE: bcrypt.compare(password, stored hash)<br/>(uses a dummy hash if the email is unknown)
+
+    alt Unknown email or wrong password
+        BE-->>FE: 401 { error: "Incorrect email or password." }
+        FE-->>User: Show the error (same message for both)
+    else Password matches
+        BE->>BE: jwt.sign({ sub: userId }, TOKEN_SECRET, 1 day)
+        BE-->>FE: 200 { token, user }
+        FE->>LS: Save token
+        FE-->>User: Show the dashboard
+    end
+
+    Note over User,LS: On a page refresh, App.jsx reads the saved token and calls GET /api/auth/me.<br/>A 200 skips the login page. A 401 clears the token and shows the login page.

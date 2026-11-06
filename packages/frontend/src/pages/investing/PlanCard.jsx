@@ -1,3 +1,5 @@
+import { firstTransferLabel } from "../../format.js";
+
 export function PlanCard() {
   return (
     <aside className="plan-card">
@@ -13,7 +15,7 @@ export function PlanCard() {
 
       <hr />
 
-      <p>Start Nov 5, 2025. Changes, pause, or cancel anytime.</p>
+      <p>Start {firstTransferLabel()}. Changes, pause, or cancel anytime.</p>
     </aside>
   );
 }

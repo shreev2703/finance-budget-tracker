@@ -1,3 +1,4 @@
+import { todayLabel } from "../../format.js";
 import { Shell } from "../../components/Shell.jsx";
 import { Account } from "./Account.jsx";
 import { Amount } from "./Amount.jsx";
@@ -20,7 +21,7 @@ export function Investing({ go, step = 0, setStep }) {
     <Shell page="investing" go={go}>
       <div className="investing">
         <div className="title">
-          <p>Investing · Oct 14, 2025</p>
+          <p>Investing · {todayLabel()}</p>
           <h1>Automatic investing</h1>
           <span>
             Build wealth gradually with a simple, recurring plan.

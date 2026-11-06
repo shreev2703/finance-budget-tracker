@@ -2,24 +2,45 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { openDatabase } from '../src/db/connection.js';
 import { createApp } from '../src/app.js';
-import { currentPeriod } from '../src/db/seed-data.js';
+import {
+  DEMO_USER_EMAIL,
+  DEMO_USER_PASSWORD,
+  currentPeriod,
+} from '../src/db/seed-data.js';
 
 let server;
 let base;
+let token;
 
 before(async () => {
-  const app = createApp(openDatabase(':memory:'));
+  const app = createApp(openDatabase(':memory:'), {
+    tokenSecret: 'test-secret',
+  });
   await new Promise((resolve) => {
     server = app.listen(0, resolve);
   });
   base = `http://localhost:${server.address().port}/api`;
+  const res = await fetch(`${base}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: DEMO_USER_EMAIL,
+      password: DEMO_USER_PASSWORD,
+    }),
+  });
+  ({ token } = await res.json());
 });
 
 after(() => server.close());
 
-const getJson = async (path) => (await fetch(base + path)).json();
-const post = (path, body) =>
+const authed = (path, { headers, ...init } = {}) =>
   fetch(base + path, {
+    ...init,
+    headers: { ...headers, Authorization: `Bearer ${token}` },
+  });
+const getJson = async (path) => (await authed(path)).json();
+const post = (path, body) =>
+  authed(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -93,12 +114,12 @@ test('POST /transactions rejects a category of the wrong type', async () => {
 });
 
 test('GET /budgets/summary rejects a malformed period', async () => {
-  const res = await fetch(`${base}/budgets/summary?period=october`);
+  const res = await authed('/budgets/summary?period=october');
   assert.equal(res.status, 400);
 });
 
 const put = (path, body) =>
-  fetch(base + path, {
+  authed(path, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -172,7 +193,7 @@ test('PUT /budgets/:id returns 404 for an unknown budget and 400 for a bad limit
   );
 });
 
-const del = (path) => fetch(base + path, { method: 'DELETE' });
+const del = (path) => authed(path, { method: 'DELETE' });
 
 test('POST /categories creates an expense category (and rejects duplicates)', async () => {
   const res = await post('/categories', { name: '  Coffee  ' });

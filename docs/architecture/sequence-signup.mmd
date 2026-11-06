@@ -1,0 +1,30 @@
+sequenceDiagram
+    title Sign-up: POST /api/auth/register
+    actor User
+    participant FE as Frontend<br/>Login.jsx<br/>api.js
+    participant LS as Browser<br/>localStorage
+    participant BE as Backend<br/>routes/auth.js<br/>authService
+    participant DB as Database<br/>userRepository<br/>SQLite
+
+    User->>FE: Enter name, email, password, click Sign Up
+    FE->>BE: POST /api/auth/register { name, email, password }
+
+    alt Invalid name, email, or password
+        BE-->>FE: 400 { error, details: [reasons] }
+        FE-->>User: Show the reasons on the form
+    else Valid input
+        BE->>DB: Find user by email
+        DB-->>BE: Result
+        alt Email already registered
+            BE-->>FE: 409 { error }
+            FE-->>User: Show "That email is already registered."
+        else Email is free
+            BE->>BE: bcrypt.hash(password, 10 rounds)
+            BE->>DB: INSERT user (email, password_hash, name)<br/>and starting categories, in one transaction
+            DB-->>BE: New user (no hash)
+            BE->>BE: jwt.sign({ sub: userId }, TOKEN_SECRET, 1 day)
+            BE-->>FE: 201 { token, user }
+            FE->>LS: Save token
+            FE-->>User: Show the dashboard (already logged in)
+        end
+    end

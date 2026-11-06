@@ -128,7 +128,7 @@ button {
   place-items: center;
 }
 
-.login-form > div {
+.login-form > form {
   width: min(100%, 630px);
 }
 
@@ -215,8 +215,14 @@ button {
   text-align: center;
 }
 
-.account b {
+.account button {
+  padding: 0;
+  border: 0;
   color: #bd8501;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
   text-decoration: underline;
 }
 
@@ -290,6 +296,17 @@ button {
 
 .top span {
   font-size: 10px;
+}
+
+.top .log-out {
+  margin-left: 12px;
+  border: 0;
+  color: #18754b;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 .top i {
@@ -938,6 +955,18 @@ button {
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   margin-bottom: 14px;
+}
+
+.no-limit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.no-limit small {
+  color: #7a827d;
 }
 
 .form-error {
