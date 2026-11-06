@@ -2,7 +2,12 @@ import { DatabaseSync } from 'node:sqlite';
 import { readFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DEMO_USER_EMAIL, hashDemoPassword, seed } from './seed-data.js';
+import {
+  DEMO_USER_EMAIL,
+  hashDemoPassword,
+  refreshDemoMonth,
+  seed,
+} from './seed-data.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_PATH = join(here, '..', '..', 'data', 'ledger.db');
@@ -30,5 +35,6 @@ export function openDatabase(path = process.env.DB_PATH ?? DEFAULT_PATH) {
       DEMO_USER_EMAIL,
     );
   }
+  refreshDemoMonth(db);
   return db;
 }

@@ -7,6 +7,7 @@ import {
   DEMO_USER_EMAIL,
   DEMO_USER_PASSWORD,
   currentPeriod,
+  refreshDemoMonth,
 } from '../src/db/seed-data.js';
 
 const SECRET = 'test-secret';
@@ -231,4 +232,24 @@ test('a user cannot see or change another user’s data', async () => {
     await send('GET', '/transactions', undefined, demo)
   ).json();
   assert.deepEqual(after[0], demoTx);
+});
+
+test('the demo account gets fresh data when a new month starts', () => {
+  const fresh = openDatabase(':memory:');
+  const count = () =>
+    fresh
+      .prepare(
+        'SELECT (SELECT COUNT(*) FROM budgets) + (SELECT COUNT(*) FROM transactions) AS n',
+      )
+      .get().n;
+  const seeded = count();
+  refreshDemoMonth(fresh);
+  assert.equal(count(), seeded); // this month already has data, so nothing is added
+
+  fresh.exec(
+    "UPDATE budgets SET period = '2020-01'; UPDATE transactions SET date = '2020-01-15'",
+  );
+  refreshDemoMonth(fresh);
+  assert.equal(count(), seeded * 2);
+  fresh.close();
 });
