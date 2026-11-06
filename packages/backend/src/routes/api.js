@@ -13,7 +13,7 @@ export function apiRouter({
 }) {
   const router = Router();
 
-  router.get('/health', (req, res) => res.json({ ok: true }));
+  router.get('/auth/me', (req, res) => res.json(req.user));
 
   router.get('/categories', (req, res) => {
     res.json(categories.listForUser(req.userId, currentPeriod()));

@@ -2,7 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { readFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { seed } from './seed-data.js';
+import { DEMO_USER_EMAIL, hashDemoPassword, seed } from './seed-data.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_PATH = join(here, '..', '..', 'data', 'ledger.db');
@@ -19,5 +19,16 @@ export function openDatabase(path = process.env.DB_PATH ?? DEFAULT_PATH) {
 
   const { count } = db.prepare('SELECT COUNT(*) AS count FROM users').get();
   if (count === 0) seed(db);
+
+  // Databases seeded before TE6 hold a scrypt hash that bcrypt can't check.
+  const demo = db
+    .prepare('SELECT password_hash AS hash FROM users WHERE email = ?')
+    .get(DEMO_USER_EMAIL);
+  if (demo?.hash.startsWith('scrypt:')) {
+    db.prepare('UPDATE users SET password_hash = ? WHERE email = ?').run(
+      hashDemoPassword(),
+      DEMO_USER_EMAIL,
+    );
+  }
   return db;
 }

@@ -1,11 +1,12 @@
-import { scryptSync, randomBytes } from 'node:crypto';
+import bcrypt from 'bcrypt';
+import { DEFAULT_CATEGORIES } from '../domain/category.js';
+import { BCRYPT_ROUNDS } from '../domain/user.js';
 
 export const DEMO_USER_EMAIL = 'demo@ledgerlogic.app';
+export const DEMO_USER_PASSWORD = 'demo-password';
 
-function hashPassword(password) {
-  const salt = randomBytes(16).toString('hex');
-  return `scrypt:${salt}:${scryptSync(password, salt, 32).toString('hex')}`;
-}
+export const hashDemoPassword = () =>
+  bcrypt.hashSync(DEMO_USER_PASSWORD, BCRYPT_ROUNDS);
 
 /** YYYY-MM-DD for a day in the current month, so the demo always has fresh data. */
 function dayThisMonth(day, now = new Date()) {
@@ -26,24 +27,15 @@ export function seed(db) {
       .prepare(
         'INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)',
       )
-      .run(DEMO_USER_EMAIL, hashPassword('demo-password'), 'Demo Student')
+      .run(DEMO_USER_EMAIL, hashDemoPassword(), 'Demo Student')
       .lastInsertRowid,
   );
 
-  const categories = [
-    ['Part-time Job', 'INCOME'],
-    ['Allowance', 'INCOME'],
-    ['Groceries', 'EXPENSE'],
-    ['Dining Out', 'EXPENSE'],
-    ['Transportation', 'EXPENSE'],
-    ['Entertainment', 'EXPENSE'],
-    ['Textbooks & Supplies', 'EXPENSE'],
-  ];
   const insertCategory = db.prepare(
     'INSERT INTO categories (user_id, name, type) VALUES (?, ?, ?)',
   );
   const cat = {};
-  for (const [name, type] of categories) {
+  for (const [name, type] of DEFAULT_CATEGORIES) {
     cat[name] = Number(insertCategory.run(userId, name, type).lastInsertRowid);
   }
 
