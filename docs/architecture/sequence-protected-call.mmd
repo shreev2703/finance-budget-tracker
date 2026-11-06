@@ -1,0 +1,38 @@
+sequenceDiagram
+    title Protected call: add a transaction (POST /api/transactions)
+    actor User
+    participant FE as Frontend<br/>TransactionForm<br/>api.js
+    participant LS as Browser<br/>localStorage
+    participant AU as Backend<br/>authenticate<br/>middleware
+    participant BE as Backend<br/>routes<br/>TransactionService
+    participant DB as Database<br/>repositories<br/>SQLite
+
+    User->>FE: Fill in the form, click Add expense
+    FE->>LS: Read token
+    LS-->>FE: token
+    FE->>AU: POST /api/transactions { amount, type, categoryId, date, note }<br/>Authorization: Bearer token
+    AU->>AU: jwt.verify(token, TOKEN_SECRET)
+    AU->>DB: Find the token's user
+    DB-->>AU: User, or nothing
+
+    alt Missing, invalid, or expired token, or user no longer exists
+        AU-->>FE: 401 { error }
+        FE->>LS: Clear token
+        FE-->>User: Return to the login page
+    else Valid token
+        AU->>BE: Continue with req.userId from the token
+        BE->>DB: Find the category for this user only
+        DB-->>BE: Category, or nothing
+        alt Invalid data, or the category isn't this user's
+            BE-->>FE: 400 { error, details: [reasons] }
+            FE-->>User: Show the reasons on the form
+        else Valid data
+            BE->>DB: INSERT transaction with user_id = req.userId
+            DB-->>BE: New transaction
+            BE-->>FE: 201 { transaction }
+            FE->>AU: GET /api/budgets/summary and /api/transactions<br/>Authorization: Bearer token
+            Note over FE,DB: Each request goes through the same token check,<br/>and every query filters by user_id
+            AU-->>FE: 200 with this user's data only
+            FE-->>User: Totals, budget bars, and the list update
+        end
+    end

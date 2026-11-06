@@ -37,13 +37,13 @@ createApp(db)
 ├── TransactionRepository(db) ─┐
 ├── CategoryRepository(db) ────┼─> TransactionService ─┐
 ├── BudgetRepository(db) ──────┴─> BudgetService ──────┴─> apiRouter
-└── middleware: json → demoUser → apiRouter → notFound → errorHandler
+└── middleware: json → authRouter → authenticate → apiRouter → notFound → errorHandler
 ```
 
 ## Request walk-through: add an expense
 
 1. The form sends `POST /api/transactions` with `{ amount, type, categoryId, date, note }`.
-2. `express.json()` parses the body; `demoUser` sets `req.userId`.
+2. `express.json()` parses the body; `authenticate` checks the `Authorization: Bearer` token and sets `req.userId` (or returns 401).
 3. `routes/api.js` calls `transactionService.create(req.userId, req.body)`.
 4. The service validates every field, checks that the category belongs to the user and matches the type, and converts dollars to cents.
    - If anything is invalid, it throws `HttpError(400, …, details)` and `errorHandler` returns the list of problems.

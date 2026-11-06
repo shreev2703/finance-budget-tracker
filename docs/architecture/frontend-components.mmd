@@ -1,0 +1,34 @@
+flowchart TD
+    App["App.jsx<br/><i>state: user, checkingToken</i>"]
+    App -->|not logged in| Login["pages/Login.jsx<br/><i>state: form fields, errors</i>"]
+    App -->|logged in| Ctx["UserContext<br/><i>user, logOut</i>"]
+    Ctx --> Pages["Pages<br/><i>state: page, step</i>"]
+
+    Pages --> Dashboard["pages/Dashboard.jsx<br/><i>state: summary, transactions, categories</i>"]
+    Pages --> Transactions["pages/Transactions.jsx<br/><i>state: transactions, categories</i>"]
+    Pages --> CreateCategory["pages/CreateCategory.jsx"]
+    Pages --> Investing["pages/investing/Investing.jsx<br/><i>mockup, no API</i>"]
+    Pages --> Funds["pages/Funds.jsx<br/><i>mockup, no API</i>"]
+
+    Dashboard --> Shell["components/Shell.jsx<br/><i>sidebar, user name, Log Out</i>"]
+    Transactions --> Shell
+    Investing --> Shell
+    Funds --> Shell
+
+    Dashboard --> EditCategory["components/EditCategory.jsx"]
+    Dashboard --> TransactionForm["components/TransactionForm.jsx<br/><i>add and edit</i>"]
+    Dashboard --> TransactionList["components/TransactionList.jsx"]
+    Transactions --> TransactionList
+    TransactionList --> TransactionRow["components/TransactionRow.jsx"]
+    TransactionList --> TransactionForm
+    EditCategory --> CategoryForm["components/CategoryForm.jsx"]
+    CreateCategory --> CategoryForm
+
+    Login -.->|login, register| Api
+    Dashboard -.-> Api["api.js<br/><i>adds the Bearer token,<br/>handles 401</i>"]
+    Transactions -.-> Api
+    CreateCategory -.-> Api
+    TransactionForm -.-> Api
+    TransactionList -.-> Api
+    Api -.-> Token["token.js<br/><i>localStorage</i>"]
+    Api -.->|"/api, or demoApi.js with VITE_DEMO=1"| Backend[("Express API")]

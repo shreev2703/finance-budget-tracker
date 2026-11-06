@@ -25,19 +25,20 @@ transactions.totalsForPeriod(userId, period); // no SQL here
 
 ## 3. Chain of responsibility (Express middleware)
 
-**Where:** `app.js:18-32`, `middleware/demoUser.js:7`, `middleware/errorHandler.js:9` and `:15`.
+**Where:** `app.js:25-48`, `middleware/authenticate.js:4`, `middleware/errorHandler.js:9` and `:15`.
 
-**How:** every request passes along a chain: `express.json()` → `demoUser` → `apiRouter` → `notFound` → `errorHandler`. Each handler either deals with the request or calls `next()` to pass it on. Errors skip ahead to `errorHandler`, which Express recognizes by its four-argument signature.
+**How:** every request passes along a chain: `express.json()` → `authRouter` → `authenticate` → `apiRouter` → `notFound` → `errorHandler`. Each handler either deals with the request or calls `next()` to pass it on. Errors skip ahead to `errorHandler`, which Express recognizes by its four-argument signature.
 
 ```js
 app.use(express.json());
-app.use('/api', demoUser(db));   // sets req.userId, then next()
+app.use('/api', authRouter(...));         // public: sign-up and login
+app.use('/api', authenticate(authService)); // checks the token, sets req.userId, then next()
 app.use('/api', apiRouter(...));
 app.use(notFound);               // nothing matched
 app.use(errorHandler);           // HttpError → 4xx JSON, anything else → 500
 ```
 
-**Why:** cross-cutting concerns such as identifying the user and formatting errors live in one place. When real login (US-07) arrives, `demoUser` is replaced by an auth middleware and no route changes.
+**Why:** cross-cutting concerns such as identifying the user and formatting errors live in one place. When real login (US-07) arrived in TE6, the demo-user middleware was swapped for `authenticate` and no data route changed.
 
 ## 4. Dependency injection / factory functions
 
