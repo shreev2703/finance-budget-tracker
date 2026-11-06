@@ -6,9 +6,9 @@ import { createApp } from '../src/app.js';
 import {
   DEMO_USER_EMAIL,
   DEMO_USER_PASSWORD,
-  currentPeriod,
   refreshDemoMonth,
 } from '../src/db/seed-data.js';
+import { currentPeriod } from '../src/domain/period.js';
 
 const SECRET = 'test-secret';
 let db;
@@ -232,6 +232,31 @@ test('a user cannot see or change another user’s data', async () => {
     await send('GET', '/transactions', undefined, demo)
   ).json();
   assert.deepEqual(after[0], demoTx);
+});
+
+test('reports and filters only include the logged-in user', async () => {
+  const demo = await demoToken();
+  const other = (await (await register('reports@student.edu')).json()).token;
+  const demoCategories = await (
+    await send('GET', '/categories', undefined, demo)
+  ).json();
+
+  const report = await (
+    await send('GET', '/reports/spending-by-category', undefined, other)
+  ).json();
+  assert.equal(report.totalCents, 0);
+  assert.deepEqual(report.categories, []);
+
+  const res = await send(
+    'GET',
+    `/transactions?categoryId=${demoCategories[0].id}`,
+    undefined,
+    other,
+  );
+  assert.equal(res.status, 400);
+
+  const anonymous = await send('GET', '/reports/spending-by-category');
+  assert.equal(anonymous.status, 401);
 });
 
 test('the demo account gets fresh data when a new month starts', () => {

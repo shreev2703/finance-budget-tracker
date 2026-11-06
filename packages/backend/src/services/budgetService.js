@@ -44,6 +44,20 @@ export function createBudgetService({ transactions, budgets, categories }) {
       return { period, totals, budgets: items };
     },
 
+    /** US-05: the month's spending per category, largest first. */
+    spendingByCategory(userId, period) {
+      const rows = transactions.spendingByCategory(userId, period);
+      const totalCents = rows.reduce((sum, row) => sum + row.spentCents, 0);
+      return {
+        period,
+        totalCents,
+        categories: rows.map((row) => ({
+          ...row,
+          percent: Math.round((row.spentCents / totalCents) * 100),
+        })),
+      };
+    },
+
     /** Sets a monthly limit for one expense category. One budget per category per month. */
     create(userId, { categoryId, limit, period }) {
       const id = Number(categoryId);

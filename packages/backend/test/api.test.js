@@ -2,11 +2,8 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { openDatabase } from '../src/db/connection.js';
 import { createApp } from '../src/app.js';
-import {
-  DEMO_USER_EMAIL,
-  DEMO_USER_PASSWORD,
-  currentPeriod,
-} from '../src/db/seed-data.js';
+import { DEMO_USER_EMAIL, DEMO_USER_PASSWORD } from '../src/db/seed-data.js';
+import { currentPeriod } from '../src/domain/period.js';
 
 let server;
 let base;
@@ -297,4 +294,67 @@ test('PUT and DELETE /transactions/:id return 404 for an unknown id', async () =
   assert.equal((await put('/transactions/99999', valid)).status, 404);
   assert.equal((await del('/transactions/99999')).status, 404);
   assert.equal((await del('/transactions/not-a-number')).status, 404);
+});
+
+test('GET /transactions filters by category, date range, and both', async () => {
+  const categories = await getJson('/categories');
+  const groceries = categories.find((c) => c.name === 'Part-time Job');
+  const all = await getJson('/transactions?limit=200');
+
+  const byCategory = await getJson(`/transactions?categoryId=${groceries.id}`);
+  assert.ok(byCategory.length > 0);
+  assert.ok(byCategory.every((t) => t.categoryId === groceries.id));
+
+  const day = all[all.length - 1].date;
+  const byDate = await getJson(`/transactions?from=${day}&to=${day}`);
+  assert.ok(byDate.length > 0);
+  assert.ok(byDate.every((t) => t.date === day));
+  assert.ok(
+    (await getJson(`/transactions?from=2099-01-01`)).length === 0,
+    'nothing is after 2099',
+  );
+
+  const both = await getJson(
+    `/transactions?categoryId=${groceries.id}&from=${day}&to=${day}`,
+  );
+  assert.ok(both.every((t) => t.categoryId === groceries.id && t.date === day));
+
+  // Blank filters mean no filter.
+  const blank = await getJson('/transactions?limit=200&categoryId=&from=&to=');
+  assert.equal(blank.length, all.length);
+});
+
+test('GET /transactions rejects a bad date, an unknown category, and a reversed range', async () => {
+  for (const query of [
+    'from=soon',
+    'to=2026-13-99',
+    'categoryId=99999',
+    'from=2026-02-01&to=2026-01-01',
+  ]) {
+    const res = await authed(`/transactions?${query}`);
+    assert.equal(res.status, 400, query);
+  }
+});
+
+test('GET /reports/spending-by-category totals this month, largest first', async () => {
+  const report = await getJson('/reports/spending-by-category');
+  const summary = await getJson('/budgets/summary');
+  assert.equal(report.period, currentPeriod());
+  assert.equal(report.totalCents, summary.totals.expenseCents);
+  const spent = report.categories.map((c) => c.spentCents);
+  assert.deepEqual(
+    spent,
+    [...spent].sort((a, b) => b - a),
+  );
+  assert.equal(
+    spent.reduce((sum, cents) => sum + cents, 0),
+    report.totalCents,
+  );
+});
+
+test('GET /reports/spending-by-category handles an empty month and a bad period', async () => {
+  const report = await getJson('/reports/spending-by-category?period=2001-01');
+  assert.deepEqual(report, { period: '2001-01', totalCents: 0, categories: [] });
+  const res = await authed('/reports/spending-by-category?period=january');
+  assert.equal(res.status, 400);
 });

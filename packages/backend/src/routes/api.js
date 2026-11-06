@@ -1,8 +1,18 @@
 import { Router } from 'express';
 import { HttpError } from '../middleware/errorHandler.js';
-import { currentPeriod } from '../db/seed-data.js';
+import { currentPeriod } from '../domain/period.js';
 
 const PERIOD_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
+const DEFAULT_LIMIT = 50;
+const MAX_LIMIT = 200;
+
+function periodFrom(req) {
+  const period = req.query.period ?? currentPeriod();
+  if (!PERIOD_RE.test(period)) {
+    throw new HttpError(400, 'period must be YYYY-MM');
+  }
+  return period;
+}
 
 /** Thin controllers: parse the request, call a service, send JSON. */
 export function apiRouter({
@@ -33,8 +43,12 @@ export function apiRouter({
   });
 
   router.get('/transactions', (req, res) => {
-    const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 200);
-    res.json(transactionService.list(req.userId, limit));
+    const { categoryId, from, to } = req.query;
+    const limit = Math.min(
+      Math.max(Number(req.query.limit) || DEFAULT_LIMIT, 1),
+      MAX_LIMIT,
+    );
+    res.json(transactionService.list(req.userId, limit, { categoryId, from, to }));
   });
 
   router.post('/transactions', (req, res) => {
@@ -51,10 +65,11 @@ export function apiRouter({
   });
 
   router.get('/budgets/summary', (req, res) => {
-    const period = req.query.period ?? currentPeriod();
-    if (!PERIOD_RE.test(period))
-      throw new HttpError(400, 'period must be YYYY-MM');
-    res.json(budgetService.summary(req.userId, period));
+    res.json(budgetService.summary(req.userId, periodFrom(req)));
+  });
+
+  router.get('/reports/spending-by-category', (req, res) => {
+    res.json(budgetService.spendingByCategory(req.userId, periodFrom(req)));
   });
 
   router.post('/budgets', (req, res) => {
