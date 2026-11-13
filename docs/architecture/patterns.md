@@ -21,7 +21,7 @@ Each pattern below is one we actually use, with the file where it appears. Backe
 transactions.totalsForPeriod(userId, period); // no SQL here
 ```
 
-**Why:** the schema can change, or SQLite can be swapped for MySQL, by editing one folder. It also guards against SQL injection, since every query uses `?` placeholders in one place.
+**Why:** SQL stays in the repository layer, which scopes each operation to its owner and uses parameterized PostgreSQL queries. The database is hosted by Supabase.
 
 ## 3. Chain of responsibility (Express middleware)
 

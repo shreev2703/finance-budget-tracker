@@ -1,51 +1,14 @@
 export function createCategoryRepository(db) {
-  // Each category with its budget for the given month (null when there isn't one).
-  const list = db.prepare(`
-    SELECT c.id, c.name, c.type,
-           b.id AS budgetId, b.limit_amount_cents AS limitCents
-      FROM categories c
-      LEFT JOIN budgets b ON b.category_id = c.id AND b.period = ?
-     WHERE c.user_id = ?
-     ORDER BY c.type DESC, c.name`);
-  const findForUser = db.prepare(
-    'SELECT id, name, type FROM categories WHERE id = ? AND user_id = ?',
-  );
-  const findByName = db.prepare(
-    'SELECT id, name, type FROM categories WHERE user_id = ? AND name = ? COLLATE NOCASE',
-  );
-  const insert = db.prepare(
-    'INSERT INTO categories (user_id, name, type) VALUES (?, ?, ?)',
-  );
-  const rename = db.prepare(
-    'UPDATE categories SET name = ? WHERE id = ? AND user_id = ?',
-  );
-  const countTransactions = db.prepare(
-    'SELECT COUNT(*) AS count FROM transactions WHERE category_id = ? AND user_id = ?',
-  );
-  const deleteBudgets = db.prepare(
-    'DELETE FROM budgets WHERE category_id = ? AND user_id = ?',
-  );
-  const deleteCategory = db.prepare(
-    'DELETE FROM categories WHERE id = ? AND user_id = ?',
-  );
-
   return {
-    listForUser: (userId, period) => list.all(period, userId),
-    findForUser: (id, userId) => findForUser.get(id, userId),
-    findByName: (userId, name) => findByName.get(userId, name),
-    create(userId, name, type) {
-      const { lastInsertRowid } = insert.run(userId, name, type);
-      return findForUser.get(Number(lastInsertRowid), userId);
+    async listForUser(userId, period) {
+      const { rows } = await db.query(`SELECT c.id,c.name,c.type,b.id AS "budgetId",b.limit_amount_cents AS "limitCents" FROM categories c LEFT JOIN budgets b ON b.category_id=c.id AND b.period=$2 WHERE c.user_id=$1 ORDER BY c.type DESC,c.name`, [userId, period]);
+      return rows;
     },
-    rename(id, userId, name) {
-      rename.run(name, id, userId);
-      return findForUser.get(id, userId);
-    },
-    transactionCount: (id, userId) => countTransactions.get(id, userId).count,
-    /** Deletes the category and its budgets. */
-    remove(id, userId) {
-      deleteBudgets.run(id, userId);
-      deleteCategory.run(id, userId);
-    },
+    async findForUser(id, userId) { const { rows } = await db.query('SELECT id,name,type FROM categories WHERE id=$1 AND user_id=$2', [id,userId]); return rows[0]; },
+    async findByName(userId, name) { const { rows } = await db.query('SELECT id,name,type FROM categories WHERE user_id=$1 AND lower(name)=lower($2)', [userId,name]); return rows[0]; },
+    async create(userId,name,type) { const { rows } = await db.query('INSERT INTO categories(user_id,name,type) VALUES($1,$2,$3) RETURNING id,name,type', [userId,name,type]); return rows[0]; },
+    async rename(id,userId,name) { await db.query('UPDATE categories SET name=$1 WHERE id=$2 AND user_id=$3', [name,id,userId]); return this.findForUser(id,userId); },
+    async transactionCount(id,userId) { const { rows } = await db.query('SELECT COUNT(*)::integer AS count FROM transactions WHERE category_id=$1 AND user_id=$2', [id,userId]); return rows[0].count; },
+    async remove(id,userId) { await db.query('DELETE FROM budgets WHERE category_id=$1 AND user_id=$2', [id,userId]); await db.query('DELETE FROM categories WHERE id=$1 AND user_id=$2', [id,userId]); },
   };
 }

@@ -14,20 +14,19 @@ import {
  */
 export function createBudgetService({ transactions, budgets, categories }) {
   return {
-    summary(userId, period) {
+    async summary(userId, period) {
       const totals = { incomeCents: 0, expenseCents: 0 };
-      for (const row of transactions.totalsForPeriod(userId, period)) {
+      for (const row of await transactions.totalsForPeriod(userId, period)) {
         if (row.type === 'INCOME') totals.incomeCents = row.totalCents;
         else totals.expenseCents = row.totalCents;
       }
       totals.balanceCents = totals.incomeCents - totals.expenseCents;
 
       const spent = new Map(
-        transactions
-          .spentByCategory(userId, period)
+        (await transactions.spentByCategory(userId, period))
           .map((r) => [r.categoryId, r.spentCents]),
       );
-      const items = budgets.listForPeriod(userId, period).map((b) => {
+      const items = (await budgets.listForPeriod(userId, period)).map((b) => {
         const spentCents = spent.get(b.categoryId) ?? 0;
         return {
           id: b.id,
@@ -45,8 +44,8 @@ export function createBudgetService({ transactions, budgets, categories }) {
     },
 
     /** US-05: the month's spending per category, largest first. */
-    spendingByCategory(userId, period) {
-      const rows = transactions.spendingByCategory(userId, period);
+    async spendingByCategory(userId, period) {
+      const rows = await transactions.spendingByCategory(userId, period);
       const totalCents = rows.reduce((sum, row) => sum + row.spentCents, 0);
       return {
         period,
@@ -59,10 +58,10 @@ export function createBudgetService({ transactions, budgets, categories }) {
     },
 
     /** Sets a monthly limit for one expense category. One budget per category per month. */
-    create(userId, { categoryId, limit, period }) {
+    async create(userId, { categoryId, limit, period }) {
       const id = Number(categoryId);
       const category = Number.isInteger(id)
-        ? categories.findForUser(id, userId)
+        ? await categories.findForUser(id, userId)
         : undefined;
       const amount = Number(limit);
       const errors = [
@@ -72,7 +71,7 @@ export function createBudgetService({ transactions, budgets, categories }) {
       ].filter(Boolean);
       if (errors.length) throw new HttpError(400, 'Invalid budget', errors);
 
-      const existing = budgets.findForCategory(userId, id, period);
+      const existing = await budgets.findForCategory(userId, id, period);
       if (existing) {
         throw new HttpError(
           409,
@@ -89,8 +88,8 @@ export function createBudgetService({ transactions, budgets, categories }) {
     },
 
     /** Changes the monthly limit of one of the user's budgets. */
-    updateLimit(userId, budgetId, { limit }) {
-      const budget = budgets.findForUser(Number(budgetId), userId);
+    async updateLimit(userId, budgetId, { limit }) {
+      const budget = await budgets.findForUser(Number(budgetId), userId);
       if (!budget) throw new HttpError(404, 'Budget not found');
 
       const amount = Number(limit);

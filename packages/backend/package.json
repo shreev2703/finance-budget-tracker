@@ -2,13 +2,13 @@
   "name": "backend",
   "version": "1.0.0",
   "private": true,
-  "description": "LedgerLogic REST API (Express + SQLite)",
+  "description": "LedgerLogic REST API (Express + Supabase PostgreSQL)",
   "type": "module",
   "main": "src/server.js",
   "scripts": {
-    "dev": "node --watch --env-file-if-exists=.env src/server.js",
+    "dev": "node --env-file-if-exists=.env --watch src/server.js",
     "start": "node --env-file-if-exists=.env src/server.js",
-    "seed": "node src/db/seed.js",
+    "seed": "node --env-file-if-exists=.env src/db/seed.js",
     "test": "node --test",
     "lint": "eslint ."
   },
@@ -16,7 +16,8 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

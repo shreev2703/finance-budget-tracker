@@ -44,24 +44,24 @@ export function createAuthService({ users, tokenSecret }) {
       if (errors.length) throw new HttpError(400, 'Invalid sign-up', errors);
 
       const taken = new HttpError(409, 'That email is already registered.');
-      if (users.findByEmail(cleanedEmail)) throw taken;
+      if (await users.findByEmail(cleanedEmail)) throw taken;
 
       const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
       try {
-        const user = users.create(
+        const user = await users.create(
           { email: cleanedEmail, passwordHash, name: cleanedName },
           DEFAULT_CATEGORIES,
         );
         return session(user);
       } catch (error) {
         // Two sign-ups can pass the check above while hashing; the UNIQUE constraint settles it.
-        if (/UNIQUE/.test(error.message)) throw taken;
+        if (error.code === '23505' || /UNIQUE/.test(error.message)) throw taken;
         throw error;
       }
     },
 
     async login({ email, password }) {
-      const user = users.findByEmail(cleanEmail(email));
+      const user = await users.findByEmail(cleanEmail(email));
       const matched = await bcrypt.compare(
         typeof password === 'string' ? password : '',
         user?.passwordHash ?? unknownUserHash,
@@ -71,12 +71,12 @@ export function createAuthService({ users, tokenSecret }) {
     },
 
     /** Returns the token's user, or null if the token is invalid, expired, or the user is gone. */
-    userFromToken(token) {
+    async userFromToken(token) {
       try {
         const { sub } = jwt.verify(token, tokenSecret, {
           algorithms: [JWT_ALGORITHM],
         });
-        return users.findById(Number(sub)) ?? null;
+        return (await users.findById(Number(sub))) ?? null;
       } catch {
         return null;
       }

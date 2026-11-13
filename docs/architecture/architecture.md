@@ -25,7 +25,7 @@ Each layer only talks to the one below it. Requests flow down; JSON flows back u
 ## Why layers
 
 - **Testable:** `test/api.test.js` runs the whole stack against an in-memory database, because `createApp(db)` takes the database as a parameter.
-- **Swappable storage:** only `src/repositories/` and `src/db/` contain SQL. Moving from SQLite to MySQL changes those two folders, not the routes or services.
+- **Storage boundary:** SQL access lives in `src/repositories/` and `src/db/`; the application connects to Supabase PostgreSQL through `DATABASE_URL`.
 - **One place per rule:** the 80% warning (US-09) is defined once in `domain/budget.js`, so the API and any future report agree.
 
 ## Component wiring

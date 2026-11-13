@@ -22,17 +22,19 @@ Each assignment folder holds one PDF with all of its diagrams. The editable diag
 
 Requires Node.js 22.13 or newer.
 
+The backend uses Supabase PostgreSQL. Create a Supabase project, run [`packages/backend/src/db/schema.sql`](packages/backend/src/db/schema.sql) in its SQL Editor, copy `packages/backend/.env.example` to `packages/backend/.env`, and set `DATABASE_URL` to the project's PostgreSQL connection string. Find it under **Project Settings → Database → Connection string**. Use the transaction pooler for hosted deployments. `.env` is git-ignored.
+
 ```bash
 npm install     # installs every workspace from the root
 npm run dev     # starts the API (http://localhost:3001/api) and the website (http://localhost:5173) together
 npm test        # backend tests
 npm run lint
-npm run seed    # reset the local database to demo data
+npm run seed    # safely add demo data to Supabase
 ```
 
 Open http://localhost:5173 and log in with the demo account (`demo@ledgerlogic.app` / `demo-password`), or create your own. The website calls `/api/...`, and Vite forwards those requests to the API on port 3001. To run one side only: `npm run dev:api` or `npm run dev:web`.
 
-The first start creates `packages/backend/data/ledger.db` and seeds a demo student with categories, budgets, and this month's transactions. The demo account gets fresh data when a new month starts. Stop the server before running `npm run seed`.
+Run `npm run seed` to add the demo account and sample data. It does not delete existing Supabase rows. Demo account: `demo@ledgerlogic.app` / `demo-password`.
 
 **Token secret:** for a stable login across API restarts, copy `packages/backend/.env.example` to `packages/backend/.env` and set `TOKEN_SECRET`. Without it, development uses a random secret per run, so a restart logs everyone out. Production refuses to start without it.
 
@@ -46,9 +48,9 @@ To present the app, follow [DEMO.md](DEMO.md).
 
 ```
 packages/
-  backend/    Express REST API + SQLite
+  backend/    Express REST API + Supabase PostgreSQL
     src/
-      db/            schema.sql, connection, seed data
+      db/            PostgreSQL schema, connection pool, seed data
       repositories/  all SQL queries
       services/      validation and business logic
       domain/        budget rules (remaining, 80% warning, over limit)

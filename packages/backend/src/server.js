@@ -6,6 +6,9 @@ import { loadTokenSecret } from './config.js';
 const port = Number(process.env.API_PORT) || 3001;
 const app = createApp(openDatabase(), { tokenSecret: loadTokenSecret() });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`LedgerLogic API listening on http://localhost:${port}/api`);
 });
+
+process.on('SIGTERM', () => server.close());
+process.on('SIGINT', () => server.close());

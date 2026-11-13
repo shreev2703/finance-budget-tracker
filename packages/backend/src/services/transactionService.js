@@ -6,10 +6,10 @@ import { dateError, validateTransaction } from '../domain/transaction.js';
  * US-03 edit and delete).
  */
 export function createTransactionService({ transactions, categories }) {
-  function validOrThrow(userId, input) {
-    const { errors, transaction } = validateTransaction(input, (id) =>
-      categories.findForUser(id, userId),
-    );
+  async function validOrThrow(userId, input) {
+    const id = Number(input?.categoryId);
+    const category = Number.isInteger(id) ? await categories.findForUser(id, userId) : undefined;
+    const { errors, transaction } = validateTransaction(input, (categoryId) => categoryId === id ? category : undefined);
     if (errors.length) {
       throw new HttpError(400, 'Invalid transaction', errors);
     }
@@ -17,14 +17,14 @@ export function createTransactionService({ transactions, categories }) {
   }
 
   /** US-06: checks the optional filters. Blank values mean "no filter". */
-  function cleanFilters(userId, { categoryId, from, to }) {
+  async function cleanFilters(userId, { categoryId, from, to }) {
     const filters = {
       categoryId: categoryId ? Number(categoryId) : undefined,
       from: from || undefined,
       to: to || undefined,
     };
     const errors = [];
-    if (categoryId && !categories.findForUser(filters.categoryId, userId)) {
+    if (categoryId && !await categories.findForUser(filters.categoryId, userId)) {
       errors.push('categoryId must be one of your categories');
     }
     if (filters.from && dateError(filters.from)) {
@@ -41,25 +41,26 @@ export function createTransactionService({ transactions, categories }) {
   }
 
   return {
-    list: (userId, limit, filters = {}) =>
-      transactions.listForUser(userId, limit, cleanFilters(userId, filters)),
-
-    create(userId, input) {
-      return transactions.create({ userId, ...validOrThrow(userId, input) });
+    async list(userId, limit, filters = {}) {
+      return transactions.listForUser(userId, limit, await cleanFilters(userId, filters));
     },
 
-    update(userId, id, input) {
-      const updated = transactions.update(
+    async create(userId, input) {
+      return transactions.create({ userId, ...await validOrThrow(userId, input) });
+    },
+
+    async update(userId, id, input) {
+      const updated = await transactions.update(
         Number(id),
         userId,
-        validOrThrow(userId, input),
+        await validOrThrow(userId, input),
       );
       if (!updated) throw new HttpError(404, 'Transaction not found');
       return updated;
     },
 
-    remove(userId, id) {
-      if (!transactions.remove(Number(id), userId)) {
+    async remove(userId, id) {
+      if (!await transactions.remove(Number(id), userId)) {
         throw new HttpError(404, 'Transaction not found');
       }
     },

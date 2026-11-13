@@ -12,7 +12,7 @@ import { authRouter } from './routes/auth.js';
 import { authenticate } from './middleware/authenticate.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 
-/** Wires repositories -> services -> routes. Takes the db so tests can pass an in-memory one. */
+/** Wires PostgreSQL repositories -> services -> routes. */
 export function createApp(db, { tokenSecret }) {
   const transactions = createTransactionRepository(db);
   const categories = createCategoryRepository(db);

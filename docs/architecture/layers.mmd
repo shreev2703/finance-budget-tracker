@@ -16,7 +16,7 @@ flowchart LR
     S --> Repo
   end
 
-  DB[("<b>Database</b><br/>SQLite (demo) / MySQL (prod)<br/>users · categories · transactions · budgets<br/><i>db/schema.sql</i>")]
+  DB[("<b>Database</b><br/>Supabase PostgreSQL<br/>users · categories · transactions · budgets<br/><i>db/schema.sql</i>")]
 
   UI -- "HTTP + JSON" --> MW
   Repo -- "SQL" --> DB

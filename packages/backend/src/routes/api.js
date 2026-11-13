@@ -25,61 +25,61 @@ export function apiRouter({
 
   router.get('/auth/me', (req, res) => res.json(req.user));
 
-  router.get('/categories', (req, res) => {
-    res.json(categories.listForUser(req.userId, currentPeriod()));
+  router.get('/categories', async (req, res) => {
+    res.json(await categories.listForUser(req.userId, currentPeriod()));
   });
 
-  router.post('/categories', (req, res) => {
-    res.status(201).json(categoryService.create(req.userId, req.body ?? {}));
+  router.post('/categories', async (req, res) => {
+    res.status(201).json(await categoryService.create(req.userId, req.body ?? {}));
   });
 
-  router.put('/categories/:id', (req, res) => {
-    res.json(categoryService.rename(req.userId, req.params.id, req.body ?? {}));
+  router.put('/categories/:id', async (req, res) => {
+    res.json(await categoryService.rename(req.userId, req.params.id, req.body ?? {}));
   });
 
-  router.delete('/categories/:id', (req, res) => {
-    categoryService.remove(req.userId, req.params.id);
+  router.delete('/categories/:id', async (req, res) => {
+    await categoryService.remove(req.userId, req.params.id);
     res.status(204).end();
   });
 
-  router.get('/transactions', (req, res) => {
+  router.get('/transactions', async (req, res) => {
     const { categoryId, from, to } = req.query;
     const limit = Math.min(
       Math.max(Number(req.query.limit) || DEFAULT_LIMIT, 1),
       MAX_LIMIT,
     );
-    res.json(transactionService.list(req.userId, limit, { categoryId, from, to }));
+    res.json(await transactionService.list(req.userId, limit, { categoryId, from, to }));
   });
 
-  router.post('/transactions', (req, res) => {
-    res.status(201).json(transactionService.create(req.userId, req.body));
+  router.post('/transactions', async (req, res) => {
+    res.status(201).json(await transactionService.create(req.userId, req.body));
   });
 
-  router.put('/transactions/:id', (req, res) => {
-    res.json(transactionService.update(req.userId, req.params.id, req.body));
+  router.put('/transactions/:id', async (req, res) => {
+    res.json(await transactionService.update(req.userId, req.params.id, req.body));
   });
 
-  router.delete('/transactions/:id', (req, res) => {
-    transactionService.remove(req.userId, req.params.id);
+  router.delete('/transactions/:id', async (req, res) => {
+    await transactionService.remove(req.userId, req.params.id);
     res.status(204).end();
   });
 
-  router.get('/budgets/summary', (req, res) => {
-    res.json(budgetService.summary(req.userId, periodFrom(req)));
+  router.get('/budgets/summary', async (req, res) => {
+    res.json(await budgetService.summary(req.userId, periodFrom(req)));
   });
 
-  router.get('/reports/spending-by-category', (req, res) => {
-    res.json(budgetService.spendingByCategory(req.userId, periodFrom(req)));
+  router.get('/reports/spending-by-category', async (req, res) => {
+    res.json(await budgetService.spendingByCategory(req.userId, periodFrom(req)));
   });
 
-  router.post('/budgets', (req, res) => {
+  router.post('/budgets', async (req, res) => {
     const input = { ...req.body, period: req.body?.period ?? currentPeriod() };
-    res.status(201).json(budgetService.create(req.userId, input));
+    res.status(201).json(await budgetService.create(req.userId, input));
   });
 
-  router.put('/budgets/:id', (req, res) => {
+  router.put('/budgets/:id', async (req, res) => {
     res.json(
-      budgetService.updateLimit(req.userId, req.params.id, req.body ?? {}),
+      await budgetService.updateLimit(req.userId, req.params.id, req.body ?? {}),
     );
   });
 
