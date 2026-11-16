@@ -1,4 +1,5 @@
 import { HttpError } from '../middleware/errorHandler.js';
+import { parseId } from '../domain/id.js';
 import {
   remaining,
   budgetStatus,
@@ -59,8 +60,8 @@ export function createBudgetService({ transactions, budgets, categories }) {
 
     /** Sets a monthly limit for one expense category. One budget per category per month. */
     async create(userId, { categoryId, limit, period }) {
-      const id = Number(categoryId);
-      const category = Number.isInteger(id)
+      const id = parseId(categoryId);
+      const category = id
         ? await categories.findForUser(id, userId)
         : undefined;
       const amount = Number(limit);

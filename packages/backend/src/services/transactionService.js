@@ -1,5 +1,6 @@
 import { HttpError } from '../middleware/errorHandler.js';
 import { dateError, validateTransaction } from '../domain/transaction.js';
+import { parseId } from '../domain/id.js';
 
 /**
  * Validates and records transactions (US-01 log expense, US-02 record income,
@@ -7,8 +8,8 @@ import { dateError, validateTransaction } from '../domain/transaction.js';
  */
 export function createTransactionService({ transactions, categories }) {
   async function validOrThrow(userId, input) {
-    const id = Number(input?.categoryId);
-    const category = Number.isInteger(id) ? await categories.findForUser(id, userId) : undefined;
+    const id = parseId(input?.categoryId);
+    const category = id ? await categories.findForUser(id, userId) : undefined;
     const { errors, transaction } = validateTransaction(input, (categoryId) => categoryId === id ? category : undefined);
     if (errors.length) {
       throw new HttpError(400, 'Invalid transaction', errors);
@@ -19,12 +20,16 @@ export function createTransactionService({ transactions, categories }) {
   /** US-06: checks the optional filters. Blank values mean "no filter". */
   async function cleanFilters(userId, { categoryId, from, to }) {
     const filters = {
-      categoryId: categoryId ? Number(categoryId) : undefined,
+      categoryId: categoryId ? parseId(categoryId) : undefined,
       from: from || undefined,
       to: to || undefined,
     };
     const errors = [];
-    if (categoryId && !await categories.findForUser(filters.categoryId, userId)) {
+    if (
+      categoryId &&
+      !(filters.categoryId &&
+        (await categories.findForUser(filters.categoryId, userId)))
+    ) {
       errors.push('categoryId must be one of your categories');
     }
     if (filters.from && dateError(filters.from)) {

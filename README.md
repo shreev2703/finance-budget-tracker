@@ -27,14 +27,16 @@ The backend uses Supabase PostgreSQL. Create a Supabase project, run [`packages/
 ```bash
 npm install     # installs every workspace from the root
 npm run dev     # starts the API (http://localhost:3001/api) and the website (http://localhost:5173) together
-npm test        # backend tests
+npm test        # backend tests (no database setup needed, see below)
 npm run lint
 npm run seed    # safely add demo data to Supabase
 ```
 
 Open http://localhost:5173 and log in with the demo account (`demo@ledgerlogic.app` / `demo-password`), or create your own. The website calls `/api/...`, and Vite forwards those requests to the API on port 3001. To run one side only: `npm run dev:api` or `npm run dev:web`.
 
-Run `npm run seed` to add the demo account and sample data. It does not delete existing Supabase rows. Demo account: `demo@ledgerlogic.app` / `demo-password`.
+Run `npm run seed` to add the demo account and sample data. It does not delete existing Supabase rows. Demo account: `demo@ledgerlogic.app` / `demo-password`. When the API starts, it also gives the demo account this month's data if it has none, so the demo dashboard is never empty after the month changes.
+
+**Tests and the database:** `npm test` never touches Supabase. By default each test file gets its own in-memory Postgres ([PGlite](https://pglite.dev), real Postgres compiled to WebAssembly), so the tests run on any laptop with no setup. To run them on a real Postgres server instead, set `TEST_DATABASE_URL` (for example `postgresql://user:pass@localhost:5432/ledger_test`); each test file then works in its own temporary schema and drops it when done. CI runs the tests both ways. Never point `TEST_DATABASE_URL` at the app's database.
 
 **Token secret:** for a stable login across API restarts, copy `packages/backend/.env.example` to `packages/backend/.env` and set `TOKEN_SECRET`. Without it, development uses a random secret per run, so a restart logs everyone out. Production refuses to start without it.
 

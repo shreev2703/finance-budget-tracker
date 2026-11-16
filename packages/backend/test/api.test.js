@@ -1,16 +1,18 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { openDatabase } from '../src/db/connection.js';
+import { createTestDb } from './helpers/testDb.js';
 import { createApp } from '../src/app.js';
 import { DEMO_USER_EMAIL, DEMO_USER_PASSWORD } from '../src/db/seed-data.js';
 import { currentPeriod } from '../src/domain/period.js';
 
+let db;
 let server;
 let base;
 let token;
 
 before(async () => {
-  const app = createApp(openDatabase(':memory:'), {
+  db = await createTestDb();
+  const app = createApp(db, {
     tokenSecret: 'test-secret',
   });
   await new Promise((resolve) => {
@@ -28,7 +30,10 @@ before(async () => {
   ({ token } = await res.json());
 });
 
-after(() => server.close());
+after(async () => {
+  await new Promise((resolve) => server.close(resolve));
+  await db.end();
+});
 
 const authed = (path, { headers, ...init } = {}) =>
   fetch(base + path, {
@@ -170,6 +175,33 @@ test('POST /budgets rejects bad input and income categories (400)', async () => 
   ]);
 });
 
+test('ids that cannot be a database id are rejected with 400, not a 500', async () => {
+  const groceries = await categoryNamed('Groceries');
+  for (const categoryId of ['abc', '1.5', '99999999999']) {
+    const tx = await post('/transactions', {
+      amount: 5,
+      type: 'EXPENSE',
+      categoryId,
+      date: '2026-11-01',
+    });
+    assert.equal(tx.status, 400, `transaction categoryId=${categoryId}`);
+    const budget = await post('/budgets', { categoryId, limit: 5 });
+    assert.equal(budget.status, 400, `budget categoryId=${categoryId}`);
+  }
+  // A valid id still works.
+  assert.equal(
+    (
+      await post('/transactions', {
+        amount: 5,
+        type: 'EXPENSE',
+        categoryId: groceries.id,
+        date: currentPeriod() + '-01',
+      })
+    ).status,
+    201,
+  );
+});
+
 test('PUT /budgets/:id changes the limit and the status updates', async () => {
   const dining = await categoryNamed('Dining Out');
   const res = await put(`/budgets/${dining.budgetId}`, { limit: 500 });
@@ -294,6 +326,11 @@ test('PUT and DELETE /transactions/:id return 404 for an unknown id', async () =
   assert.equal((await put('/transactions/99999', valid)).status, 404);
   assert.equal((await del('/transactions/99999')).status, 404);
   assert.equal((await del('/transactions/not-a-number')).status, 404);
+  // Postgres rejects these as INTEGERs, so the router must answer 404 first, not 500.
+  for (const id of ['1.5', '-1', '99999999999']) {
+    assert.equal((await del(`/transactions/${id}`)).status, 404, id);
+    assert.equal((await put(`/transactions/${id}`, valid)).status, 404, id);
+  }
 });
 
 test('GET /transactions filters by category, date range, and both', async () => {
@@ -329,6 +366,9 @@ test('GET /transactions rejects a bad date, an unknown category, and a reversed 
     'from=soon',
     'to=2026-13-99',
     'categoryId=99999',
+    'categoryId=abc',
+    'categoryId=1.5',
+    'categoryId=99999999999',
     'from=2026-02-01&to=2026-01-01',
   ]) {
     const res = await authed(`/transactions?${query}`);
