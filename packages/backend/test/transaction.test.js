@@ -36,6 +36,20 @@ test('dateError requires a real YYYY-MM-DD date', () => {
   assert.equal(dateError(undefined), 'date must be YYYY-MM-DD');
 });
 
+// TE7 TDD (#88): days that don't exist must be rejected. JavaScript's Date.parse
+// rolls 2026-02-30 over to March 2, and Postgres then refuses it with a 500.
+test('dateError rejects days that do not exist in that month', () => {
+  for (const impossible of ['2026-02-30', '2026-02-31', '2026-04-31', '2025-02-29']) {
+    assert.equal(dateError(impossible), 'date must be YYYY-MM-DD', impossible);
+  }
+});
+
+test('dateError accepts the last day of every month, and Feb 29 in leap years', () => {
+  for (const real of ['2026-01-31', '2026-02-28', '2028-02-29', '2026-04-30', '2026-12-31']) {
+    assert.equal(dateError(real), null, real);
+  }
+});
+
 test('categoryError checks ownership and that the type matches', () => {
   assert.equal(categoryError(groceries, 'EXPENSE'), null);
   assert.equal(

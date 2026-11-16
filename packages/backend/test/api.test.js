@@ -115,6 +115,21 @@ test('POST /transactions rejects a category of the wrong type', async () => {
   assert.equal(res.status, 400);
 });
 
+test('POST /transactions rejects a day that does not exist (400, not 500) and saves nothing', async () => {
+  const groceries = await categoryNamed('Groceries');
+  const before = (await getJson('/transactions?limit=200')).length;
+  const res = await post('/transactions', {
+    amount: 5,
+    type: 'EXPENSE',
+    categoryId: groceries.id,
+    date: '2026-02-30',
+  });
+  assert.equal(res.status, 400);
+  assert.deepEqual((await res.json()).details, ['date must be YYYY-MM-DD']);
+  assert.equal((await getJson('/transactions?limit=200')).length, before);
+  assert.equal((await authed('/transactions?from=2026-04-31')).status, 400);
+});
+
 test('GET /budgets/summary rejects a malformed period', async () => {
   const res = await authed('/budgets/summary?period=october');
   assert.equal(res.status, 400);
