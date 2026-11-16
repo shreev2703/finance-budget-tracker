@@ -122,6 +122,15 @@ export function seedDemoAccount(db) {
   });
 }
 
+/**
+ * Deletes the demo account and everything it owns, then seeds it again, so a
+ * demo starts from the numbers in DEMO.md. Never touches any other account.
+ */
+export async function resetDemoAccount(db) {
+  await db.query('DELETE FROM users WHERE email = $1', [DEMO_USER_EMAIL]);
+  return seedDemoAccount(db);
+}
+
 /** Budgets are per month, so a new month would show the demo account as empty. Real accounts are untouched. */
 export function refreshDemoMonth(db) {
   return inTransaction(db, async (client) => {

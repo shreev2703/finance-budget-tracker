@@ -6,17 +6,20 @@ A walkthrough of about 2.5 minutes. Each step has a backup screenshot in [docs/d
 
 Run these on the presenting laptop. Node.js 22.13 or newer is required.
 
-```bash
-git checkout main
-git pull
-npm install
-npm run seed
-npm run dev
-```
+1. **Database connection (once per laptop):** the data lives in the team's Supabase project. Copy `packages/backend/.env.example` to `packages/backend/.env`, and set `DATABASE_URL` (ask Juan S. privately; never post it in GitHub or the group chat) and `TOKEN_SECRET`.
+2. **Every time:**
 
-Then open the address Vite prints, usually http://localhost:5173. Stop the server before running `npm run seed` again.
+   ```bash
+   git checkout main
+   git pull
+   npm install
+   npm run seed -- --reset-demo
+   npm run dev
+   ```
 
-`npm run seed` resets the database, so run it right before presenting to make the numbers match the steps below.
+Then open the address Vite prints, usually http://localhost:5173.
+
+`npm run seed -- --reset-demo` deletes and re-creates **only the demo account**, so the numbers match the steps below even after rehearsals added transactions. Other accounts are not touched. Plain `npm run seed` only adds what is missing and never deletes anything.
 
 **Demo login:** `demo@ledgerlogic.app` / `demo-password`
 
@@ -32,11 +35,14 @@ Then open the address Vite prints, usually http://localhost:5173. Stop the serve
 | 6 | Click **View all transactions** and filter by Groceries | Filters by category and date range | [Filter](docs/demo/6-filter-transactions.png) |
 | 7 | Refresh the page | You stay logged in, because the token is saved in the browser | |
 | 8 | Click **Log Out**, then log in with a wrong password | Same error for a wrong password or an unknown email | [Bad token](docs/demo/7-bad-token-returns-to-login.png) |
+| 9 | (TE7, optional) In a terminal, run `npm test` | 65 backend unit and system tests run on an in-memory Postgres (no setup, never Supabase), then 5 UI tests click through logging an expense and logging in. Show the TDD section of [TESTING.md](TESTING.md): the 2026-02-30 bug went from a 500 to a clear 400 | |
 
 ## If something goes wrong
 
 - **Blank data or an error on the dashboard:** check that the terminal shows `LedgerLogic API listening`. Restart `npm run dev`.
-- **Numbers don't match:** stop the server, run `npm run seed`, and start it again.
+- **`DATABASE_URL is required`:** `packages/backend/.env` is missing or has no `DATABASE_URL`. See step 1 above.
+- **Connection errors or timeouts from Supabase:** check the Wi-Fi, and that the Supabase project isn't paused (free projects pause after a week without use; resume it in the Supabase dashboard). Otherwise use demo mode below.
+- **Numbers don't match:** stop the server, run `npm run seed -- --reset-demo`, and start it again.
 - **Logged out after a restart:** expected unless `TOKEN_SECRET` is set in `packages/backend/.env`. Log in again.
 - **Port 5173 is taken:** Vite picks the next free port. Use the address it prints.
 - **The backend won't start at all:** run the website alone with browser-only sample data: `VITE_DEMO=1 npm run dev:web` (Windows cmd: `set VITE_DEMO=1&& npm run dev:web`). Any login works in this mode, so say it isn't using the real API.

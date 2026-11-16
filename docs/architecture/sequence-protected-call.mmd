@@ -5,7 +5,7 @@ sequenceDiagram
     participant LS as Browser<br/>localStorage
     participant AU as Backend<br/>authenticate<br/>middleware
     participant BE as Backend<br/>routes<br/>TransactionService
-    participant DB as Database<br/>repositories<br/>SQLite
+    participant DB as Database<br/>repositories<br/>Supabase PostgreSQL
 
     User->>FE: Fill in the form, click Add expense
     FE->>LS: Read token
