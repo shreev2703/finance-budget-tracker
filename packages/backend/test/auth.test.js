@@ -7,6 +7,7 @@ import {
   DEMO_USER_EMAIL,
   DEMO_USER_PASSWORD,
   refreshDemoMonth,
+  resetDemoAccount,
 } from '../src/db/seed-data.js';
 import { currentPeriod } from '../src/domain/period.js';
 
@@ -292,6 +293,85 @@ test('the demo account gets fresh data when a new month starts', async () => {
     await refreshDemoMonth(fresh);
     assert.equal(await count(), seeded * 2);
   } finally {
+    await fresh.end();
+  }
+});
+
+test('resetDemoAccount restores the demo numbers and leaves other accounts alone', async () => {
+  const fresh = await createTestDb();
+  const app = createApp(fresh, { tokenSecret: SECRET });
+  const local = await new Promise((resolve) => {
+    const s = app.listen(0, () => resolve(s));
+  });
+  const url = `http://localhost:${local.address().port}/api`;
+  const call = (method, path, body, token) =>
+    fetch(url + path, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  const tokenFor = async (email, password) =>
+    (await (await call('POST', '/auth/login', { email, password })).json())
+      .token;
+  try {
+    const student = (
+      await (
+        await call('POST', '/auth/register', {
+          email: 'keep@student.edu',
+          password: 'correct-horse',
+          name: 'Keep Me',
+        })
+      ).json()
+    ).token;
+    const [studentCategory] = await (
+      await call('GET', '/categories', undefined, student)
+    ).json();
+    await call(
+      'POST',
+      '/transactions',
+      {
+        amount: 3,
+        type: studentCategory.type,
+        categoryId: studentCategory.id,
+        date: `${currentPeriod()}-01`,
+      },
+      student,
+    );
+
+    let demo = await tokenFor(DEMO_USER_EMAIL, DEMO_USER_PASSWORD);
+    const summary = async () =>
+      (await (await call('GET', '/budgets/summary', undefined, demo)).json())
+        .totals;
+    const original = await summary();
+    const groceries = (
+      await (await call('GET', '/categories', undefined, demo)).json()
+    ).find((c) => c.name === 'Groceries');
+    await call(
+      'POST',
+      '/transactions',
+      {
+        amount: 85,
+        type: 'EXPENSE',
+        categoryId: groceries.id,
+        date: `${currentPeriod()}-01`,
+      },
+      demo,
+    );
+    assert.notDeepEqual(await summary(), original);
+
+    await resetDemoAccount(fresh);
+    demo = await tokenFor(DEMO_USER_EMAIL, DEMO_USER_PASSWORD);
+    assert.deepEqual(await summary(), original);
+
+    const kept = await (
+      await call('GET', '/transactions', undefined, student)
+    ).json();
+    assert.equal(kept.length, 1);
+  } finally {
+    await new Promise((resolve) => local.close(resolve));
     await fresh.end();
   }
 });
