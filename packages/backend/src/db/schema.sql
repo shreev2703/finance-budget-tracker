@@ -35,3 +35,13 @@ CREATE TABLE IF NOT EXISTS budgets (
   limit_amount_cents INTEGER NOT NULL CHECK (limit_amount_cents > 0),
   UNIQUE (user_id, category_id, period)
 );
+
+-- Supabase also exposes every table through its Data API, using the public "anon" key.
+-- LedgerLogic only reaches the database from the backend, so turn on row level security
+-- with no policies: the anon and authenticated roles then see and change nothing, while
+-- the backend connects as the tables' owner, which row level security does not apply to.
+-- Safe to run again on an existing database.
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE budgets ENABLE ROW LEVEL SECURITY;

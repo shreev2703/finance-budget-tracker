@@ -22,7 +22,7 @@ Each assignment folder holds one PDF with all of its diagrams. The editable diag
 
 Requires Node.js 22.13 or newer.
 
-The backend uses Supabase PostgreSQL. Create a Supabase project, run [`packages/backend/src/db/schema.sql`](packages/backend/src/db/schema.sql) in its SQL Editor, copy `packages/backend/.env.example` to `packages/backend/.env`, and set `DATABASE_URL` to the project's PostgreSQL connection string. Find it under **Project Settings → Database → Connection string**. Use the transaction pooler for hosted deployments. `.env` is git-ignored.
+The backend uses Supabase PostgreSQL. Create a Supabase project, run [`packages/backend/src/db/schema.sql`](packages/backend/src/db/schema.sql) in its SQL Editor, copy `packages/backend/.env.example` to `packages/backend/.env`, and set `DATABASE_URL` to the project's PostgreSQL connection string. Find it under **Project Settings → Database → Connection string**. Use the transaction pooler for hosted deployments. `.env` is git-ignored. If your Supabase project was set up before Nov 16, run the four `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` lines at the end of `schema.sql` in the SQL Editor once. They stop Supabase's public Data API from reading the tables; the backend is not affected.
 
 ```bash
 npm install     # installs every workspace from the root
