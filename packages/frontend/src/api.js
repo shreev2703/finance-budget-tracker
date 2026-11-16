@@ -66,6 +66,16 @@ const httpApi = {
   /** The logged-in user, from the stored token. */
   me: () => request("/auth/me"),
 
+  /** { currentPassword, newPassword }. A wrong current password is a 400 with an error. */
+  changePassword: (passwords) =>
+    request("/auth/password", { method: "PUT", body: passwords }),
+
+  /** Deletes the account and all of its data. Needs the password to confirm. */
+  deleteAccount: (password) =>
+    request("/auth/me", { method: "DELETE", body: { password } }).then(() =>
+      clearToken(),
+    ),
+
   /** Monthly totals + every budget's spent / remaining / status ('ok' | 'warning' | 'over'). */
   getSummary: (period) =>
     request(`/budgets/summary${period ? `?period=${period}` : ""}`),

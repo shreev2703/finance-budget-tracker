@@ -49,7 +49,15 @@ function seed() {
     date: `${period}-01`,
     note,
   }));
-  return { period, categories, budgets, transactions, nextId: rows.length + 1 };
+  return {
+    period,
+    categories,
+    budgets,
+    transactions,
+    nextId: rows.length + 1,
+    password: DEMO.password,
+    deleted: false,
+  };
 }
 
 const json = (status, body) =>
@@ -72,11 +80,34 @@ export function installFakeBackend() {
 
   const routes = {
     "POST /api/auth/login": ({ body }) =>
-      body.email === DEMO.email && body.password === DEMO.password
+      body.email === DEMO.email && body.password === db.password && !db.deleted
         ? json(200, { token: TOKEN, user: { id: 1, email: DEMO.email, name: DEMO.name } })
         : json(401, { error: "Incorrect email or password." }),
 
     "GET /api/auth/me": () => json(200, { id: 1, email: DEMO.email, name: DEMO.name }),
+
+    // Same rules as authService.changePassword and deleteAccount.
+    "PUT /api/auth/password": ({ body }) => {
+      if (body.currentPassword !== db.password) {
+        return json(400, { error: "Current password is incorrect." });
+      }
+      if (!(body.newPassword?.length >= 8)) {
+        return json(400, {
+          error: "Invalid password",
+          details: ["Password must be at least 8 characters."],
+        });
+      }
+      db.password = body.newPassword;
+      return new Response(null, { status: 204 });
+    },
+
+    "DELETE /api/auth/me": ({ body }) => {
+      if (body.password !== db.password) {
+        return json(400, { error: "Password is incorrect." });
+      }
+      db.deleted = true;
+      return new Response(null, { status: 204 });
+    },
 
     "GET /api/budgets/summary": () => {
       const total = (type) =>

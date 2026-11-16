@@ -27,7 +27,7 @@ The backend uses Supabase PostgreSQL. Create a Supabase project, run [`packages/
 ```bash
 npm install     # installs every workspace from the root
 npm run dev     # starts the API (http://localhost:3001/api) and the website (http://localhost:5173) together
-npm test        # backend tests (no database setup needed, see below)
+npm test        # backend and frontend tests (no database setup needed, see below)
 npm run lint
 npm run seed    # safely add demo data to Supabase
 ```

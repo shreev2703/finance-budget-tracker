@@ -8,7 +8,7 @@ import { createBudgetService } from './services/budgetService.js';
 import { createCategoryService } from './services/categoryService.js';
 import { createAuthService } from './services/authService.js';
 import { apiRouter } from './routes/api.js';
-import { authRouter } from './routes/auth.js';
+import { accountRouter, authRouter } from './routes/auth.js';
 import { authenticate } from './middleware/authenticate.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 
@@ -33,6 +33,7 @@ export function createApp(db, { tokenSecret }) {
   app.use('/api', authRouter({ authService }));
   // Everything mounted after this line requires a valid token.
   app.use('/api', authenticate(authService));
+  app.use('/api', accountRouter({ authService }));
   app.use(
     '/api',
     apiRouter({
