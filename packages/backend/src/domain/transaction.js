@@ -3,7 +3,7 @@ export const TRANSACTION_TYPES = ['INCOME', 'EXPENSE'];
 export const MAX_AMOUNT_DOLLARS = 1_000_000;
 export const MAX_NOTE_LENGTH = 200;
 
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 export function toCents(dollars) {
   return Math.round(dollars * 100);
@@ -23,13 +23,21 @@ export function typeError(type) {
     : 'type must be INCOME or EXPENSE';
 }
 
+/** True for a YYYY-MM-DD string naming a day that exists (not 2026-02-30). */
+export function isCalendarDate(text) {
+  const match = typeof text === 'string' && DATE_PATTERN.exec(text);
+  if (!match) return false;
+  const [year, month, day] = match.slice(1).map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
+
 export function dateError(date) {
-  const isValid =
-    typeof date === 'string' &&
-    DATE_PATTERN.test(date) &&
-    !Number.isNaN(Date.parse(date)) &&
-    new Date(date).toISOString().slice(0, 10) === date;
-  return isValid ? null : 'date must be YYYY-MM-DD';
+  return isCalendarDate(date) ? null : 'date must be YYYY-MM-DD';
 }
 
 export function categoryError(category, type) {
