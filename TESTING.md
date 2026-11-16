@@ -6,19 +6,19 @@ How the automated tests are organised, how to run them, and the TDD work for TE7
 
 ```bash
 npm install   # from the repo root, installs every workspace
-npm test      # runs the backend tests (unit + system)
+npm test      # runs every test: backend unit + system, then frontend UI
 ```
 
 No database setup is needed. `npm test` never connects to the team's Supabase project.
 
 | Command | What it runs |
 |---|---|
-| `npm test` (root) | `npm test -w backend` |
+| `npm test` (root) | `npm test -w backend && npm test -w frontend` |
 | `npm test -w backend` | Every `packages/backend/test/**/*.test.js` file with Node's built-in test runner |
-| `npm test -w frontend` | UI tests. Added in #91; until then the frontend has no `test` script |
+| `npm test -w frontend` | Every `packages/frontend/src/**/*.test.{js,jsx}` file with Vitest (jsdom) |
 | `npm run lint` | ESLint (backend) and oxlint (frontend) |
 
-CI (`.github/workflows/ci.yml`) runs lint, the backend tests twice (once on a real Postgres 16 server and once on PGlite), and the frontend build on every pull request and every push to `main`.
+CI (`.github/workflows/ci.yml`) runs lint, the backend tests on a real Postgres 16 server, then every test the way a laptop runs them (backend on PGlite, plus the UI tests), then the frontend build, on every pull request and every push to `main`.
 
 ## Tools
 
@@ -26,7 +26,7 @@ CI (`.github/workflows/ci.yml`) runs lint, the backend tests twice (once on a re
 |---|---|---|
 | Unit | [`node:test`](https://nodejs.org/api/test.html) + `node:assert/strict` | Built into Node 22, so nothing extra to install |
 | System | `node:test` + the real Express app on a random port + `fetch`, against Postgres | Exercises route → middleware → service → repository → database exactly as the website does |
-| UI | Vitest + React Testing Library + `@testing-library/user-event` (jsdom) | Component-level tests that act like a user: labels, buttons, visible text (#91) |
+| UI | Vitest + React Testing Library + `@testing-library/user-event` (jsdom) | Render the whole app and act like a user: labels, buttons, visible text |
 | Test database | [PGlite](https://pglite.dev) (default) or any Postgres via `TEST_DATABASE_URL` | Real Postgres behaviour without needing a server |
 
 ## The test database
@@ -42,6 +42,8 @@ CI (`.github/workflows/ci.yml`) runs lint, the backend tests twice (once on a re
 
   Never point it at the app's database (`DATABASE_URL`).
 
+The UI tests need no backend: `src/test/fakeBackend.js` replaces `fetch` with an in-memory copy of the API (same URLs and JSON, seeded with the demo account), so the real `api.js`, pages, and components run unchanged.
+
 Environment variables used by the tests: only `TEST_DATABASE_URL` (optional). The tests pass their own JWT secret (`test-secret`), so `TOKEN_SECRET` isn't needed. No external services are called.
 
 ## Test levels
@@ -54,6 +56,8 @@ Environment variables used by the tests: only `TEST_DATABASE_URL` (optional). Th
 | `test/budget.test.js` | `src/domain/budget.js` | The 80% warning boundary (79.99% ok, exactly 80% warning, exactly 100% still warning, one cent over is over), negative remaining, limit and period rules, budgets only on expense categories |
 | `test/period.test.js` | `src/domain/period.js` | `YYYY-MM` formatting and the Dec 31 → Jan 1 rollover, using fixed dates |
 | `test/id.test.js` | `src/domain/id.js` | Which URL/body values can be a Postgres `INTEGER` id (`abc`, `1.5`, `-1`, too-large values are rejected) |
+
+All unit-test files are in `packages/backend/`.
 
 ### System tests: the whole backend working together
 
@@ -71,14 +75,22 @@ These start the real Express app (`createApp`) on a random port with a test data
 - **Bad tokens:** garbage, wrong secret, expired, deleted user, and `alg: none` tokens are all rejected.
 - **Passwords:** `register stores a bcrypt hash, never the password` reads the row straight from the database.
 
+`test/rls.test.js` checks the database itself: a role like Supabase's public `anon`, given full table permissions, still sees no rows and can't insert any, because of the row level security in `schema.sql`.
+
 ### UI tests: what a user sees and does
 
-Tracked in #91 (Juan F.). Plan: user story **US-01, log an expense**, with `api.js` mocked and the date frozen:
-1. Fill in the Add transaction form, submit, and see the new transaction and the updated totals.
-2. Submit without an amount, see the plain-language error, and nothing is saved.
-3. (Bonus, US-07) A wrong password on the login page shows "Incorrect email or password."
+These render the whole `<App />` in jsdom and use it the way a student would: typing into labelled fields and clicking buttons by their text. They check only what is on screen (and, at the end, what the fake API saved), never component state.
 
-This section will list the test files once #91 is merged.
+**User story US-01, log an expense** (`packages/frontend/src/test/logExpense.test.jsx`):
+1. `a student logs in, adds an expense, and sees it in the list, the totals, and the budget`: log in, click **+ Add transaction**, enter $85, choose Groceries, add a note, click **Add expense**. The new transaction appears, "$446.17 left" becomes "$361.17 left", and the Groceries card goes from "On track" to "$165.85 of $200.00" and **Near limit** (US-09).
+2. `an expense without an amount shows a plain-language error and nothing is saved`: the error "amount must be a positive number" appears, the form stays open, the totals don't change, and nothing new is saved.
+3. `an expense can only use an expense category`: Expense shows Groceries but not Allowance, and switching to Income swaps them (US-02).
+
+**User story US-07, log in** (`packages/frontend/src/test/login.test.jsx`):
+1. `a wrong password shows an error and keeps the budget hidden`: "Incorrect email or password." appears, the dashboard does not, and the password box is cleared.
+2. `the right password opens the dashboard, and a refresh stays logged in`: after logging in, the app is rendered again from scratch (a page refresh) and still shows the dashboard.
+
+`src/test/setup.js` logs out and clears browser storage after each test, so the tests don't depend on each other. They passed three runs in a row with no warnings.
 
 ## TDD: a transaction date must be a real calendar day (#88)
 
@@ -130,7 +142,7 @@ Result: 52 / 52 pass.
 
 ## Known limitations and future tests
 
-- **UI tests** are not merged yet (#91). Until then `npm test` covers the backend only.
+- **UI tests use a fake API**, not the real backend. The system tests cover the real API, but nothing yet runs the real website against the real API together.
 - **No browser end-to-end tests.** Next step: Playwright running sign-in → add expense → see the 80% warning against `npm run dev`.
 - **PGlite is a single connection**, so truly concurrent requests are serialized. The CI run on a real Postgres server covers the pooled case.
 - **Time-dependent code** (the current month) uses today's date in system tests, and the unit tests pass fixed dates. A test that runs exactly at midnight on the last day of a month could in theory see two different months.
