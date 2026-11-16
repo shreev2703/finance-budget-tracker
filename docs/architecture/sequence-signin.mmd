@@ -4,7 +4,7 @@ sequenceDiagram
     participant FE as Frontend<br/>Login.jsx<br/>api.js
     participant LS as Browser<br/>localStorage
     participant BE as Backend<br/>routes/auth.js<br/>authService
-    participant DB as Database<br/>userRepository<br/>SQLite
+    participant DB as Database<br/>userRepository<br/>Supabase PostgreSQL
 
     User->>FE: Enter email and password, click Log In
     FE->>BE: POST /api/auth/login { email, password }

@@ -3,7 +3,7 @@ sequenceDiagram
     actor User
     participant FE as React frontend<br/>Login.jsx<br/>TransactionForm<br/>api.js, token.js
     participant BE as Backend API<br/>authenticate<br/>routes<br/>services
-    participant DB as Database<br/>repositories<br/>SQLite
+    participant DB as Database<br/>repositories<br/>Supabase PostgreSQL
 
     rect rgb(240, 247, 243)
     Note over User,DB: Sign-in
