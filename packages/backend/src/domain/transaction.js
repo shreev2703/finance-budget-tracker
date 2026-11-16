@@ -27,7 +27,8 @@ export function dateError(date) {
   const isValid =
     typeof date === 'string' &&
     DATE_PATTERN.test(date) &&
-    !Number.isNaN(Date.parse(date));
+    !Number.isNaN(Date.parse(date)) &&
+    new Date(date).toISOString().slice(0, 10) === date;
   return isValid ? null : 'date must be YYYY-MM-DD';
 }
 
