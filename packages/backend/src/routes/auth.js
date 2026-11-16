@@ -14,3 +14,20 @@ export function authRouter({ authService }) {
 
   return router;
 }
+
+/** Protected account routes: mounted after `authenticate`, so req.userId comes from the token. */
+export function accountRouter({ authService }) {
+  const router = Router();
+
+  router.put('/auth/password', async (req, res) => {
+    await authService.changePassword(req.userId, req.body ?? {});
+    res.status(204).end();
+  });
+
+  router.delete('/auth/me', async (req, res) => {
+    await authService.deleteAccount(req.userId, req.body ?? {});
+    res.status(204).end();
+  });
+
+  return router;
+}

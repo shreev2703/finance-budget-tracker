@@ -35,7 +35,7 @@ Then open the address Vite prints, usually http://localhost:5173.
 | 6 | Click **View all transactions** and filter by Groceries | Filters by category and date range | [Filter](docs/demo/6-filter-transactions.png) |
 | 7 | Refresh the page | You stay logged in, because the token is saved in the browser | |
 | 8 | Click **Log Out**, then log in with a wrong password | Same error for a wrong password or an unknown email | [Bad token](docs/demo/7-bad-token-returns-to-login.png) |
-| 9 | (TE7, optional) In a terminal, run `npm test` | 65 backend unit and system tests run on an in-memory Postgres (no setup, never Supabase), then 5 UI tests click through logging an expense and logging in. Show the TDD section of [TESTING.md](TESTING.md): the 2026-02-30 bug went from a 500 to a clear 400 | |
+| 9 | (TE7, optional) In a terminal, run `npm test` | 70 backend unit and system tests run on an in-memory Postgres (no setup, never Supabase), then 8 UI tests click through logging an expense, logging in, and account settings. Show the TDD section of [TESTING.md](TESTING.md): the 2026-02-30 bug went from a 500 to a clear 400 | |
 
 ## If something goes wrong
 

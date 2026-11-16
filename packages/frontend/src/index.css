@@ -1087,3 +1087,33 @@ button {
     grid-column: 2 / -1;
   }
 }
+
+/* Account dialog (#95) */
+.modal form + form {
+  margin-top: 18px;
+}
+
+.modal h3 {
+  margin: 14px 0 8px;
+  font-size: 14px;
+}
+
+.modal [role="status"] {
+  color: #18754b;
+  font-size: 12px;
+}
+
+.danger-zone {
+  padding-top: 14px;
+  border-top: 1px solid #f0d6d4;
+}
+
+.danger-zone p {
+  color: #8a3a35;
+  font-size: 12px;
+}
+
+.button.danger {
+  background: #cf4f48;
+  border-color: #cf4f48;
+}

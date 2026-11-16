@@ -70,6 +70,39 @@ export function createAuthService({ users, tokenSecret }) {
       return session(user);
     },
 
+    /**
+     * US-07: a logged-in user changes their password. The current password is required,
+     * so someone using an unlocked, logged-in laptop can't lock the owner out.
+     * A wrong current password is a 400, not a 401, so the website doesn't log the user out.
+     */
+    async changePassword(userId, { currentPassword, newPassword }) {
+      const hash = await users.findPasswordHash(userId);
+      const matched = await bcrypt.compare(
+        typeof currentPassword === 'string' ? currentPassword : '',
+        hash ?? unknownUserHash,
+      );
+      if (!matched) throw new HttpError(400, 'Current password is incorrect.');
+      const error = passwordError(newPassword);
+      if (error) throw new HttpError(400, 'Invalid password', [error]);
+      if (newPassword === currentPassword) {
+        throw new HttpError(400, 'Invalid password', [
+          'New password must be different from the current one.',
+        ]);
+      }
+      await users.updatePasswordHash(userId, await bcrypt.hash(newPassword, BCRYPT_ROUNDS));
+    },
+
+    /** US-07: deletes the account and all of its data, after confirming the password. */
+    async deleteAccount(userId, { password }) {
+      const hash = await users.findPasswordHash(userId);
+      const matched = await bcrypt.compare(
+        typeof password === 'string' ? password : '',
+        hash ?? unknownUserHash,
+      );
+      if (!matched) throw new HttpError(400, 'Password is incorrect.');
+      await users.remove(userId);
+    },
+
     /** Returns the token's user, or null if the token is invalid, expired, or the user is gone. */
     async userFromToken(token) {
       try {

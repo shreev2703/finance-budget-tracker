@@ -75,6 +75,8 @@ These start the real Express app (`createApp`) on a random port with a test data
 - **Bad tokens:** garbage, wrong secret, expired, deleted user, and `alg: none` tokens are all rejected.
 - **Passwords:** `register stores a bcrypt hash, never the password` reads the row straight from the database.
 
+`test/account.test.js` covers account management (#95): changing the password (the old one stops working; a wrong current password, a short new one, or the same one is refused) and deleting an account (needs the password, removes every category and transaction, the token stops working, other accounts are untouched).
+
 `test/rls.test.js` checks the database itself: a role like Supabase's public `anon`, given full table permissions, still sees no rows and can't insert any, because of the row level security in `schema.sql`.
 
 ### UI tests: what a user sees and does
@@ -89,6 +91,11 @@ These render the whole `<App />` in jsdom and use it the way a student would: ty
 **User story US-07, log in** (`packages/frontend/src/test/login.test.jsx`):
 1. `a wrong password shows an error and keeps the budget hidden`: "Incorrect email or password." appears, the dashboard does not, and the password box is cleared.
 2. `the right password opens the dashboard, and a refresh stays logged in`: after logging in, the app is rendered again from scratch (a page refresh) and still shows the dashboard.
+
+**Account management** (`packages/frontend/src/test/account.test.jsx`, US-07):
+1. `a wrong current password is refused; the right one changes the password`: the error shows and the user stays logged in; then the change succeeds.
+2. `deleting the account asks for confirmation, then returns to the login page`.
+3. `cancelling the confirmation keeps the account`.
 
 `src/test/setup.js` logs out and clears browser storage after each test, so the tests don't depend on each other. They passed three runs in a row with no warnings.
 

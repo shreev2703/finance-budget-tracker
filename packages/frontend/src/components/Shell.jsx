@@ -1,6 +1,7 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { PAGES } from "../pages/pages.js";
 import { UserContext } from "../UserContext.js";
+import { AccountSettings } from "./AccountSettings.jsx";
 import { Mark } from "./Mark.jsx";
 
 function Side({ page, go }) {
@@ -46,6 +47,7 @@ const initials = (name) =>
 
 function Top() {
   const { user, logOut } = useContext(UserContext);
+  const [showAccount, setShowAccount] = useState(false);
 
   return (
     <header className="top">
@@ -53,10 +55,15 @@ function Top() {
 
       <span>
         {user.name} <i>{initials(user.name)}</i>
+        <button className="log-out" onClick={() => setShowAccount(true)}>
+          Account
+        </button>
         <button className="log-out" onClick={logOut}>
           Log Out
         </button>
       </span>
+
+      {showAccount && <AccountSettings onClose={() => setShowAccount(false)} />}
     </header>
   );
 }

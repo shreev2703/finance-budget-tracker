@@ -8,6 +8,17 @@ export function createUserRepository(db) {
       const { rows } = await db.query('SELECT id,email,name FROM users WHERE id=$1', [id]);
       return rows[0];
     },
+    async findPasswordHash(id) {
+      const { rows } = await db.query('SELECT password_hash AS "passwordHash" FROM users WHERE id=$1', [id]);
+      return rows[0]?.passwordHash;
+    },
+    async updatePasswordHash(id, passwordHash) {
+      await db.query('UPDATE users SET password_hash=$1 WHERE id=$2', [passwordHash, id]);
+    },
+    /** Deletes the user; ON DELETE CASCADE removes their categories, transactions, and budgets. */
+    async remove(id) {
+      await db.query('DELETE FROM users WHERE id=$1', [id]);
+    },
     /** Creates the user and starting categories atomically. */
     async create({ email, passwordHash, name }, categories) {
       const client = await db.connect();

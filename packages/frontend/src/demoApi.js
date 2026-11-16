@@ -236,6 +236,15 @@ export const demoApi = {
   register: () => delay(DEMO_USER),
   login: () => delay(DEMO_USER),
   me: () => delay(DEMO_USER),
+  // Demo mode has no real accounts, so these explain that instead of pretending to work.
+  changePassword: () =>
+    Promise.reject(
+      new ApiError(400, "Demo mode has no real account, so the password can't be changed."),
+    ),
+  deleteAccount: () =>
+    Promise.reject(
+      new ApiError(400, "Demo mode has no real account to delete."),
+    ),
 
   getSummary: (period) => delay(makeSummary(readData(), period)),
 
