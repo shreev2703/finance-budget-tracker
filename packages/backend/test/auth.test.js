@@ -1,7 +1,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import jwt from 'jsonwebtoken';
-import { openDatabase } from '../src/db/connection.js';
+import { createTestDb } from './helpers/testDb.js';
 import { createApp } from '../src/app.js';
 import {
   DEMO_USER_EMAIL,
@@ -16,7 +16,7 @@ let server;
 let base;
 
 before(async () => {
-  db = openDatabase(':memory:');
+  db = await createTestDb();
   const app = createApp(db, { tokenSecret: SECRET });
   await new Promise((resolve) => {
     server = app.listen(0, resolve);
@@ -24,7 +24,10 @@ before(async () => {
   base = `http://localhost:${server.address().port}/api`;
 });
 
-after(() => server.close());
+after(async () => {
+  await new Promise((resolve) => server.close(resolve));
+  await db.end();
+});
 
 const send = (method, path, body, token) =>
   fetch(base + path, {
@@ -60,9 +63,11 @@ test('register creates a user and returns a working token (201)', async () => {
 
 test('register stores a bcrypt hash, never the password', async () => {
   await register('hash@student.edu', 'plain-text-pass');
-  const { password_hash: hash } = db
-    .prepare('SELECT password_hash FROM users WHERE email = ?')
-    .get('hash@student.edu');
+  const {
+    rows: [{ password_hash: hash }],
+  } = await db.query('SELECT password_hash FROM users WHERE email = $1', [
+    'hash@student.edu',
+  ]);
   assert.match(hash, /^\$2[aby]\$10\$/);
   assert.ok(!hash.includes('plain-text-pass'));
 });
@@ -158,9 +163,11 @@ test('health stays public', async () => {
 });
 
 test('bad tokens get 401: garbage, wrong secret, expired, unknown user, wrong scheme', async () => {
-  const { id } = db
-    .prepare('SELECT id FROM users WHERE email = ?')
-    .get(DEMO_USER_EMAIL);
+  const {
+    rows: [{ id }],
+  } = await db.query('SELECT id FROM users WHERE email = $1', [
+    DEMO_USER_EMAIL,
+  ]);
   const sub = String(id);
   const bad = [
     'garbage',
@@ -264,22 +271,27 @@ test('reports and filters only include the logged-in user', async () => {
   assert.equal(anonymous.status, 401);
 });
 
-test('the demo account gets fresh data when a new month starts', () => {
-  const fresh = openDatabase(':memory:');
-  const count = () =>
-    fresh
-      .prepare(
-        'SELECT (SELECT COUNT(*) FROM budgets) + (SELECT COUNT(*) FROM transactions) AS n',
-      )
-      .get().n;
-  const seeded = count();
-  refreshDemoMonth(fresh);
-  assert.equal(count(), seeded); // this month already has data, so nothing is added
+test('the demo account gets fresh data when a new month starts', async () => {
+  const fresh = await createTestDb();
+  const count = async () =>
+    Number(
+      (
+        await fresh.query(
+          'SELECT (SELECT COUNT(*) FROM budgets) + (SELECT COUNT(*) FROM transactions) AS n',
+        )
+      ).rows[0].n,
+    );
+  try {
+    const seeded = await count();
+    assert.ok(seeded > 0);
+    await refreshDemoMonth(fresh);
+    assert.equal(await count(), seeded); // this month already has data, so nothing is added
 
-  fresh.exec(
-    "UPDATE budgets SET period = '2020-01'; UPDATE transactions SET date = '2020-01-15'",
-  );
-  refreshDemoMonth(fresh);
-  assert.equal(count(), seeded * 2);
-  fresh.close();
+    await fresh.query("UPDATE budgets SET period = '2020-01'");
+    await fresh.query("UPDATE transactions SET date = '2020-01-15'");
+    await refreshDemoMonth(fresh);
+    assert.equal(await count(), seeded * 2);
+  } finally {
+    await fresh.end();
+  }
 });

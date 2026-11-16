@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { HttpError } from '../middleware/errorHandler.js';
 import { currentPeriod } from '../domain/period.js';
+import { parseId } from '../domain/id.js';
 
 const PERIOD_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
 const DEFAULT_LIMIT = 50;
@@ -22,6 +23,12 @@ export function apiRouter({
   categories,
 }) {
   const router = Router();
+
+  // Ids are Postgres INTEGERs. Anything else (abc, 1.5, too large) can't match a row,
+  // so answer 404 here instead of letting the database reject it with a 500.
+  router.param('id', (req, res, next, id) =>
+    next(parseId(id) ? undefined : new HttpError(404, 'Not found')),
+  );
 
   router.get('/auth/me', (req, res) => res.json(req.user));
 
