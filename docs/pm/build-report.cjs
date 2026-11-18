@@ -34,7 +34,7 @@ const avgWeekly = t.completedEst / weeks;
 
 // ---------- Burnup chart (one axis: estimated hours) ----------
 function burnupSvg() {
-  const W = 1000, H = 380, L = 56, R = 150, T = 34, B = 40;
+  const W = 1000, H = 320, L = 56, R = 150, T = 34, B = 40;
   const days = r.burnup.map((d) => d.day);
   const x = (day) => L + ((new Date(day) - new Date(days[0])) / 864e5 / (days.length - 1)) * (W - L - R);
   const yMax = 200;
@@ -86,7 +86,7 @@ function burnupSvg() {
 
 // ---------- Hours by person per sprint (stacked bars, one axis) ----------
 function hoursSvg() {
-  const W = 1000, H = 330, L = 56, R = 20, T = 20, B = 70;
+  const W = 1000, H = 250, L = 56, R = 20, T = 20, B = 60;
   const n = r.sprints.length;
   const slot = (W - L - R) / n;
   const bw = slot * 0.56;
@@ -121,7 +121,7 @@ function hoursSvg() {
 const legend = (items) => `<div class="legend">${items.map(([label, color, dashed]) =>
   `<span><i style="background:${dashed ? 'transparent' : color};border-top:${dashed ? `3px dashed ${color}` : '0'};height:${dashed ? '0' : '12px'}"></i>${label}</span>`).join('')}</div>`;
 
-const hoursRows = r.sprints.map((s) => `<tr><td>${esc(s.name)}<br><span class="muted">${s.start.slice(5)} to ${s.end.slice(5)}</span></td>${PEOPLE.map((p) => `<td class="num">${fmt(r.hours[s.name][p])}</td>`).join('')}<td class="num"><b>${fmt(s.actual)}</b></td><td class="num">${fmt(s.planned)}</td><td class="num">${s.doneTickets} / ${s.tickets}</td></tr>`).join('');
+const hoursRows = r.sprints.map((s) => `<tr><td>${esc(s.name)}</td>${PEOPLE.map((p) => `<td class="num">${fmt(r.hours[s.name][p])}</td>`).join('')}<td class="num"><b>${fmt(s.actual)}</b></td><td class="num">${fmt(s.planned)}</td><td class="num">${s.doneTickets} / ${s.tickets}</td></tr>`).join('');
 
 const remainingRows = r.remaining.map((it) => `<tr><td>#${it.n}</td><td>${esc(it.title)}</td><td>${it.who.join(', ')}</td><td>${esc(it.status)}</td><td class="num">${fmt(it.est)}</td></tr>`).join('');
 
@@ -138,7 +138,7 @@ const html = `<!doctype html>
   body { margin: 0; background: var(--paper); color: var(--ink); font: 14px/1.5 "Segoe UI", Arial, sans-serif; }
   main { max-width: 1000px; margin: 0 auto; padding: 32px 16px 48px; }
   h1 { font-size: 28px; margin: 0 0 4px; }
-  h2 { font-size: 20px; margin: 32px 0 8px; break-after: avoid; }
+  h2 { font-size: 18px; margin: 20px 0 6px; break-after: avoid; }
   h3 { font-size: 15px; margin: 16px 0 4px; }
   p, li { color: var(--ink); }
   .muted { color: var(--muted); font-size: 12px; }
@@ -149,7 +149,7 @@ const html = `<!doctype html>
   .tile span { color: var(--muted); font-size: 12px; }
   .ok { color: var(--accent); }
   table { width: 100%; border-collapse: collapse; margin: 8px 0 4px; font-size: 13px; }
-  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { font-size: 12px; color: var(--muted); font-weight: 600; }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   tfoot td { font-weight: 700; border-top: 2px solid var(--ink); }
@@ -178,7 +178,7 @@ const html = `<!doctype html>
 </div>
 
 <h2>1. Actual hours for each person, each sprint</h2>
-<p>From the <b>Actual Time (hrs)</b> field on every ticket, grouped by the new <b>Iteration</b> field. A ticket with two owners is split evenly, except where one person did the work (credited to the commit author: #85 Supabase switch to Juan S., #94 Plaid to Shreev).</p>
+<p class="muted">From each ticket’s Actual Time (hrs), grouped by sprint. Shared tickets are split evenly, except #85 (Juan S.) and #94 (Shreev), credited to whoever did the work.</p>
 <table>
   <thead><tr><th>Sprint</th>${PEOPLE.map((p) => `<th class="num">${p}</th>`).join('')}<th class="num">Actual</th><th class="num">Estimated</th><th class="num">Tickets done</th></tr></thead>
   <tbody>${hoursRows}</tbody>
@@ -187,78 +187,25 @@ const html = `<!doctype html>
 <figure>
   ${legend(PEOPLE.map((p) => [p, COLOR[p]]))}
   ${hoursSvg()}
-  <figcaption>Actual hours per sprint, stacked by person. Sprint 5 is the class’s Sprint #4 (Nov 2–15); the Final Sprint is the class’s Sprint #5 and is still in progress.</figcaption>
+  
 </figure>
 
 <h2>2. Burnup: completed work vs. total scope</h2>
 <figure>
   ${legend([['Total scope (estimated hours of every ticket created so far)', '#eb6834'], ['Completed (estimated hours of closed tickets)', '#2a78d6'], ['Forecast at the final sprint’s pace', '#2a78d6', true]])}
   ${burnupSvg()}
-  <figcaption>Scope rises when tickets are added; completed rises when they close. Both use estimated hours, so the gap between the lines is the work left. Early sprints step up late because those tickets were entered and closed on GitHub after the work (Sep 30).</figcaption>
+  <figcaption>Both lines in estimated hours: scope rises as tickets are added, completed rises as they close. The gap is the work left.</figcaption>
 </figure>
 
-<h2>3. Are we on schedule?</h2>
-<div class="callout">
-<p><b>Yes.</b> ${fmt(pctDone)}% of the scope is done with two working days left, and every user story (US-01 to US-09, plus the stretch goal US-10) is built, tested, and merged. ${fmt(t.remainingEst)} estimated hours remain.</p>
-</div>
-<ul>
-  <li><b>Scope grew ${fmt(final.planned)} h in the final sprint</b> (Nov 16): fixing the tests the Supabase switch broke, all four TE7 test levels, account settings, the Plaid bank import, deployment, and the final documents. ${fmt(final.completedEst)} h of that is already done.</li>
-  <li><b>Every sprint before this one finished all of its tickets.</b> Estimates have held: ${fmt(t.completedEst)} estimated hours took ${fmt(actualTotal)} actual hours (cost performance index ${t.cpi.toFixed(2)}). The biggest miss was #44 (transactions page: 2 h estimated, 5 h actual).</li>
-  <li><b>Workload is uneven.</b> ${fmt(personTotal.Shreev)} of ${fmt(actualTotal)} hours (${Math.round((personTotal.Shreev / actualTotal) * 100)}%) are Shreev’s; Juan S. and Juan F. logged none in the final sprint so far. To rebalance, Shreev took over the test fixes and the stretch goal, while Juan S. owns deployment and Juan F. the TE5 review. A Thursday check-in moves anything not started to whoever is free.</li>
-</ul>
-<div class="callout risk avoid-break">
-<p><b>Risks to the Nov 20 finish</b></p>
-<ul>
-  <li><b>Deployment (#93, 3 h, Juan S.) hasn’t started.</b> If it slips, the app is still fully usable locally and in demo mode, but the SRD has no public URL.</li>
-  <li><b>The team’s Supabase connection string</b> is only on Juan S.’s laptop. Until it is shared, nobody else can run the app against the live database (#87).</li>
-  <li><b>TE5 reviews (#65, #66, 1.5 h)</b> are unstarted. Small, but they are graded.</li>
-</ul>
-</div>
-
-<h2>4. When will the project be complete?</h2>
-<p>We forecast from velocity: estimated hours completed per day.</p>
-<ul>
-  <li><b>Final-sprint pace:</b> ${fmt(final.completedEst)} h in 3 days, about ${fmt(finalVelocity)} h/day. At that pace the remaining ${fmt(t.remainingEst)} h take about ${fmt(daysToFinish)} days, which means <b>Thursday, Nov 19</b>, one day before the deadline.</li>
-  <li><b>Whole-project pace:</b> ${fmt(t.completedEst)} h over ${fmt(weeks)} weeks, about ${fmt(avgWeekly)} h/week. At that slower pace the remaining work takes under a week, but the deadline caps it: anything not done Friday is dropped, not delayed.</li>
-  <li><b>Forecast: complete on Fri, Nov 20</b>, if Juan S. deploys and shares the database by Thursday. If not, those two items ship without a public URL, and everything graded still lands on time.</li>
-</ul>
-
-<h2>5. What does the project cost?</h2>
-<p>The only real cost is our time. We price it at an assumed <b>$${RATE}/hour</b>, a typical student developer rate; a different rate scales every number in the same proportion.</p>
+<h2>3. Status</h2>
 <table class="avoid-break">
-  <thead><tr><th>Measure</th><th class="num">Hours</th><th class="num">Cost</th><th>Meaning</th></tr></thead>
   <tbody>
-    <tr><td>Budget at completion (BAC)</td><td class="num">${fmt(t.scope)}</td><td class="num">${money(bac)}</td><td>Every ticket’s estimate</td></tr>
-    <tr><td>Earned value (EV)</td><td class="num">${fmt(t.completedEst)}</td><td class="num">${money(ev)}</td><td>Estimate of the work finished</td></tr>
-    <tr><td>Actual cost (AC)</td><td class="num">${fmt(actualTotal)}</td><td class="num">${money(ac)}</td><td>Hours actually logged</td></tr>
-    <tr><td>Estimate at completion (EAC)</td><td class="num">${fmt(eacHours)}</td><td class="num">${money(eac)}</td><td>AC + remaining work ÷ CPI</td></tr>
-    <tr><td>Infrastructure</td><td class="num">—</td><td class="num">$0</td><td>GitHub, Supabase, Plaid sandbox, and hosting all on free tiers</td></tr>
+    <tr><td style="width:24%"><b>Are we on schedule?</b></td><td><b>Yes.</b> ${fmt(pctDone)}% of the scope is done with two working days left, and every sprint before this one finished all its tickets. Estimates have held (${fmt(t.completedEst)} estimated hours took ${fmt(actualTotal)} actual). Risks: deployment (#93, Juan S.) hasn’t started, and the Supabase connection string is only on Juan S.’s laptop.</td></tr>
+    <tr><td><b>When will it be complete?</b></td><td><b>Nov 19 to 20.</b> The final sprint finished ${fmt(final.completedEst)} h in 3 days (about ${fmt(finalVelocity)} h/day), so the remaining ${fmt(t.remainingEst)} h take about ${fmt(daysToFinish)} days, ahead of the Nov 20 deadline if deployment and database access come through by Thursday.</td></tr>
+    <tr><td><b>What does it cost?</b></td><td><b>${money(ac)} so far, ${money(eac)} forecast at completion</b> (${fmt(eacHours)} h), against a ${money(bac)} budget (${fmt(t.scope)} estimated h), at an assumed $${RATE}/hour. Infrastructure is $0 (GitHub, Supabase, Plaid sandbox, and hosting on free tiers).</td></tr>
+    <tr><td><b>How we report</b></td><td>From the GitHub project board: each ticket has an owner, Estimated and Actual hours, a status, and a new dated <b>Iteration</b> field (added for this report and set on all ${t.tickets} tickets). The board’s Insights tab shows the burnup live; this page is regenerated each sprint from a board export.</td></tr>
   </tbody>
 </table>
-<p>By person to date: ${PEOPLE.map((p) => `${p} ${fmt(personTotal[p])} h (${money(personTotal[p] * RATE)})`).join(' · ')}. The project is forecast to finish about ${money(Math.abs(eac - bac))} ${eac >= bac ? 'over' : 'under'} budget (${fmt(Math.abs(eacHours - t.scope))} h), which is within normal estimating error.</p>
-
-<h2>6. How we report, and what we changed on the board</h2>
-<ul>
-  <li><b>Source of truth:</b> the GitHub project “Finance Budget Tracker Board.” Every ticket has an owner, an <b>Estimated Time (hrs)</b>, an <b>Actual Time (hrs)</b> once done, a status, and a milestone.</li>
-  <li><b>New field: Iteration.</b> We added a dated Iteration field with all eight sprints (start date and length) and set it on all ${t.tickets} tickets. That lets GitHub group hours by sprint and draw the burnup over real dates. The old Sprint labels had no dates, and four tickets had none.</li>
-  <li><b>Fixed on the board:</b> tickets with no sprint (#22, #40, #85, #94) now have one; the leftover TE5 reviews (#65, #66) moved into the final sprint; the finished bank-import ticket (#94) moved to Done; finished milestones were closed.</li>
-  <li><b>Charts in GitHub:</b> the board’s Insights tab can show the same two charts live: <i>Burn up</i> filtered to all items, and a bar chart with X-axis = Iteration, group by Assignees, Y-axis = sum of Actual Time (hrs).</li>
-  <li><b>Weekly cadence:</b> at the end of each sprint, the PM exports the board, re-runs <code>docs/pm/compute.cjs</code> and <code>build-report.cjs</code>, and brings this page to the retro: are we on schedule, when will we finish, what has it cost.</li>
-</ul>
-
-<h2>7. Work remaining</h2>
-<table>
-  <thead><tr><th>Ticket</th><th>Task</th><th>Owner</th><th>Status</th><th class="num">Est. h</th></tr></thead>
-  <tbody>${remainingRows}</tbody>
-  <tfoot><tr><td colspan="4">Total remaining</td><td class="num">${fmt(t.remainingEst)}</td></tr></tfoot>
-</table>
-
-<h2>Data notes</h2>
-<ul class="muted">
-  <li>Hours are what each person entered on GitHub. On Nov 16 and 18 we filled in 13 done tickets that had no actual time with their estimates (and 0 h for #70, a rehearsal that didn’t happen), so those tickets show no estimating error by construction and the CPI is somewhat flattering.</li>
-  <li>Scope and completion dates come from each ticket’s GitHub created and closed dates.</li>
-  <li>Totals: ${t.tickets} tickets, ${t.done} done, ${t.open} open.</li>
-</ul>
 </main>
 </body>
 </html>
