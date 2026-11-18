@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { api, centsToDollars } from "../api";
 import { Button } from "../components/Button.jsx";
+import { BankConnect } from "../components/BankConnect.jsx";
 import { EditCategory } from "../components/EditCategory.jsx";
 import { Shell } from "../components/Shell.jsx";
 import { SpendingChart } from "../components/SpendingChart.jsx";
@@ -89,6 +90,8 @@ export function Dashboard({ go }) {
             <p>Where your {money(spending.totalCents)} went this month.</p>
           </div>
         </div>
+
+        <BankConnect onImported={refresh} />
 
         <SpendingChart spending={spending} />
 

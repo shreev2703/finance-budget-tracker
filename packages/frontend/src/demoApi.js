@@ -236,6 +236,8 @@ export const demoApi = {
   register: () => delay(DEMO_USER),
   login: () => delay(DEMO_USER),
   me: () => delay(DEMO_USER),
+  // Demo mode has no bank connection, so the Connect bank button stays hidden.
+  bankStatus: () => delay({ enabled: false, connected: false }),
   // Demo mode has no real accounts, so these explain that instead of pretending to work.
   changePassword: () =>
     Promise.reject(
