@@ -1,0 +1,603 @@
+{
+ "hours": {
+  "Sprint 1 · TE1": {
+   "Shreev": 5,
+   "Juan S.": 5,
+   "Juan F.": 5
+  },
+  "Sprint 2 · TE2": {
+   "Shreev": 5,
+   "Juan S.": 5,
+   "Juan F.": 5
+  },
+  "Sprint 2 · TE3": {
+   "Shreev": 11,
+   "Juan S.": 7,
+   "Juan F.": 8
+  },
+  "TE4": {
+   "Shreev": 14,
+   "Juan S.": 3,
+   "Juan F.": 0
+  },
+  "Sprint 3": {
+   "Shreev": 10,
+   "Juan S.": 0,
+   "Juan F.": 8
+  },
+  "Sprint 4": {
+   "Shreev": 10.5,
+   "Juan S.": 0,
+   "Juan F.": 6
+  },
+  "Sprint 5 (class Sprint #4)": {
+   "Shreev": 29,
+   "Juan S.": 6,
+   "Juan F.": 0
+  },
+  "Final Sprint (class Sprint #5)": {
+   "Shreev": 27,
+   "Juan S.": 0,
+   "Juan F.": 0
+  }
+ },
+ "estByPerson": {
+  "Sprint 1 · TE1": {
+   "Shreev": 5,
+   "Juan S.": 5,
+   "Juan F.": 5
+  },
+  "Sprint 2 · TE2": {
+   "Shreev": 5,
+   "Juan S.": 5,
+   "Juan F.": 5
+  },
+  "Sprint 2 · TE3": {
+   "Shreev": 11,
+   "Juan S.": 7,
+   "Juan F.": 8
+  },
+  "TE4": {
+   "Shreev": 14,
+   "Juan S.": 3,
+   "Juan F.": 0
+  },
+  "Sprint 3": {
+   "Shreev": 10,
+   "Juan S.": 0,
+   "Juan F.": 5
+  },
+  "Sprint 4": {
+   "Shreev": 10.5,
+   "Juan S.": 0,
+   "Juan F.": 6
+  },
+  "Sprint 5 (class Sprint #4)": {
+   "Shreev": 29.333333333333336,
+   "Juan S.": 6.333333333333333,
+   "Juan F.": 0.3333333333333333
+  },
+  "Final Sprint (class Sprint #5)": {
+   "Shreev": 34.166666666666664,
+   "Juan S.": 4.666666666666667,
+   "Juan F.": 1.1666666666666667
+  }
+ },
+ "sprints": [
+  {
+   "name": "Sprint 1 · TE1",
+   "start": "2026-09-14",
+   "end": "2026-09-20",
+   "tickets": 9,
+   "doneTickets": 9,
+   "planned": 15,
+   "completedEst": 15,
+   "actual": 15
+  },
+  {
+   "name": "Sprint 2 · TE2",
+   "start": "2026-09-21",
+   "end": "2026-09-27",
+   "tickets": 6,
+   "doneTickets": 6,
+   "planned": 15,
+   "completedEst": 15,
+   "actual": 15
+  },
+  {
+   "name": "Sprint 2 · TE3",
+   "start": "2026-09-28",
+   "end": "2026-10-04",
+   "tickets": 9,
+   "doneTickets": 9,
+   "planned": 26,
+   "completedEst": 26,
+   "actual": 26
+  },
+  {
+   "name": "TE4",
+   "start": "2026-10-05",
+   "end": "2026-10-18",
+   "tickets": 7,
+   "doneTickets": 7,
+   "planned": 17,
+   "completedEst": 17,
+   "actual": 17
+  },
+  {
+   "name": "Sprint 3",
+   "start": "2026-10-19",
+   "end": "2026-10-25",
+   "tickets": 6,
+   "doneTickets": 6,
+   "planned": 15,
+   "completedEst": 15,
+   "actual": 18
+  },
+  {
+   "name": "Sprint 4",
+   "start": "2026-10-26",
+   "end": "2026-11-01",
+   "tickets": 7,
+   "doneTickets": 7,
+   "planned": 16.5,
+   "completedEst": 16.5,
+   "actual": 16.5
+  },
+  {
+   "name": "Sprint 5 (class Sprint #4)",
+   "start": "2026-11-02",
+   "end": "2026-11-15",
+   "tickets": 16,
+   "doneTickets": 16,
+   "planned": 36,
+   "completedEst": 36,
+   "actual": 35
+  },
+  {
+   "name": "Final Sprint (class Sprint #5)",
+   "start": "2026-11-16",
+   "end": "2026-11-20",
+   "tickets": 15,
+   "doneTickets": 8,
+   "planned": 40,
+   "completedEst": 28.5,
+   "actual": 27
+  }
+ ],
+ "burnup": [
+  {
+   "day": "2026-09-14",
+   "scope": 0,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-15",
+   "scope": 0,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-16",
+   "scope": 0,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-17",
+   "scope": 0,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-18",
+   "scope": 15,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-19",
+   "scope": 15,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-20",
+   "scope": 15,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-21",
+   "scope": 15,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-22",
+   "scope": 15,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-23",
+   "scope": 15,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-24",
+   "scope": 15,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-25",
+   "scope": 15,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-26",
+   "scope": 15,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-27",
+   "scope": 15,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-28",
+   "scope": 17,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-29",
+   "scope": 17,
+   "completed": 0
+  },
+  {
+   "day": "2026-09-30",
+   "scope": 69,
+   "completed": 30
+  },
+  {
+   "day": "2026-10-01",
+   "scope": 71,
+   "completed": 30
+  },
+  {
+   "day": "2026-10-02",
+   "scope": 71,
+   "completed": 40
+  },
+  {
+   "day": "2026-10-03",
+   "scope": 71,
+   "completed": 40
+  },
+  {
+   "day": "2026-10-04",
+   "scope": 71,
+   "completed": 40
+  },
+  {
+   "day": "2026-10-05",
+   "scope": 71,
+   "completed": 40
+  },
+  {
+   "day": "2026-10-06",
+   "scope": 71,
+   "completed": 40
+  },
+  {
+   "day": "2026-10-07",
+   "scope": 74,
+   "completed": 45
+  },
+  {
+   "day": "2026-10-08",
+   "scope": 74,
+   "completed": 45
+  },
+  {
+   "day": "2026-10-09",
+   "scope": 74,
+   "completed": 45
+  },
+  {
+   "day": "2026-10-10",
+   "scope": 74,
+   "completed": 45
+  },
+  {
+   "day": "2026-10-11",
+   "scope": 74,
+   "completed": 45
+  },
+  {
+   "day": "2026-10-12",
+   "scope": 74,
+   "completed": 45
+  },
+  {
+   "day": "2026-10-13",
+   "scope": 74,
+   "completed": 45
+  },
+  {
+   "day": "2026-10-14",
+   "scope": 74,
+   "completed": 45
+  },
+  {
+   "day": "2026-10-15",
+   "scope": 74,
+   "completed": 45
+  },
+  {
+   "day": "2026-10-16",
+   "scope": 94,
+   "completed": 63
+  },
+  {
+   "day": "2026-10-17",
+   "scope": 94,
+   "completed": 63
+  },
+  {
+   "day": "2026-10-18",
+   "scope": 94,
+   "completed": 63
+  },
+  {
+   "day": "2026-10-19",
+   "scope": 94,
+   "completed": 63
+  },
+  {
+   "day": "2026-10-20",
+   "scope": 94,
+   "completed": 63
+  },
+  {
+   "day": "2026-10-21",
+   "scope": 94,
+   "completed": 63
+  },
+  {
+   "day": "2026-10-22",
+   "scope": 94,
+   "completed": 63
+  },
+  {
+   "day": "2026-10-23",
+   "scope": 105,
+   "completed": 73
+  },
+  {
+   "day": "2026-10-24",
+   "scope": 105,
+   "completed": 85
+  },
+  {
+   "day": "2026-10-25",
+   "scope": 105,
+   "completed": 85
+  },
+  {
+   "day": "2026-10-26",
+   "scope": 105,
+   "completed": 85
+  },
+  {
+   "day": "2026-10-27",
+   "scope": 105,
+   "completed": 85
+  },
+  {
+   "day": "2026-10-28",
+   "scope": 116,
+   "completed": 88
+  },
+  {
+   "day": "2026-10-29",
+   "scope": 116,
+   "completed": 88
+  },
+  {
+   "day": "2026-10-30",
+   "scope": 116,
+   "completed": 88
+  },
+  {
+   "day": "2026-10-31",
+   "scope": 116,
+   "completed": 88
+  },
+  {
+   "day": "2026-11-01",
+   "scope": 116,
+   "completed": 88
+  },
+  {
+   "day": "2026-11-02",
+   "scope": 119.5,
+   "completed": 91.5
+  },
+  {
+   "day": "2026-11-03",
+   "scope": 122.5,
+   "completed": 91.5
+  },
+  {
+   "day": "2026-11-04",
+   "scope": 122.5,
+   "completed": 91.5
+  },
+  {
+   "day": "2026-11-05",
+   "scope": 122.5,
+   "completed": 91.5
+  },
+  {
+   "day": "2026-11-06",
+   "scope": 136,
+   "completed": 129.5
+  },
+  {
+   "day": "2026-11-07",
+   "scope": 142,
+   "completed": 129.5
+  },
+  {
+   "day": "2026-11-08",
+   "scope": 142,
+   "completed": 129.5
+  },
+  {
+   "day": "2026-11-09",
+   "scope": 142,
+   "completed": 129.5
+  },
+  {
+   "day": "2026-11-10",
+   "scope": 142,
+   "completed": 129.5
+  },
+  {
+   "day": "2026-11-11",
+   "scope": 142,
+   "completed": 129.5
+  },
+  {
+   "day": "2026-11-12",
+   "scope": 142,
+   "completed": 129.5
+  },
+  {
+   "day": "2026-11-13",
+   "scope": 142,
+   "completed": 129.5
+  },
+  {
+   "day": "2026-11-14",
+   "scope": 142,
+   "completed": 129.5
+  },
+  {
+   "day": "2026-11-15",
+   "scope": 142,
+   "completed": 129.5
+  },
+  {
+   "day": "2026-11-16",
+   "scope": 180.5,
+   "completed": 157.5
+  },
+  {
+   "day": "2026-11-17",
+   "scope": 180.5,
+   "completed": 157.5
+  },
+  {
+   "day": "2026-11-18",
+   "scope": 180.5,
+   "completed": 169
+  },
+  {
+   "day": "2026-11-19",
+   "scope": 180.5,
+   "completed": null
+  },
+  {
+   "day": "2026-11-20",
+   "scope": 180.5,
+   "completed": null
+  }
+ ],
+ "totals": {
+  "tickets": 75,
+  "done": 68,
+  "open": 7,
+  "scope": 180.5,
+  "completedEst": 169,
+  "actualDone": 169.5,
+  "remainingEst": 11.5,
+  "cpi": 0.9970501474926253
+ },
+ "remaining": [
+  {
+   "n": 65,
+   "title": "TE5 reviewer comments on R-01 (#50) and R-04 (#53)",
+   "status": "Todo",
+   "est": 1,
+   "who": [
+    "Juan S."
+   ]
+  },
+  {
+   "n": 66,
+   "title": "TE5 reviewer comment on R-05 (#54) and close stale PR #35",
+   "status": "Todo",
+   "est": 0.5,
+   "who": [
+    "Juan F."
+   ]
+  },
+  {
+   "n": 87,
+   "title": "Finish the Supabase migration checklist (#85)",
+   "status": "In Progress",
+   "est": 2,
+   "who": [
+    "Shreev"
+   ]
+  },
+  {
+   "n": 93,
+   "title": "Deploy the app (frontend and API) so it can be used outside our laptops",
+   "status": "Todo",
+   "est": 3,
+   "who": [
+    "Juan S."
+   ]
+  },
+  {
+   "n": 96,
+   "title": "Final SRD update: no gaps, matches the final app",
+   "status": "In Progress",
+   "est": 3,
+   "who": [
+    "Shreev"
+   ]
+  },
+  {
+   "n": 97,
+   "title": "Final demo: update DEMO.md, rehearse, close out the board",
+   "status": "In Progress",
+   "est": 1.5,
+   "who": [
+    "Shreev",
+    "Juan S.",
+    "Juan F."
+   ]
+  },
+  {
+   "n": 98,
+   "title": "Board cleanup: close stale Sprint 5 tickets and fill in missing hours",
+   "status": "Todo",
+   "est": 0.5,
+   "who": [
+    "Shreev",
+    "Juan S.",
+    "Juan F."
+   ]
+  }
+ ],
+ "overruns": [
+  {
+   "n": 44,
+   "title": "Recent transactions and Transactions page load from GET /api/transactions",
+   "est": 2,
+   "act": 5
+  },
+  {
+   "n": 70,
+   "title": "Team rehearsal on the presenting laptop",
+   "est": 1,
+   "act": 0
+  }
+ ]
+}
