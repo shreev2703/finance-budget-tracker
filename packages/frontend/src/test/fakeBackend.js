@@ -66,8 +66,11 @@ const json = (status, body) =>
     headers: { "Content-Type": "application/json" },
   });
 
-/** Replaces global fetch with the fake API. Returns its data so tests can check what was saved. */
-export function installFakeBackend() {
+/**
+ * Replaces global fetch with the fake API. Returns its data so tests can check what was saved.
+ * Pass { bank: true } to switch on bank connections, as if the server had Plaid keys.
+ */
+export function installFakeBackend({ bank = false } = {}) {
   const db = seed();
   const categoryName = (id) => db.categories.find((c) => c.id === id)?.name;
   const withName = (t) => ({ ...t, categoryName: categoryName(t.categoryId) });
@@ -197,6 +200,21 @@ export function installFakeBackend() {
       };
       db.transactions.push(saved);
       return json(201, withName(saved));
+    },
+
+    // Bank connections (#94): one Safeway purchase arrives the first time the bank is imported.
+    "GET /api/plaid/status": () =>
+      bank ? json(200, { enabled: true, connected: Boolean(db.bankConnected) }) : json(200, { enabled: false, connected: false }),
+    "POST /api/plaid/link-token": () => json(200, { linkToken: "link-sandbox-test" }),
+    "POST /api/plaid/connect": ({ body }) => {
+      db.bankConnected = body.publicToken === "public-sandbox-test";
+      return db.bankConnected ? json(200, { connected: true }) : json(502, { error: "We couldn’t reach your bank. Please try again." });
+    },
+    "POST /api/plaid/sync": () => {
+      if (db.bankImported) return json(200, { imported: 0, skipped: 0 });
+      db.bankImported = true;
+      db.transactions.push({ id: db.nextId++, categoryId: 3, type: "EXPENSE", amountCents: 4210, date: `${db.period}-02`, note: "Safeway" });
+      return json(200, { imported: 1, skipped: 0 });
     },
   };
 

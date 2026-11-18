@@ -9,13 +9,25 @@ import { createCategoryService } from './services/categoryService.js';
 import { createAuthService } from './services/authService.js';
 import { apiRouter } from './routes/api.js';
 import { accountRouter, authRouter } from './routes/auth.js';
+import { plaidRouter } from './routes/plaid.js';
+import { createBankRepository } from './repositories/bankRepository.js';
+import { createPlaidService } from './services/plaidService.js';
 import { authenticate } from './middleware/authenticate.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 
 /** Wires PostgreSQL repositories -> services -> routes. */
-export function createApp(db, { tokenSecret }) {
+export function createApp(db, { tokenSecret, plaid = null, plaidTokenKey }) {
   const transactions = createTransactionRepository(db);
   const categories = createCategoryRepository(db);
+  const plaidService = plaid
+    ? createPlaidService({
+        plaid,
+        bank: createBankRepository(db),
+        categories,
+        // Encrypts stored bank tokens. Its own key when set, else derived from TOKEN_SECRET.
+        tokenSecret: plaidTokenKey || tokenSecret,
+      })
+    : null;
   const budgets = createBudgetRepository(db);
   const authService = createAuthService({
     users: createUserRepository(db),
@@ -34,6 +46,7 @@ export function createApp(db, { tokenSecret }) {
   // Everything mounted after this line requires a valid token.
   app.use('/api', authenticate(authService));
   app.use('/api', accountRouter({ authService }));
+  app.use('/api', plaidRouter({ plaidService }));
   app.use(
     '/api',
     apiRouter({

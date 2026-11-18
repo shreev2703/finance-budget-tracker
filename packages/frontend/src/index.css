@@ -1117,3 +1117,27 @@ button {
   background: #cf4f48;
   border-color: #cf4f48;
 }
+
+/* Connect bank (#94) */
+.bank-connect {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin: 0 0 24px;
+  padding: 16px 20px;
+  border: 1px solid #cfe6d8;
+  border-radius: 12px;
+  background: #f1f8f3;
+  font-size: 13px;
+}
+
+.bank-connect p {
+  flex: 1 1 320px;
+  margin: 0;
+}
+
+.bank-connect [role="status"],
+.bank-connect [role="alert"] {
+  flex-basis: 100%;
+}

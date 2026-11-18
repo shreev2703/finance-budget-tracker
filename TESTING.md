@@ -55,6 +55,7 @@ Environment variables used by the tests: only `TEST_DATABASE_URL` (optional). Th
 | `test/transaction.test.js` | `src/domain/transaction.js` | Amount limits and rounding to cents, `INCOME`/`EXPENSE` only, real calendar dates (TDD below), category ownership and type, note trimming, every error reported at once |
 | `test/budget.test.js` | `src/domain/budget.js` | The 80% warning boundary (79.99% ok, exactly 80% warning, exactly 100% still warning, one cent over is over), negative remaining, limit and period rules, budgets only on expense categories |
 | `test/period.test.js` | `src/domain/period.js` | `YYYY-MM` formatting and the Dec 31 → Jan 1 rollover, using fixed dates |
+| `test/bankImport.test.js` | `src/domain/bankImport.js`, `createTokenBox` | Plaid amounts to expense or income, pending skipped, Plaid categories mapped to ours, and the token encryption refusing a wrong key or a tampered token |
 | `test/id.test.js` | `src/domain/id.js` | Which URL/body values can be a Postgres `INTEGER` id (`abc`, `1.5`, `-1`, too-large values are rejected) |
 
 All unit-test files are in `packages/backend/`.
@@ -77,6 +78,8 @@ These start the real Express app (`createApp`) on a random port with a test data
 
 `test/account.test.js` covers account management (#95): changing the password (the old one stops working; a wrong current password, a short new one, or the same one is refused) and deleting an account (needs the password, removes every category and transaction, the token stops working, other accounts are untouched).
 
+`test/plaid.test.js` covers bank connections (#94) with a fake Plaid client, so it never calls Plaid: disabled without keys, login required, the access token stored encrypted (never plain text), posted transactions imported into the right categories with pending ones skipped, no duplicates on a second import, a failed Plaid call is a plain 502 that leaks nothing, and one user's bank data is invisible to others.
+
 `test/rls.test.js` checks the database itself: a role like Supabase's public `anon`, given full table permissions, still sees no rows and can't insert any, because of the row level security in `schema.sql`.
 
 ### UI tests: what a user sees and does
@@ -96,6 +99,10 @@ These render the whole `<App />` in jsdom and use it the way a student would: ty
 1. `a wrong current password is refused; the right one changes the password`: the error shows and the user stays logged in; then the change succeeds.
 2. `deleting the account asks for confirmation, then returns to the login page`.
 3. `cancelling the confirmation keeps the account`.
+
+**Connect a bank** (`packages/frontend/src/test/bankConnect.test.jsx`, US-10): `react-plaid-link` is replaced by a stand-in where the student signs in at once.
+1. `connecting imports the bank’s purchases into the dashboard`: click Connect bank, see "Imported 1 transaction from your bank.", the totals and the Groceries card change, and a second import adds nothing.
+2. `the Connect bank button is hidden when the server has no bank connections`.
 
 `src/test/setup.js` logs out and clears browser storage after each test, so the tests don't depend on each other. They passed three runs in a row with no warnings.
 
@@ -154,4 +161,4 @@ Result: 52 / 52 pass.
 - **PGlite is a single connection**, so truly concurrent requests are serialized. The CI run on a real Postgres server covers the pooled case.
 - **Time-dependent code** (the current month) uses today's date in system tests, and the unit tests pass fixed dates. A test that runs exactly at midnight on the last day of a month could in theory see two different months.
 - **No load or performance tests.** The SRD's "under 500 ms" target is checked by hand.
-- **Bank import (Plaid, #94)**, if built, needs tests with a mocked Plaid client so CI never calls Plaid.
+- **Bank import (Plaid, #94)** is tested with a fake Plaid client and a stand-in for Plaid Link. Nothing in CI calls Plaid; the real sandbox is checked by hand with `user_good` / `pass_good`.

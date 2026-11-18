@@ -66,6 +66,20 @@ const httpApi = {
   /** The logged-in user, from the stored token. */
   me: () => request("/auth/me"),
 
+  /** Bank connections (#94): { enabled, connected }. enabled is false until Plaid keys are set. */
+  bankStatus: () => request("/plaid/status"),
+
+  /** A short-lived token for Plaid Link. */
+  createBankLinkToken: () =>
+    request("/plaid/link-token", { method: "POST" }).then((r) => r.linkToken),
+
+  /** Hands Plaid Link's one-time public token to the API, which keeps the bank connection. */
+  connectBank: (publicToken) =>
+    request("/plaid/connect", { method: "POST", body: { publicToken } }),
+
+  /** Imports new bank transactions: { imported, skipped }. */
+  importFromBank: () => request("/plaid/sync", { method: "POST" }),
+
   /** { currentPassword, newPassword }. A wrong current password is a 400 with an error. */
   changePassword: (passwords) =>
     request("/auth/password", { method: "PUT", body: passwords }),
