@@ -23,7 +23,7 @@ test('a non-owner role like Supabase "anon" can neither read nor write any table
     await client.query(`GRANT ALL ON ALL TABLES IN SCHEMA ${schema} TO ${role}`);
     await client.query(`SET LOCAL ROLE ${role}`);
 
-    for (const table of ['users', 'categories', 'transactions', 'budgets']) {
+    for (const table of ['users', 'categories', 'transactions', 'budgets', 'bank_connections']) {
       const result = await client.query(
         `SELECT COUNT(*)::integer AS n FROM ${table}`,
       );
