@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LedgerLogic Project Status</title>
+<style>
+  :root { --ink:#17251f; --muted:#52514e; --line:#e4e3df; --paper:#fcfcfb; --accent:#18754b; }
+  @page { size: Letter; margin: 0.6in; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 14px/1.5 "Segoe UI", Arial, sans-serif; }
+  main { max-width: 1000px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; break-after: avoid; }
+  h3 { font-size: 15px; margin: 16px 0 4px; }
+  p, li { color: var(--ink); }
+  .muted { color: var(--muted); font-size: 12px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .tile { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: #fff; }
+  .tile b { display: block; font-size: 26px; line-height: 1.2; }
+  .tile span { color: var(--muted); font-size: 12px; }
+  .ok { color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 4px; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tfoot td { font-weight: 700; border-top: 2px solid var(--ink); }
+  figure { margin: 8px 0 0; break-inside: avoid; }
+  figcaption { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  svg .tick { font-size: 12px; fill: var(--muted); }
+  svg .lbl { font-size: 13px; fill: var(--ink); font-weight: 600; }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin: 6px 0; }
+  .legend i { display: inline-block; width: 18px; margin-right: 6px; vertical-align: middle; border-radius: 2px; }
+  .callout { border-left: 4px solid var(--accent); background: #f1f8f3; padding: 10px 14px; border-radius: 6px; }
+  .risk { border-left-color: #b07a06; background: #fff8e6; }
+  .avoid-break { break-inside: avoid; }
+  @media (max-width: 700px) { .tiles { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<main>
+<h1>LedgerLogic: Project Status Report</h1>
+<p class="sub">Team Undefined (Juan Solis, Shreev Babu, Juan Flores) · CSC 3100 · Data as of 11/18/2026 from the GitHub project board · Final sprint ends Fri, Nov 20</p>
+
+<div class="tiles">
+  <div class="tile"><b>93.6%</b><span>of estimated scope done (169 of 180.5 h; 68 of 75 tickets)</span></div>
+  <div class="tile"><b class="ok">On schedule</b><span>forecast finish Nov 19 to 20, deadline Nov 20 (risks below)</span></div>
+  <div class="tile"><b>$4,238</b><span>labor cost to date (169.5 h × $25/h); forecast $4,526 at completion</span></div>
+  <div class="tile"><b>11.5 h</b><span>left in 7 open tickets</span></div>
+</div>
+
+<h2>1. Actual hours for each person, each sprint</h2>
+<p>From the <b>Actual Time (hrs)</b> field on every ticket, grouped by the new <b>Iteration</b> field. A ticket with two owners is split evenly, except where one person did the work (credited to the commit author: #85 Supabase switch to Juan S., #94 Plaid to Shreev).</p>
+<table>
+  <thead><tr><th>Sprint</th><th class="num">Shreev</th><th class="num">Juan S.</th><th class="num">Juan F.</th><th class="num">Actual</th><th class="num">Estimated</th><th class="num">Tickets done</th></tr></thead>
+  <tbody><tr><td>Sprint 1 · TE1<br><span class="muted">09-14 to 09-20</span></td><td class="num">5</td><td class="num">5</td><td class="num">5</td><td class="num"><b>15</b></td><td class="num">15</td><td class="num">9 / 9</td></tr><tr><td>Sprint 2 · TE2<br><span class="muted">09-21 to 09-27</span></td><td class="num">5</td><td class="num">5</td><td class="num">5</td><td class="num"><b>15</b></td><td class="num">15</td><td class="num">6 / 6</td></tr><tr><td>Sprint 2 · TE3<br><span class="muted">09-28 to 10-04</span></td><td class="num">11</td><td class="num">7</td><td class="num">8</td><td class="num"><b>26</b></td><td class="num">26</td><td class="num">9 / 9</td></tr><tr><td>TE4<br><span class="muted">10-05 to 10-18</span></td><td class="num">14</td><td class="num">3</td><td class="num">0</td><td class="num"><b>17</b></td><td class="num">17</td><td class="num">7 / 7</td></tr><tr><td>Sprint 3<br><span class="muted">10-19 to 10-25</span></td><td class="num">10</td><td class="num">0</td><td class="num">8</td><td class="num"><b>18</b></td><td class="num">15</td><td class="num">6 / 6</td></tr><tr><td>Sprint 4<br><span class="muted">10-26 to 11-01</span></td><td class="num">10.5</td><td class="num">0</td><td class="num">6</td><td class="num"><b>16.5</b></td><td class="num">16.5</td><td class="num">7 / 7</td></tr><tr><td>Sprint 5 (class Sprint #4)<br><span class="muted">11-02 to 11-15</span></td><td class="num">29</td><td class="num">6</td><td class="num">0</td><td class="num"><b>35</b></td><td class="num">36</td><td class="num">16 / 16</td></tr><tr><td>Final Sprint (class Sprint #5)<br><span class="muted">11-16 to 11-20</span></td><td class="num">27</td><td class="num">0</td><td class="num">0</td><td class="num"><b>27</b></td><td class="num">40</td><td class="num">8 / 15</td></tr></tbody>
+  <tfoot><tr><td>Total</td><td class="num">111.5</td><td class="num">26</td><td class="num">32</td><td class="num">169.5</td><td class="num">180.5</td><td class="num">68 / 75</td></tr></tfoot>
+</table>
+<figure>
+  <div class="legend"><span><i style="background:#2a78d6;border-top:0;height:12px"></i>Shreev</span><span><i style="background:#eb6834;border-top:0;height:12px"></i>Juan S.</span><span><i style="background:#1baf7a;border-top:0;height:12px"></i>Juan F.</span></div>
+  <svg viewBox="0 0 1000 330" width="100%" role="img" aria-label="Actual hours per sprint, stacked by person. Totals by sprint: 15, 15, 26, 17, 18, 16.5, 35, 27.">
+    <line x1="56" x2="980" y1="260" y2="260" stroke="#e4e3df"/>
+    <text x="48" y="264" text-anchor="end" class="tick">0</text><line x1="56" x2="980" y1="200" y2="200" stroke="#e4e3df"/>
+    <text x="48" y="204" text-anchor="end" class="tick">10</text><line x1="56" x2="980" y1="140" y2="140" stroke="#e4e3df"/>
+    <text x="48" y="144" text-anchor="end" class="tick">20</text><line x1="56" x2="980" y1="80" y2="80" stroke="#e4e3df"/>
+    <text x="48" y="84" text-anchor="end" class="tick">30</text><line x1="56" x2="980" y1="20" y2="20" stroke="#e4e3df"/>
+    <text x="48" y="24" text-anchor="end" class="tick">40</text>
+    <text x="12" y="140" class="tick" transform="rotate(-90 12 140)" text-anchor="middle">Actual hours</text>
+    <rect x="81.41" y="230" width="64.68" height="28" rx="2" fill="#2a78d6"><title>Sprint 1 · TE1: Shreev 5 h</title></rect><rect x="81.41" y="200" width="64.68" height="28" rx="2" fill="#eb6834"><title>Sprint 1 · TE1: Juan S. 5 h</title></rect><rect x="81.41" y="170" width="64.68" height="28" rx="2" fill="#1baf7a"><title>Sprint 1 · TE1: Juan F. 5 h</title></rect><text x="113.75" y="164" text-anchor="middle" class="lbl">15</text>
+      <text x="113.75" y="280" text-anchor="middle" class="tick">S1 · TE1</text>
+      <text x="113.75" y="298" text-anchor="middle" class="tick">Sep 14</text><rect x="196.91" y="230" width="64.68" height="28" rx="2" fill="#2a78d6"><title>Sprint 2 · TE2: Shreev 5 h</title></rect><rect x="196.91" y="200" width="64.68" height="28" rx="2" fill="#eb6834"><title>Sprint 2 · TE2: Juan S. 5 h</title></rect><rect x="196.91" y="170" width="64.68" height="28" rx="2" fill="#1baf7a"><title>Sprint 2 · TE2: Juan F. 5 h</title></rect><text x="229.25" y="164" text-anchor="middle" class="lbl">15</text>
+      <text x="229.25" y="280" text-anchor="middle" class="tick">S2 · TE2</text>
+      <text x="229.25" y="298" text-anchor="middle" class="tick">Sep 21</text><rect x="312.40999999999997" y="194" width="64.68" height="64" rx="2" fill="#2a78d6"><title>Sprint 2 · TE3: Shreev 11 h</title></rect><rect x="312.40999999999997" y="152" width="64.68" height="40" rx="2" fill="#eb6834"><title>Sprint 2 · TE3: Juan S. 7 h</title></rect><rect x="312.40999999999997" y="104" width="64.68" height="46" rx="2" fill="#1baf7a"><title>Sprint 2 · TE3: Juan F. 8 h</title></rect><text x="344.75" y="98" text-anchor="middle" class="lbl">26</text>
+      <text x="344.75" y="280" text-anchor="middle" class="tick">S2 · TE3</text>
+      <text x="344.75" y="298" text-anchor="middle" class="tick">Sep 28</text><rect x="427.90999999999997" y="176" width="64.68" height="82" rx="2" fill="#2a78d6"><title>TE4: Shreev 14 h</title></rect><rect x="427.90999999999997" y="158" width="64.68" height="16" rx="2" fill="#eb6834"><title>TE4: Juan S. 3 h</title></rect><text x="460.25" y="152" text-anchor="middle" class="lbl">17</text>
+      <text x="460.25" y="280" text-anchor="middle" class="tick">TE4</text>
+      <text x="460.25" y="298" text-anchor="middle" class="tick">Oct 5</text><rect x="543.41" y="200" width="64.68" height="58" rx="2" fill="#2a78d6"><title>Sprint 3: Shreev 10 h</title></rect><rect x="543.41" y="152" width="64.68" height="46" rx="2" fill="#1baf7a"><title>Sprint 3: Juan F. 8 h</title></rect><text x="575.75" y="146" text-anchor="middle" class="lbl">18</text>
+      <text x="575.75" y="280" text-anchor="middle" class="tick">Sprint 3</text>
+      <text x="575.75" y="298" text-anchor="middle" class="tick">Oct 19</text><rect x="658.91" y="197" width="64.68" height="61" rx="2" fill="#2a78d6"><title>Sprint 4: Shreev 10.5 h</title></rect><rect x="658.91" y="161" width="64.68" height="34" rx="2" fill="#1baf7a"><title>Sprint 4: Juan F. 6 h</title></rect><text x="691.25" y="155" text-anchor="middle" class="lbl">16.5</text>
+      <text x="691.25" y="280" text-anchor="middle" class="tick">Sprint 4</text>
+      <text x="691.25" y="298" text-anchor="middle" class="tick">Oct 26</text><rect x="774.41" y="86" width="64.68" height="172" rx="2" fill="#2a78d6"><title>Sprint 5 (class Sprint #4): Shreev 29 h</title></rect><rect x="774.41" y="50" width="64.68" height="34" rx="2" fill="#eb6834"><title>Sprint 5 (class Sprint #4): Juan S. 6 h</title></rect><text x="806.75" y="44" text-anchor="middle" class="lbl">35</text>
+      <text x="806.75" y="280" text-anchor="middle" class="tick">Sprint 5</text>
+      <text x="806.75" y="298" text-anchor="middle" class="tick">Nov 2</text><rect x="889.91" y="97.99999999999999" width="64.68" height="160" rx="2" fill="#2a78d6"><title>Final Sprint (class Sprint #5): Shreev 27 h</title></rect><text x="922.25" y="91.99999999999999" text-anchor="middle" class="lbl">27</text>
+      <text x="922.25" y="280" text-anchor="middle" class="tick">Final</text>
+      <text x="922.25" y="298" text-anchor="middle" class="tick">Nov 16</text>
+    <line x1="56" x2="980" y1="260" y2="260" stroke="#52514e"/>
+  </svg>
+  <figcaption>Actual hours per sprint, stacked by person. Sprint 5 is the class’s Sprint #4 (Nov 2–15); the Final Sprint is the class’s Sprint #5 and is still in progress.</figcaption>
+</figure>
+
+<h2>2. Burnup: completed work vs. total scope</h2>
+<figure>
+  <div class="legend"><span><i style="background:#eb6834;border-top:0;height:12px"></i>Total scope (estimated hours of every ticket created so far)</span><span><i style="background:#2a78d6;border-top:0;height:12px"></i>Completed (estimated hours of closed tickets)</span><span><i style="background:transparent;border-top:3px dashed #2a78d6;height:0"></i>Forecast at the final sprint’s pace</span></div>
+  <svg viewBox="0 0 1000 380" width="100%" role="img" aria-label="Burnup chart: total scope rises to 180.5 estimated hours; completed work reaches 169 hours on November 18, with the rest forecast to finish before the November 20 deadline.">
+    <rect x="56" y="34" width="82.955223880597" height="306" fill="#fcfcfb"/>
+      <text x="97.4776119402985" y="24" text-anchor="middle" class="tick">S1 · TE1</text><rect x="138.95522388059703" y="34" width="82.955223880597" height="306" fill="#f1f1ee"/>
+      <text x="180.43283582089555" y="24" text-anchor="middle" class="tick">S2 · TE2</text><rect x="221.91044776119404" y="34" width="82.955223880597" height="306" fill="#fcfcfb"/>
+      <text x="263.3880597014925" y="24" text-anchor="middle" class="tick">S2 · TE3</text><rect x="304.8656716417911" y="34" width="165.910447761194" height="306" fill="#f1f1ee"/>
+      <text x="387.8208955223881" y="24" text-anchor="middle" class="tick">TE4</text><rect x="470.77611940298505" y="34" width="82.95522388059703" height="306" fill="#fcfcfb"/>
+      <text x="512.2537313432836" y="24" text-anchor="middle" class="tick">Sprint 3</text><rect x="553.7313432835822" y="34" width="82.95522388059692" height="306" fill="#f1f1ee"/>
+      <text x="595.2089552238806" y="24" text-anchor="middle" class="tick">Sprint 4</text><rect x="636.6865671641791" y="34" width="165.91044776119406" height="306" fill="#fcfcfb"/>
+      <text x="719.6417910447761" y="24" text-anchor="middle" class="tick">Sprint 5</text><rect x="802.5970149253732" y="34" width="59.25373134328356" height="306" fill="#f1f1ee"/>
+      <text x="832.223880597015" y="24" text-anchor="middle" class="tick">Final</text><line x1="56" x2="850" y1="340" y2="340" stroke="#e4e3df" stroke-width="1"/>
+    <text x="48" y="344" text-anchor="end" class="tick">0</text><line x1="56" x2="850" y1="263.5" y2="263.5" stroke="#e4e3df" stroke-width="1"/>
+    <text x="48" y="267.5" text-anchor="end" class="tick">50</text><line x1="56" x2="850" y1="187" y2="187" stroke="#e4e3df" stroke-width="1"/>
+    <text x="48" y="191" text-anchor="end" class="tick">100</text><line x1="56" x2="850" y1="110.5" y2="110.5" stroke="#e4e3df" stroke-width="1"/>
+    <text x="48" y="114.5" text-anchor="end" class="tick">150</text><line x1="56" x2="850" y1="34" y2="34" stroke="#e4e3df" stroke-width="1"/>
+    <text x="48" y="38" text-anchor="end" class="tick">200</text>
+    <text x="12" y="187" class="tick" transform="rotate(-90 12 187)" text-anchor="middle">Estimated hours</text>
+    <path d="M56,340 H67.85074626865672 V340 H79.70149253731343 V340 H91.55223880597015 V340 H103.40298507462686 V340 H115.25373134328358 V340 H127.1044776119403 V340 H138.95522388059703 V340 H150.8059701492537 V340 H162.65671641791045 V340 H174.50746268656715 V340 H186.3582089552239 V340 H198.2089552238806 V340 H210.05970149253733 V340 H221.91044776119404 V340 H233.76119402985074 V340 H245.61194029850745 V294.09999999999997 H257.46268656716416 V294.09999999999997 H269.3134328358209 V278.8 H281.1641791044776 V278.8 H293.0149253731343 V278.8 H304.8656716417911 V278.8 H316.7164179104478 V278.8 H328.56716417910445 V271.15 H340.4179104477612 V271.15 H352.2686567164179 V271.15 H364.11940298507466 V271.15 H375.97014925373134 V271.15 H387.82089552238807 V271.15 H399.67164179104475 V271.15 H411.5223880597015 V271.15 H423.3731343283582 V271.15 H435.2238805970149 V243.61 H447.07462686567163 V243.61 H458.92537313432837 V243.61 H470.77611940298505 V243.61 H482.6268656716418 V243.61 H494.4776119402985 V243.61 H506.3283582089552 V243.61 H518.1791044776119 V228.31 H530.0298507462686 V209.95 H541.8805970149253 V209.95 H553.7313432835822 V209.95 H565.5820895522388 V209.95 H577.4328358208955 V205.36 H589.2835820895523 V205.36 H601.1343283582089 V205.36 H612.9850746268656 V205.36 H624.8358208955224 V205.36 H636.6865671641791 V200.005 H648.5373134328358 V200.005 H660.3880597014925 V200.005 H672.2388059701493 V200.005 H684.0895522388059 V141.865 H695.9402985074627 V141.865 H707.7910447761194 V141.865 H719.6417910447761 V141.865 H731.4925373134329 V141.865 H743.3432835820895 V141.865 H755.1940298507462 V141.865 H767.044776119403 V141.865 H778.8955223880597 V141.865 H790.7462686567164 V141.865 H802.5970149253732 V99.025 H814.4477611940298 V99.025 H826.2985074626866 V81.43 V340 H56 Z" fill="#2a78d6" fill-opacity="0.12"/>
+    <path d="M56,340 H67.85074626865672 V340 H79.70149253731343 V340 H91.55223880597015 V340 H103.40298507462686 V317.05 H115.25373134328358 V317.05 H127.1044776119403 V317.05 H138.95522388059703 V317.05 H150.8059701492537 V317.05 H162.65671641791045 V317.05 H174.50746268656715 V317.05 H186.3582089552239 V317.05 H198.2089552238806 V317.05 H210.05970149253733 V317.05 H221.91044776119404 V313.99 H233.76119402985074 V313.99 H245.61194029850745 V234.43 H257.46268656716416 V231.37 H269.3134328358209 V231.37 H281.1641791044776 V231.37 H293.0149253731343 V231.37 H304.8656716417911 V231.37 H316.7164179104478 V231.37 H328.56716417910445 V226.78 H340.4179104477612 V226.78 H352.2686567164179 V226.78 H364.11940298507466 V226.78 H375.97014925373134 V226.78 H387.82089552238807 V226.78 H399.67164179104475 V226.78 H411.5223880597015 V226.78 H423.3731343283582 V226.78 H435.2238805970149 V196.18 H447.07462686567163 V196.18 H458.92537313432837 V196.18 H470.77611940298505 V196.18 H482.6268656716418 V196.18 H494.4776119402985 V196.18 H506.3283582089552 V196.18 H518.1791044776119 V179.35 H530.0298507462686 V179.35 H541.8805970149253 V179.35 H553.7313432835822 V179.35 H565.5820895522388 V179.35 H577.4328358208955 V162.52 H589.2835820895523 V162.52 H601.1343283582089 V162.52 H612.9850746268656 V162.52 H624.8358208955224 V162.52 H636.6865671641791 V157.165 H648.5373134328358 V152.575 H660.3880597014925 V152.575 H672.2388059701493 V152.575 H684.0895522388059 V131.92 H695.9402985074627 V122.74000000000001 H707.7910447761194 V122.74000000000001 H719.6417910447761 V122.74000000000001 H731.4925373134329 V122.74000000000001 H743.3432835820895 V122.74000000000001 H755.1940298507462 V122.74000000000001 H767.044776119403 V122.74000000000001 H778.8955223880597 V122.74000000000001 H790.7462686567164 V122.74000000000001 H802.5970149253732 V63.83500000000001 H814.4477611940298 V63.83500000000001 H826.2985074626866 V63.83500000000001 H838.1492537313433 V63.83500000000001 H850 V63.83500000000001" fill="none" stroke="#eb6834" stroke-width="2.5"/>
+    <path d="M56,340 H67.85074626865672 V340 H79.70149253731343 V340 H91.55223880597015 V340 H103.40298507462686 V340 H115.25373134328358 V340 H127.1044776119403 V340 H138.95522388059703 V340 H150.8059701492537 V340 H162.65671641791045 V340 H174.50746268656715 V340 H186.3582089552239 V340 H198.2089552238806 V340 H210.05970149253733 V340 H221.91044776119404 V340 H233.76119402985074 V340 H245.61194029850745 V294.09999999999997 H257.46268656716416 V294.09999999999997 H269.3134328358209 V278.8 H281.1641791044776 V278.8 H293.0149253731343 V278.8 H304.8656716417911 V278.8 H316.7164179104478 V278.8 H328.56716417910445 V271.15 H340.4179104477612 V271.15 H352.2686567164179 V271.15 H364.11940298507466 V271.15 H375.97014925373134 V271.15 H387.82089552238807 V271.15 H399.67164179104475 V271.15 H411.5223880597015 V271.15 H423.3731343283582 V271.15 H435.2238805970149 V243.61 H447.07462686567163 V243.61 H458.92537313432837 V243.61 H470.77611940298505 V243.61 H482.6268656716418 V243.61 H494.4776119402985 V243.61 H506.3283582089552 V243.61 H518.1791044776119 V228.31 H530.0298507462686 V209.95 H541.8805970149253 V209.95 H553.7313432835822 V209.95 H565.5820895522388 V209.95 H577.4328358208955 V205.36 H589.2835820895523 V205.36 H601.1343283582089 V205.36 H612.9850746268656 V205.36 H624.8358208955224 V205.36 H636.6865671641791 V200.005 H648.5373134328358 V200.005 H660.3880597014925 V200.005 H672.2388059701493 V200.005 H684.0895522388059 V141.865 H695.9402985074627 V141.865 H707.7910447761194 V141.865 H719.6417910447761 V141.865 H731.4925373134329 V141.865 H743.3432835820895 V141.865 H755.1940298507462 V141.865 H767.044776119403 V141.865 H778.8955223880597 V141.865 H790.7462686567164 V141.865 H802.5970149253732 V99.025 H814.4477611940298 V99.025 H826.2985074626866 V81.43" fill="none" stroke="#2a78d6" stroke-width="2.5"/>
+    <line x1="826.2985074626866" y1="81.43" x2="840.6441476826395" y2="63.83500000000001" stroke="#2a78d6" stroke-width="2.5" stroke-dasharray="6 5"/>
+    <line x1="826.2985074626866" x2="826.2985074626866" y1="34" y2="340" stroke="#52514e" stroke-width="1" stroke-dasharray="3 3"/>
+    <text x="820.2985074626866" y="332" text-anchor="end" class="tick">Today, Nov 18</text>
+    <line x1="850" x2="850" y1="34" y2="340" stroke="#0b0b0b" stroke-width="1.5"/>
+    <text x="856" y="332" class="tick">Deadline, Nov 20</text>
+    <text x="56" y="360" text-anchor="middle" class="tick">Sep 14</text><text x="257.46268656716416" y="360" text-anchor="middle" class="tick">Oct 1</text><text x="423.3731343283582" y="360" text-anchor="middle" class="tick">Oct 15</text><text x="624.8358208955224" y="360" text-anchor="middle" class="tick">Nov 1</text><text x="790.7462686567164" y="360" text-anchor="middle" class="tick">Nov 15</text>
+    <line x1="56" x2="850" y1="340" y2="340" stroke="#52514e" stroke-width="1"/>
+    <text x="860" y="57.83500000000001" class="lbl">Total scope 180.5 h</text>
+    <text x="860" y="103.43" class="lbl">Completed 169 h</text>
+    <circle cx="826.2985074626866" cy="81.43" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>Nov 18: 169 of 180.5 estimated hours completed</title></circle>
+  </svg>
+  <figcaption>Scope rises when tickets are added; completed rises when they close. Both use estimated hours, so the gap between the lines is the work left. Early sprints step up late because those tickets were entered and closed on GitHub after the work (Sep 30).</figcaption>
+</figure>
+
+<h2>3. Are we on schedule?</h2>
+<div class="callout">
+<p><b>Yes.</b> 93.6% of the scope is done with two working days left, and every user story (US-01 to US-09, plus the stretch goal US-10) is built, tested, and merged. 11.5 estimated hours remain.</p>
+</div>
+<ul>
+  <li><b>Scope grew 40 h in the final sprint</b> (Nov 16): fixing the tests the Supabase switch broke, all four TE7 test levels, account settings, the Plaid bank import, deployment, and the final documents. 28.5 h of that is already done.</li>
+  <li><b>Every sprint before this one finished all of its tickets.</b> Estimates have held: 169 estimated hours took 169.5 actual hours (cost performance index 1.00). The biggest miss was #44 (transactions page: 2 h estimated, 5 h actual).</li>
+  <li><b>Workload is uneven.</b> 111.5 of 169.5 hours (66%) are Shreev’s; Juan S. and Juan F. logged none in the final sprint so far. To rebalance, Shreev took over the test fixes and the stretch goal, while Juan S. owns deployment and Juan F. the TE5 review. A Thursday check-in moves anything not started to whoever is free.</li>
+</ul>
+<div class="callout risk avoid-break">
+<p><b>Risks to the Nov 20 finish</b></p>
+<ul>
+  <li><b>Deployment (#93, 3 h, Juan S.) hasn’t started.</b> If it slips, the app is still fully usable locally and in demo mode, but the SRD has no public URL.</li>
+  <li><b>The team’s Supabase connection string</b> is only on Juan S.’s laptop. Until it is shared, nobody else can run the app against the live database (#87).</li>
+  <li><b>TE5 reviews (#65, #66, 1.5 h)</b> are unstarted. Small, but they are graded.</li>
+</ul>
+</div>
+
+<h2>4. When will the project be complete?</h2>
+<p>We forecast from velocity: estimated hours completed per day.</p>
+<ul>
+  <li><b>Final-sprint pace:</b> 28.5 h in 3 days, about 9.5 h/day. At that pace the remaining 11.5 h take about 1.2 days, which means <b>Thursday, Nov 19</b>, one day before the deadline.</li>
+  <li><b>Whole-project pace:</b> 169 h over 9.3 weeks, about 18.2 h/week. At that slower pace the remaining work takes under a week, but the deadline caps it: anything not done Friday is dropped, not delayed.</li>
+  <li><b>Forecast: complete on Fri, Nov 20</b>, if Juan S. deploys and shares the database by Thursday. If not, those two items ship without a public URL, and everything graded still lands on time.</li>
+</ul>
+
+<h2>5. What does the project cost?</h2>
+<p>The only real cost is our time. We price it at an assumed <b>$25/hour</b>, a typical student developer rate; a different rate scales every number in the same proportion.</p>
+<table class="avoid-break">
+  <thead><tr><th>Measure</th><th class="num">Hours</th><th class="num">Cost</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td>Budget at completion (BAC)</td><td class="num">180.5</td><td class="num">$4,513</td><td>Every ticket’s estimate</td></tr>
+    <tr><td>Earned value (EV)</td><td class="num">169</td><td class="num">$4,225</td><td>Estimate of the work finished</td></tr>
+    <tr><td>Actual cost (AC)</td><td class="num">169.5</td><td class="num">$4,238</td><td>Hours actually logged</td></tr>
+    <tr><td>Estimate at completion (EAC)</td><td class="num">181</td><td class="num">$4,526</td><td>AC + remaining work ÷ CPI</td></tr>
+    <tr><td>Infrastructure</td><td class="num">—</td><td class="num">$0</td><td>GitHub, Supabase, Plaid sandbox, and hosting all on free tiers</td></tr>
+  </tbody>
+</table>
+<p>By person to date: Shreev 111.5 h ($2,788) · Juan S. 26 h ($650) · Juan F. 32 h ($800). The project is forecast to finish about $13 over budget (0.5 h), which is within normal estimating error.</p>
+
+<h2>6. How we report, and what we changed on the board</h2>
+<ul>
+  <li><b>Source of truth:</b> the GitHub project “Finance Budget Tracker Board.” Every ticket has an owner, an <b>Estimated Time (hrs)</b>, an <b>Actual Time (hrs)</b> once done, a status, and a milestone.</li>
+  <li><b>New field: Iteration.</b> We added a dated Iteration field with all eight sprints (start date and length) and set it on all 75 tickets. That lets GitHub group hours by sprint and draw the burnup over real dates. The old Sprint labels had no dates, and four tickets had none.</li>
+  <li><b>Fixed on the board:</b> tickets with no sprint (#22, #40, #85, #94) now have one; the leftover TE5 reviews (#65, #66) moved into the final sprint; the finished bank-import ticket (#94) moved to Done; finished milestones were closed.</li>
+  <li><b>Charts in GitHub:</b> the board’s Insights tab can show the same two charts live: <i>Burn up</i> filtered to all items, and a bar chart with X-axis = Iteration, group by Assignees, Y-axis = sum of Actual Time (hrs).</li>
+  <li><b>Weekly cadence:</b> at the end of each sprint, the PM exports the board, re-runs <code>docs/pm/compute.cjs</code> and <code>build-report.cjs</code>, and brings this page to the retro: are we on schedule, when will we finish, what has it cost.</li>
+</ul>
+
+<h2>7. Work remaining</h2>
+<table>
+  <thead><tr><th>Ticket</th><th>Task</th><th>Owner</th><th>Status</th><th class="num">Est. h</th></tr></thead>
+  <tbody><tr><td>#65</td><td>TE5 reviewer comments on R-01 (#50) and R-04 (#53)</td><td>Juan S.</td><td>Todo</td><td class="num">1</td></tr><tr><td>#66</td><td>TE5 reviewer comment on R-05 (#54) and close stale PR #35</td><td>Juan F.</td><td>Todo</td><td class="num">0.5</td></tr><tr><td>#87</td><td>Finish the Supabase migration checklist (#85)</td><td>Shreev</td><td>In Progress</td><td class="num">2</td></tr><tr><td>#93</td><td>Deploy the app (frontend and API) so it can be used outside our laptops</td><td>Juan S.</td><td>Todo</td><td class="num">3</td></tr><tr><td>#96</td><td>Final SRD update: no gaps, matches the final app</td><td>Shreev</td><td>In Progress</td><td class="num">3</td></tr><tr><td>#97</td><td>Final demo: update DEMO.md, rehearse, close out the board</td><td>Shreev, Juan S., Juan F.</td><td>In Progress</td><td class="num">1.5</td></tr><tr><td>#98</td><td>Board cleanup: close stale Sprint 5 tickets and fill in missing hours</td><td>Shreev, Juan S., Juan F.</td><td>Todo</td><td class="num">0.5</td></tr></tbody>
+  <tfoot><tr><td colspan="4">Total remaining</td><td class="num">11.5</td></tr></tfoot>
+</table>
+
+<h2>Data notes</h2>
+<ul class="muted">
+  <li>Hours are what each person entered on GitHub. On Nov 16 and 18 we filled in 13 done tickets that had no actual time with their estimates (and 0 h for #70, a rehearsal that didn’t happen), so those tickets show no estimating error by construction and the CPI is somewhat flattering.</li>
+  <li>Scope and completion dates come from each ticket’s GitHub created and closed dates.</li>
+  <li>Totals: 75 tickets, 68 done, 7 open.</li>
+</ul>
+</main>
+</body>
+</html>
