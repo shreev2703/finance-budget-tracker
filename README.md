@@ -40,6 +40,8 @@ Run `npm run seed` to add the demo account and sample data. It does not delete e
 
 **Token secret:** for a stable login across API restarts, copy `packages/backend/.env.example` to `packages/backend/.env` and set `TOKEN_SECRET`. Without it, development uses a random secret per run, so a restart logs everyone out. Production refuses to start without it.
 
+**Bank connections (Plaid, optional):** students can connect a bank and import purchases instead of typing them. It stays off, and the Connect bank button hidden, until `PLAID_CLIENT_ID` and `PLAID_SECRET` are set in `packages/backend/.env` (free sandbox keys from the Plaid dashboard; `PLAID_ENV` defaults to `sandbox`). In sandbox, pick any bank in Plaid's window and sign in with `user_good` / `pass_good`. Our site never sees the bank password, the Plaid secret and access tokens never reach the browser, and stored access tokens are encrypted (AES-256-GCM). Existing Supabase projects need the new `bank_connections` table: run `schema.sql` again in the SQL Editor (every statement is safe to repeat).
+
 **Demo mode:** run the website alone with `VITE_DEMO=1 npm run dev:web` (or `set VITE_DEMO=1&& npm run dev:web` in Windows cmd) to use browser-only sample data with no backend. Any login works in this mode, so it is only for showing the UI.
 
 In the frontend, call the API through `packages/frontend/src/api.js` (`api.login()`, `api.getSummary()`, `api.addTransaction()`, and so on). It adds the auth token to every call. Failed requests throw an `ApiError` with `status` and a `details` list of validation problems.
